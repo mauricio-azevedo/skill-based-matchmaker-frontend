@@ -57,5 +57,20 @@ export function generateMatches(players: Player[], teamSize = 2): Match[] {
 }
 
 function sameLevels(a: Team, b: Team) {
-  return a.length === b.length && a.every((p) => b.some((q) => q.level === p.level))
+  if (a.length !== b.length) return false
+
+  const count = (team: Team) =>
+    team.reduce<Record<number, number>>((map, p) => {
+      map[p.level] = (map[p.level] ?? 0) + 1
+      return map
+    }, {})
+
+  const ca = count(a)
+  const cb = count(b)
+
+  const levels = new Set([...Object.keys(ca), ...Object.keys(cb)])
+  for (const lvl of levels) {
+    if (ca[Number(lvl)] !== cb[Number(lvl)]) return false
+  }
+  return true
 }

@@ -8,7 +8,8 @@
     "skipLibCheck": true,
     // skip type-checking inside node_modules
     "types": [
-      "node"
+      "node",
+      "vitest"
     ]
     // pull in Node’s built-ins
   },
