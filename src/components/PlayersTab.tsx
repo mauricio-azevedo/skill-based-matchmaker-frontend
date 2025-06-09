@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 
 const PlayersTab: React.FC = () => {
-  const { players, add, remove } = usePlayers()
+  const { players, add, remove, resetMatches } = usePlayers()
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
 
@@ -40,7 +40,9 @@ const PlayersTab: React.FC = () => {
         {players.map((p) => (
           <li key={p.id} className="flex justify-between items-center p-2 border rounded">
             <span>
-              {p.name} <span className="badge badge-secondary ml-2">Lv {p.level}</span>
+              {p.name}
+              <span className="badge badge-secondary ml-2">Lv {p.level}</span>
+              <span className="badge ml-2">{p.matches} matches</span>
             </span>
             <button className="btn btn-sm btn-error" onClick={() => remove(p.id)}>
               ✕
@@ -48,6 +50,12 @@ const PlayersTab: React.FC = () => {
           </li>
         ))}
       </ul>
+
+      {players.length > 0 && (
+        <button className="btn btn-warning w-full" onClick={resetMatches}>
+          Reset match counts
+        </button>
+      )}
     </div>
   )
 }

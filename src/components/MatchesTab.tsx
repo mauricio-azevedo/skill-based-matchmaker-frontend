@@ -3,11 +3,16 @@ import { usePlayers } from '../context/PlayersContext'
 import { generateMatches } from '../lib/algorithm'
 
 const MatchesTab: React.FC = () => {
-  const { players } = usePlayers()
+  const { players, incrementMatches } = usePlayers()
   const [teamSize, setTeamSize] = useState(2)
   const [matches, setMatches] = useState(() => generateMatches(players, 2))
 
   const refresh = () => setMatches(generateMatches(players, teamSize))
+  const recordUsage = () => {
+    const ids = matches.flatMap((m) => [...m.teamA, ...m.teamB].map((p) => p.id))
+    incrementMatches(ids)
+    setMatches(generateMatches(players, teamSize))
+  }
 
   return (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -39,6 +44,12 @@ const MatchesTab: React.FC = () => {
           </li>
         ))}
       </ol>
+
+      {matches.length > 0 && (
+        <button className="btn btn-secondary" onClick={recordUsage}>
+          Record match usage
+        </button>
+      )}
     </div>
   )
 }

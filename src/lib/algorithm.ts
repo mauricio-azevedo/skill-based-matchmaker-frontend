@@ -1,6 +1,6 @@
 import type { Player } from '../context/PlayersContext.tsx'
 
-export interface Team extends Array<Player> {}
+export type Team = Player[]
 export interface Match {
   teamA: Team
   teamB: Team
@@ -20,6 +20,11 @@ export function generateMatches(players: Player[], teamSize = 2): Match[] {
   players.forEach((p) => {
     ;(byLevel[p.level] ??= []).push(p)
   })
+
+  // prefer players with fewer matches
+  for (const lvl in byLevel) {
+    byLevel[lvl].sort((a, b) => (a.matches ?? 0) - (b.matches ?? 0))
+  }
 
   // ensure each bucket length is multiple of teamSize
   for (const lvl in byLevel) {
