@@ -1,7 +1,29 @@
 {
+  "compilerOptions": {
+    "moduleResolution": "nodenext",
+    "module": "esnext",
+    // lookup packages like Node does
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    // skip type-checking inside node_modules
+    "types": [
+      "node"
+    ]
+    // pull in Node’s built-ins
+  },
+  "include": [
+    "src/**/*",
+    "tailwind.config.ts"
+    // explicitly include your config file
+  ],
   "files": [],
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
   ]
 }
