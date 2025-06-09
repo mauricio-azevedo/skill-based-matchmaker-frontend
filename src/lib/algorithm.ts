@@ -6,56 +6,64 @@ export interface Match {
   teamB: Team
 }
 
-/**
- * Generate skill‑balanced matches with generic teamSize T.
- * – groups players by skill level
- * – forms disjoint teams of size T inside each level bucket
- * – pairs identical skill‑multisets together into matches
- */
-export function generateMatches(players: Player[], teamSize = 2): Match[] {
-  if (players.length < teamSize * 2) return []
-
-  // 1. group by level
-  const byLevel: Record<number, Player[]> = {}
-  players.forEach((p) => {
-    ;(byLevel[p.level] ??= []).push(p)
-  })
-
-  // ensure each bucket length is multiple of teamSize
-  for (const lvl in byLevel) {
-    const bucket = byLevel[lvl]
-    if (bucket.length % teamSize !== 0) {
-      // drop extras (could add dummy)
-      byLevel[lvl] = bucket.slice(0, bucket.length - (bucket.length % teamSize))
-    }
-  }
-
-  // 2. inside each level, slice into teams of size T (simple round‑robin slice)
-  const teams: Team[] = []
-  for (const bucket of Object.values(byLevel)) {
-    for (let i = 0; i < bucket.length; i += teamSize) {
-      teams.push(bucket.slice(i, i + teamSize))
-    }
-  }
-
-  // 3. pair teams that share the same multiset of levels (here, identical)
-  const matches: Match[] = []
-  const used = new Set<number>()
-  for (let i = 0; i < teams.length; i++) {
-    if (used.has(i)) continue
-    for (let j = i + 1; j < teams.length; j++) {
-      if (used.has(j)) continue
-      if (sameLevels(teams[i], teams[j])) {
-        matches.push({ teamA: teams[i], teamB: teams[j] })
-        used.add(i)
-        used.add(j)
-        break
-      }
-    }
-  }
-  return matches
+export interface MatchesResult {
+  matches: Match[]
+  counts: Record<string, number>
 }
 
-function sameLevels(a: Team, b: Team) {
-  return a.length === b.length && a.every((p) => b.some((q) => q.level === p.level))
+/**
+ * Generate matches so every player participates at least once.
+ * If there are not enough unique players for the final match, players
+ * with the fewest previous matches are reused at random.
+ */
+export function generateMatches(players: Player[], teamSize = 2): MatchesResult {
+  if (players.length < teamSize * 2) return { matches: [], counts: {} }
+
+  const counts: Record<string, number> = {}
+  players.forEach((p) => {
+    counts[p.id] = 0
+  })
+
+  const shuffled = [...players]
+  shuffle(shuffled)
+  const queue = [...shuffled]
+  const matches: Match[] = []
+  const numMatches = Math.ceil(players.length / (teamSize * 2))
+
+  for (let m = 0; m < numMatches; m++) {
+    const picked: Player[] = []
+    for (let i = 0; i < teamSize * 2; i++) {
+      let player: Player | undefined = queue.shift()
+      if (!player) {
+        player = pickWithFewestMatches(players, counts, new Set(picked.map((p) => p.id)))
+      } else if (picked.some((p) => p.id === player!.id)) {
+        // avoid duplicates if queue provides already used player
+        queue.unshift(player)
+        player = pickWithFewestMatches(players, counts, new Set(picked.map((p) => p.id)))
+      }
+      counts[player.id]++
+      picked.push(player)
+    }
+    matches.push({ teamA: picked.slice(0, teamSize), teamB: picked.slice(teamSize) })
+  }
+
+  return { matches, counts }
+}
+
+function pickWithFewestMatches(players: Player[], counts: Record<string, number>, used: Set<string>): Player {
+  let min = Math.min(...players.map((p) => counts[p.id]))
+  while (true) {
+    const candidates = players.filter((p) => counts[p.id] === min && !used.has(p.id))
+    if (candidates.length > 0) {
+      return candidates[Math.floor(Math.random() * candidates.length)]
+    }
+    min++
+  }
+}
+
+function shuffle<T>(arr: T[]): void {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
 }

@@ -5,9 +5,9 @@ import { generateMatches } from '../lib/algorithm'
 const MatchesTab: React.FC = () => {
   const { players } = usePlayers()
   const [teamSize, setTeamSize] = useState(2)
-  const [matches, setMatches] = useState(() => generateMatches(players, 2))
+  const [result, setResult] = useState(() => generateMatches(players, 2))
 
-  const refresh = () => setMatches(generateMatches(players, teamSize))
+  const refresh = () => setResult(generateMatches(players, teamSize))
 
   return (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -26,10 +26,10 @@ const MatchesTab: React.FC = () => {
         </button>
       </div>
 
-      {matches.length === 0 && <p>No matches possible ⚠️</p>}
+      {result.matches.length === 0 && <p>No matches possible ⚠️</p>}
 
       <ol className="space-y-4">
-        {matches.map((m, idx) => (
+        {result.matches.map((m, idx) => (
           <li key={idx} className="border rounded p-4">
             <div className="flex justify-between">
               <TeamView title="Team A" team={m.teamA} />
@@ -43,7 +43,7 @@ const MatchesTab: React.FC = () => {
   )
 }
 
-const TeamView: React.FC<{ title: string; team: ReturnType<typeof generateMatches>[number]['teamA'] }> = ({
+const TeamView: React.FC<{ title: string; team: ReturnType<typeof generateMatches>['matches'][number]['teamA'] }> = ({
   title,
   team,
 }) => (
