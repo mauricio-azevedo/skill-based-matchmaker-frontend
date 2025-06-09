@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "moduleResolution": "nodenext",
-    "module": "esnext",
+    "module": "NodeNext",
     // lookup packages like Node does
     "resolveJsonModule": true,
     "allowJs": true,
+    "noEmit": true,
     "skipLibCheck": true,
     // skip type-checking inside node_modules
     "types": [

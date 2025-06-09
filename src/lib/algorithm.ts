@@ -1,6 +1,6 @@
 import type { Player } from '../context/PlayersContext.tsx'
 
-export interface Team extends Array<Player> {}
+export type Team = Player[]
 export interface Match {
   teamA: Team
   teamB: Team
