@@ -4,46 +4,36 @@
 import React, { useState } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import type { Player } from '../context/PlayersContext'
-import { generateMatches, type PlayedMap, type Match } from '../lib/algorithm'
+import { generateMatches, type Match } from '../lib/algorithm'
 
 const PLAYERS_PER_MATCH = 4 as const
 
 // ---------------------------------------------------------------------------
 // Componente principal que mostra controles + lista de partidas.
-// Regra de negócio‑chave: Sempre que houver jogadores suficientes, gera
-// partidas equilibradas, priorizando quem jogou menos vezes.
 // ---------------------------------------------------------------------------
 const MatchesTab: React.FC = () => {
   // players – array reativo vindo do contexto global.  Qualquer inserção /
   // remoção em PlayersProvider dispara rerender aqui.
   const { players } = usePlayers()
 
-  // played – mapa id → nº de partidas disputadas.  Mantido localmente para
-  // que a UX se lembre da contagem mesmo se o usuário alternar de aba.
-  const [played, setPlayed] = useState<PlayedMap>({})
   // matches – lista de partidas geradas pela última chamada a generate().
   const [matches, setMatches] = useState<Match[]>([])
 
-  // Saída de depuração para checagem rápida no DevTools.
-  console.log(players, played)
-
   // -------------------------------------------------------------------------
   // generate() encapsula a regra de negócio pesada importada de algorithm.ts.
-  // - Copiamos played (spread) para evitar side‑effects.
-  // - Recebemos de volta lista de partidas + novo mapa played, já incrementado.
+  // - Recebemos de volta lista de partidas.
   // -------------------------------------------------------------------------
   const generate = () => {
-    const { matches: novos, played: atualizado } = generateMatches(players, { ...played })
+    const newMatches = generateMatches(players)
+
+    printMatchCounts(newMatches)
 
     // somar, não trocar
-    setMatches((prev) => [...prev, ...novos])
-    setPlayed(atualizado)
+    setMatches((prev) => [...prev, ...newMatches])
   }
 
   // -------------------------------------------------------------------------
   // Renderização declarativa com Tailwind / DaisyUI:
-  //   - Painel de controles (input numeric + botão)
-  //   - <ol> de partidas, cada uma com Team A vs Team B.
   // -------------------------------------------------------------------------
   return (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
@@ -89,3 +79,32 @@ const TeamView: React.FC<{ title: string; team: Player[] }> = ({ title, team }) 
 )
 
 export default MatchesTab
+
+// ---------------------------------------------------------------------------
+// Estatísticas de participação por jogador
+// ---------------------------------------------------------------------------
+
+/** Conta quantas partidas cada jogador disputou.
+ *  Retorna um Map<playerId, número de partidas>.
+ */
+function countMatches(playersMatches: Match[]): Map<Player['id'], number> {
+  const counts = new Map<Player['id'], number>()
+
+  for (const { teamA, teamB } of playersMatches) {
+    for (const p of [...teamA, ...teamB]) {
+      counts.set(p.id, (counts.get(p.id) ?? 0) + 1)
+    }
+  }
+
+  return counts
+}
+
+/** Imprime no console, em ordem decrescente, o total de partidas por jogador. */
+function printMatchCounts(playersMatches: Match[]): void {
+  const counts = countMatches(playersMatches)
+
+  console.log('Partidas jogadas por jogador:')
+  ;[...counts.entries()]
+    .sort(([, a], [, b]) => b - a) // maior → menor
+    .forEach(([id, n]) => console.log(`• Jogador ${id}: ${n} partida(s)`))
+}
