@@ -41,14 +41,14 @@ export interface Round {
 // ---------------------------------------------------------------------------
 
 /** Nº máximo de tentativas de geração antes de devolver o melhor resultado encontrado. */
-const MAX_REGENERATIONS = 50
+const MAX_REGENERATIONS = 100
 /** Diferença máxima permitida entre jogadores (0 → todos iguais). */
 const ALLOWED_MATCH_DIFF = 0
 /** Nº máximo de *rounds* incompletos permitido (0 → todos completos). */
 const ALLOWED_INCOMPLETE_ROUNDS = 0
 
 const MAX_IDLE_ROUNDS = 3 // ninguém pode ficar > 3 rounds sem atuar
-const MAX_ORDER_RETRIES = 10 // repete a tentativa de ordenação até
+const MAX_ORDER_RETRIES = 100 // repete a tentativa de ordenação até
 
 // ---------------------------------------------------------------------------
 // Utilidades internas
