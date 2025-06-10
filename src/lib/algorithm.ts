@@ -1,5 +1,15 @@
 // ============================================================================
-// src/lib/algorithm.ts – Coração da lógica de balanceamento
+// src/lib/algorithm.ts – Coração da lógica de balanceamento (REV 2)
+// ----------------------------------------------------------------------------
+// Alteração principal:
+//   • Evita escolher repetidamente a mesma pessoa dentro da MESMA rodada
+//     incrementando o contador `played` no momento em que o jogador é
+//     selecionado para um par.
+//   • Com isso, o passo final que antes somava +1 é dispensado (já contamos
+//     durante a montagem dos pares).
+//
+// Resultado: após um sorteio, cada jogador aparece no mapa exatamente tantas
+// vezes quanto partidas disputou ― nunca 2‑3x em um único sorteio sem precisar.
 // ============================================================================
 import type { Player } from '../context/PlayersContext.tsx'
 
@@ -37,6 +47,16 @@ export function generateMatches(
   }
 
   // -------------------------------------------------------------------------
+  // 1.1 Helper: marca uso IMEDIATO de um jogador.
+  //     Ao incrementar já aqui, evitamos que o mesmo nome seja escolhido
+  //     novamente dentro da mesma rodada apenas porque ainda "parece"
+  //     ter o menor contador.
+  // -------------------------------------------------------------------------
+  const markUsed = (p: Player) => {
+    played[p.id] += 1
+  }
+
+  // -------------------------------------------------------------------------
   // 2. Agrupa jogadores por nível e ordena cada fila por quem jogou menos.
   //    Isso torna a escolha greedy simples e justa.
   // -------------------------------------------------------------------------
@@ -60,6 +80,8 @@ export function generateMatches(
       const a = queue.shift()! // menor contador first
       const b = queue.shift()!
       pairs.push({ level: +lvl, a, b })
+      markUsed(a)
+      markUsed(b)
     }
     if (queue.length) singles.push(queue.shift()!) // sobrou 1 → marcar para reuse
   }
@@ -75,6 +97,8 @@ export function generateMatches(
 
     if (candidato) {
       pairs.push({ level: s.level, a: s, b: candidato })
+      markUsed(s)
+      markUsed(candidato)
     }
   }
 
@@ -91,6 +115,8 @@ export function generateMatches(
 
     if (candidatos.length >= 2) {
       pairs.push({ level: baseLevel, a: candidatos[0], b: candidatos[1] })
+      markUsed(candidatos[0])
+      markUsed(candidatos[1])
     } else {
       break // não há mais como completar – sairá com partidas a menos
     }
@@ -112,15 +138,6 @@ export function generateMatches(
       teamB.push(b)
     }
     matches.push({ teamA, teamB })
-  }
-
-  // -------------------------------------------------------------------------
-  // 7. Incrementa contagem de jogos de todo mundo que apareceu em matches.
-  // -------------------------------------------------------------------------
-  for (const { teamA, teamB } of matches) {
-    for (const p of [...teamA, ...teamB]) {
-      played[p.id] += 1
-    }
   }
 
   return { matches, played }
