@@ -1,116 +1,116 @@
-// src/components/MatchesTab.tsx
-
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import { generateSchedule } from '../lib/algorithm'
 import { toast, Toaster } from 'react-hot-toast'
 import type { Player, Round } from '../types/players'
 
-// constants
+// Constants
 const PLAYERS_PER_MATCH = 4 as const
 const STORAGE_KEY_COURTS = 'match_courts'
 const STORAGE_KEY_ROUNDS = 'match_rounds'
 
-// helper to create a responsive grid
-const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` })
-
-const MatchesTab: React.FC = () => {
-  const { players } = usePlayers()
-
-  // number of courts (persisted)
-  const [courts, setCourts] = useState<number>(() => {
-    const raw = localStorage.getItem(STORAGE_KEY_COURTS)
-    return raw ? Number(raw) : 2
+// Custom hook for syncing state with localStorage
+function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [value, setValue] = useState<T>(() => {
+    const stored = localStorage.getItem(key)
+    return stored ? (JSON.parse(stored) as T) : initialValue
   })
 
-  // past rounds (persisted)
-  const [rounds, setRounds] = useState<Round[]>(() => {
-    const raw = localStorage.getItem(STORAGE_KEY_ROUNDS)
-    return raw ? JSON.parse(raw) : []
-  })
-
-  // persist courts when changed
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_COURTS, String(courts))
-  }, [courts])
+    localStorage.setItem(key, JSON.stringify(value))
+  }, [key, value])
 
-  // persist rounds when changed
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_ROUNDS, JSON.stringify(rounds))
-  }, [rounds])
+  return [value, setValue]
+}
 
-  // count how many matches each player has played
-  const matchCounts = React.useMemo(() => {
+// Hook: count matches per player across all rounds
+function useMatchCounts(rounds: Round[]): Map<string, number> {
+  return useMemo(() => {
     const counts = new Map<string, number>()
-    for (const round of rounds) {
-      for (const match of round.matches) {
-        for (const p of [...match.teamA, ...match.teamB]) {
-          counts.set(p.id, (counts.get(p.id) || 0) + 1)
-        }
-      }
-    }
+    rounds.forEach((round) => {
+      round.matches.forEach((match) => {
+        const participants = [...match.teamA, ...match.teamB]
+        participants.forEach((player) => {
+          counts.set(player.id, (counts.get(player.id) || 0) + 1)
+        })
+      })
+    })
     return counts
   }, [rounds])
+}
 
-  // --- NEW: build a map of how many times each pair has teamed up ---
-  const partnerCounts = React.useMemo(() => {
-    // initialize a nested map: playerId -> (otherId -> times teamed)
+// Hook: count how many times each pair of players has teamed up
+function usePartnerCounts(rounds: Round[], players: Player[]): Map<string, Map<string, number>> {
+  return useMemo(() => {
+    // Initialize nested map: playerId -> (partnerId -> times teamed)
     const counts = new Map<string, Map<string, number>>()
     players.forEach((p) => {
       const inner = new Map<string, number>()
       players.forEach((q) => {
-        if (p.id !== q.id) {
-          inner.set(q.id, 0)
-        }
+        if (p.id !== q.id) inner.set(q.id, 0)
       })
       counts.set(p.id, inner)
     })
 
-    // iterate through past rounds and increment each partnership
-    for (const round of rounds) {
-      for (const match of round.matches) {
-        for (const team of [match.teamA, match.teamB] as Player[][]) {
+    // Tally partnerships from past rounds
+    rounds.forEach((round) => {
+      round.matches.forEach((match) => {
+        ;[match.teamA, match.teamB].forEach((team) => {
           const [p1, p2] = team
           const map1 = counts.get(p1.id)!
-          map1.set(p2.id, (map1.get(p2.id) || 0) + 1)
           const map2 = counts.get(p2.id)!
+          map1.set(p2.id, (map1.get(p2.id) || 0) + 1)
           map2.set(p1.id, (map2.get(p1.id) || 0) + 1)
-        }
-      }
-    }
-
-    // Converte Map<Map> em objeto simples: { [playerId]: { [otherId]: count } }
-    const legibleCounts: Record<string, Record<string, number>> = {}
-    counts.forEach((innerMap, playerId) => {
-      // cria objeto para cada jogador
-      legibleCounts[playerId] = {}
-      innerMap.forEach((count, otherId) => {
-        legibleCounts[playerId][otherId] = count
+        })
       })
     })
 
-    // Log em formato de tabela (colunas = parceiros)
-    console.table(legibleCounts)
+    // For debugging: output as a table in console
+    const debugObj: Record<string, Record<string, number>> = {}
+    counts.forEach((innerMap, id) => {
+      debugObj[id] = {}
+      innerMap.forEach((count, partnerId) => {
+        debugObj[id][partnerId] = count
+      })
+    })
+    console.table(debugObj)
 
     return counts
   }, [rounds, players])
+}
 
-  const generate = () => {
+// Helper: CSS grid template style for given number of courts
+const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` })
+
+// Main component: displays controls and list of rounds
+const MatchesTab: React.FC = () => {
+  const { players } = usePlayers()
+
+  // State: number of courts and past rounds (both synced with localStorage)
+  const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
+  const [rounds, setRounds] = useLocalStorage<Round[]>(STORAGE_KEY_ROUNDS, [])
+
+  // Compute helper maps for scheduling algorithm
+  const matchCounts = useMatchCounts(rounds)
+  const partnerCounts = usePartnerCounts(rounds, players)
+
+  // Generate a new round when user clicks "Gerar"
+  const handleGenerate = () => {
     try {
-      // now include partnerCounts to help balance pairings over time
       const newRound = generateSchedule(players, courts, matchCounts, partnerCounts)
       setRounds((prev) => [...prev, newRound])
       toast.success('Rodada gerada e salva!', { duration: 3000 })
-    } catch (err) {
-      toast.error((err as Error).message, { duration: 6000 })
+    } catch (error) {
+      toast.error((error as Error).message, { duration: 6000 })
     }
   }
 
   return (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
+      {/* Notification container */}
       <Toaster position="top-right" />
 
-      {/* CONTROLS */}
+      {/* Controls: number of courts and generate button */}
       <div className="flex items-end gap-4">
         <label className="form-control w-32">
           <span className="label-text">Quadras</span>
@@ -124,14 +124,14 @@ const MatchesTab: React.FC = () => {
         </label>
         <button
           className="btn btn-primary rounded-full"
-          onClick={generate}
+          onClick={handleGenerate}
           disabled={players.length < PLAYERS_PER_MATCH}
         >
           Gerar
         </button>
       </div>
 
-      {/* ROUNDS LIST */}
+      {/* List of generated rounds */}
       {rounds.length === 0 ? (
         <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
       ) : (
@@ -158,7 +158,13 @@ const MatchesTab: React.FC = () => {
   )
 }
 
-const TeamView: React.FC<{ title: string; team: Player[] }> = ({ title, team }) => (
+// Sub-component: displays a team with player names and levels
+interface TeamViewProps {
+  title: string
+  team: Player[]
+}
+
+const TeamView: React.FC<TeamViewProps> = ({ title, team }) => (
   <div className="space-y-1">
     <h3 className="font-medium text-lg opacity-75 mb-1">{title}</h3>
     <ul className="space-y-1">
