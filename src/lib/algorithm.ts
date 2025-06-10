@@ -12,6 +12,12 @@
 //     mais de **uma** partida de diferença para o mínimo observado.
 //  4. ***NOVA REGRA (2025‑06‑10)***: **nunca** formar uma dupla em que ambos
 //     os jogadores tenham o **mesmo nível**.
+//  5. Se a diferença de partidas entre quaisquer dois jogadores for > 2,
+//     refazer toda a geração.
+//  6. Se existir mais de **uma** rodada “incompleta” (com menos que `courts`
+//     partidas), refazer toda a geração.
+//     • Para ambas as regras define-se um limite máximo de tentativas;
+//       caso nenhuma satisfaça tudo, devolvemos o melhor resultado encontrado.
 //
 //  Observação: O código está dividido em seções independentes. Cada função
 //  possui JSDoc detalhando sua responsabilidade e as regras que faz cumprir.
@@ -47,15 +53,15 @@ const sharesPlayer = (a: Match, b: Match) => {
  *   • ≤ `courts` partidas simultâneas;
  *   • nenhum jogador repetido dentro da mesma rodada.
  */
-export function generateSchedule(players: Player[], courts: number): Round[] {
+function buildSchedule(players: Player[], courts: number): Round[] {
   if (courts < 1) throw new Error('courts must be ≥ 1')
 
-  const matches = generateMatches(shuffle(players))
+  const matches = generateMatches(players)
   const rounds: Round[] = []
 
+  /* --- corpo original de generateSchedule (sem mudanças) --- */
   for (const match of matches) {
-    // 1. Tenta colocar na rodada mais vazia possível.
-    rounds.sort((a, b) => a.matches.length - b.matches.length) // menor → maior
+    rounds.sort((a, b) => a.matches.length - b.matches.length)
     let placed = false
 
     for (const round of rounds) {
@@ -67,11 +73,10 @@ export function generateSchedule(players: Player[], courts: number): Round[] {
       }
     }
 
-    // 2. Se não couber em nenhuma, cria nova rodada.
     if (!placed) rounds.push({ matches: [match] })
   }
 
-  // 3. Compactação: tenta mover partidas de rodadas posteriores para anteriores.
+  /* compactação + limpeza */
   for (let i = 0; i < rounds.length; i++) {
     if (rounds[i].matches.length === courts) continue
     for (let j = i + 1; j < rounds.length && rounds[i].matches.length < courts; j++) {
@@ -87,8 +92,45 @@ export function generateSchedule(players: Player[], courts: number): Round[] {
     }
   }
 
-  // 4. Remove rodadas vazias (podem surgir após a compactação)
   return rounds.filter((r) => r.matches.length > 0)
+}
+
+// ---------------------------------------------------------------------------
+// 🚀 Função principal – agora com retentativas para regras 5 e 6.
+// ---------------------------------------------------------------------------
+export function generateSchedule(
+  players: Player[],
+  courts: number,
+  maxRetries = 50, // ← valor default razoável
+): Round[] {
+  if (players.length < 4) return []
+
+  let bestRounds: Round[] = []
+  let bestScore = Number.POSITIVE_INFINITY
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const shuffled = shuffle(players)
+    const rounds = buildSchedule(shuffled, courts)
+
+    // --- Métricas para as novas regras -----------------------------------
+    const matchCounts = countMatches(rounds.flatMap((r) => r.matches))
+    const counts = [...matchCounts.values()]
+    const diff = Math.max(...counts) - Math.min(...counts) // regra 5
+    const incomplete = rounds.filter((r) => r.matches.length < courts).length // regra 6
+
+    // calendário aceitável?
+    if (diff === 0 && incomplete === 0) return rounds
+
+    // Pior caso → score grande; melhor → score 0
+    const score = diff * 100 + incomplete
+    if (score < bestScore) {
+      bestScore = score
+      bestRounds = rounds
+    }
+  }
+
+  // Nenhuma tentativa cumpriu tudo → devolvemos o “menos pior”.
+  return bestRounds
 }
 
 /**
