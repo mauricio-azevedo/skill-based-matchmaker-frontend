@@ -18,6 +18,7 @@
 // ============================================================================
 
 import type { Player } from '../context/PlayersContext'
+import { shuffle } from './shuffle.js'
 
 /** Cada partida contém dois times de dois jogadores. */
 export interface Match {
@@ -25,9 +26,70 @@ export interface Match {
   teamB: Player[]
 }
 
+/** Conjunto de partidas que podem acontecer simultaneamente. */
+export interface Round {
+  matches: Match[] // ≤ courts partidas, sem jogadores repetidos
+}
+
 // ---------------------------------------------------------------------------
 // Utilidades internas
 // ---------------------------------------------------------------------------
+
+/** Retorna *true* se as duas partidas compartilham algum jogador. */
+const sharesPlayer = (a: Match, b: Match) => {
+  const idsA = new Set([...a.teamA, ...a.teamB].map((p) => p.id))
+  return [...b.teamA, ...b.teamB].some((p) => idsA.has(p.id))
+}
+
+/**
+ * Gera um cronograma, com prioridade em rounds completos, de rodadas respeitando:
+ *   • Regras 1-4 (já garantidas por `generateMatches`);
+ *   • ≤ `courts` partidas simultâneas;
+ *   • nenhum jogador repetido dentro da mesma rodada.
+ */
+export function generateSchedule(players: Player[], courts: number): Round[] {
+  if (courts < 1) throw new Error('courts must be ≥ 1')
+
+  const matches = generateMatches(shuffle(players))
+  const rounds: Round[] = []
+
+  for (const match of matches) {
+    // 1. Tenta colocar na rodada mais vazia possível.
+    rounds.sort((a, b) => a.matches.length - b.matches.length) // menor → maior
+    let placed = false
+
+    for (const round of rounds) {
+      const clash = round.matches.some((m) => sharesPlayer(m, match))
+      if (!clash && round.matches.length < courts) {
+        round.matches.push(match)
+        placed = true
+        break
+      }
+    }
+
+    // 2. Se não couber em nenhuma, cria nova rodada.
+    if (!placed) rounds.push({ matches: [match] })
+  }
+
+  // 3. Compactação: tenta mover partidas de rodadas posteriores para anteriores.
+  for (let i = 0; i < rounds.length; i++) {
+    if (rounds[i].matches.length === courts) continue
+    for (let j = i + 1; j < rounds.length && rounds[i].matches.length < courts; j++) {
+      for (let k = 0; k < rounds[j].matches.length; k++) {
+        const m = rounds[j].matches[k]
+        if (!rounds[i].matches.some((x) => sharesPlayer(x, m))) {
+          rounds[i].matches.push(m)
+          rounds[j].matches.splice(k, 1)
+          k--
+          if (rounds[i].matches.length === courts) break
+        }
+      }
+    }
+  }
+
+  // 4. Remove rodadas vazias (podem surgir após a compactação)
+  return rounds.filter((r) => r.matches.length > 0)
+}
 
 /**
  * Gera uma chave única (e ordenada) para um par de jogadores.

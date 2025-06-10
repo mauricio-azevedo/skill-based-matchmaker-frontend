@@ -4,7 +4,7 @@
 import React, { useState } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import type { Player } from '../context/PlayersContext'
-import { generateMatches, type Match } from '../lib/algorithm'
+import { generateSchedule, type Match, type Round } from '../lib/algorithm'
 
 const PLAYERS_PER_MATCH = 4 as const
 
@@ -16,20 +16,16 @@ const MatchesTab: React.FC = () => {
   // remoção em PlayersProvider dispara rerender aqui.
   const { players } = usePlayers()
 
-  // matches – lista de partidas geradas pela última chamada a generate().
-  const [matches, setMatches] = useState<Match[]>([])
+  // ---------------------------------------------------------------------------
+  // nº de quadras selecionado pelo usuário
+  // ---------------------------------------------------------------------------
+  const [courts, setCourts] = useState<number>(2) // default 2
+  const [rounds, setRounds] = useState<Round[]>([])
 
-  // -------------------------------------------------------------------------
-  // generate() encapsula a regra de negócio pesada importada de algorithm.ts.
-  // - Recebemos de volta lista de partidas.
-  // -------------------------------------------------------------------------
   const generate = () => {
-    const newMatches = generateMatches(players)
-
-    printMatchCounts(newMatches)
-
-    // somar, não trocar
-    setMatches((prev) => [...prev, ...newMatches])
+    const newRounds = generateSchedule(players, courts)
+    setRounds(newRounds) // substitui, não soma
+    printMatchCounts(newRounds.flatMap((r) => r.matches))
   }
 
   // -------------------------------------------------------------------------
@@ -39,24 +35,37 @@ const MatchesTab: React.FC = () => {
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
       {/* ---------- CONTROLES ---------- */}
       <div className="flex items-center space-x-2">
+        <label className="label">Quadras:</label>
+        <input
+          type="number"
+          min={1}
+          value={courts}
+          onChange={(e) => setCourts(Number(e.target.value))}
+          className="input input-bordered w-20"
+        />
         <button className="btn btn-primary" onClick={generate} disabled={players.length < PLAYERS_PER_MATCH}>
           Generate
         </button>
       </div>
 
-      {/* ---------- LISTA DE PARTIDAS ---------- */}
-      <ol className="space-y-4">
-        {matches.map((m, idx) => (
-          <li key={idx} className="border rounded p-4">
-            Match #{idx + 1}
-            <div className="flex justify-between">
-              <TeamView title="Team A" team={m.teamA} />
-              <span className="text-xl font-bold self-center">vs</span>
-              <TeamView title="Team B" team={m.teamB} />
-            </div>
-          </li>
-        ))}
-      </ol>
+      {/* ---------- LISTA DE RODADAS ---------- */}
+      {rounds.map((r, rIdx) => (
+        <div key={rIdx} className="mb-6">
+          <h2 className="text-lg font-bold mb-2">Round #{rIdx + 1}</h2>
+          <ol className="grid gap-4" style={{ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` }}>
+            {' '}
+            {r.matches.map((m, mIdx) => (
+              <li key={mIdx} className="border rounded p-4">
+                <div className="flex justify-between">
+                  <TeamView title="Team A" team={m.teamA} />
+                  <span className="text-xl font-bold self-center">vs</span>
+                  <TeamView title="Team B" team={m.teamB} />
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
     </div>
   )
 }
