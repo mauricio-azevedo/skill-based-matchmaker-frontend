@@ -12,6 +12,7 @@
 //   • Todos que estavam no menor nº de partidas (min0) jogam pelo menos 1x
 // ============================================================================
 import type { Player } from '../context/PlayersContext'
+import { shuffle } from './shuffle.js'
 
 // --------- Tipos auxiliares ---------
 export type Team = [Player, Player]
@@ -46,9 +47,9 @@ export function generateMatches(
 
   // 2 ─── gera quartetos até zerarmos todos os “atrasados” (min0)
   while (players.some((p) => played[p.id] === min0)) {
-    const needers = players.filter((p) => played[p.id] === min0)
-    const extras = players.filter((p) => played[p.id] === min0 + 1)
-
+    const shuffledPlayers = shuffle(players)
+    const needers = shuffledPlayers.filter((p) => played[p.id] === min0)
+    const extras = shuffledPlayers.filter((p) => played[p.id] === min0 + 1)
     // monta quarteto
     const q: Player[] = needers.slice(0, PLAYERS_PER_MATCH)
     if (q.length < PLAYERS_PER_MATCH) {
