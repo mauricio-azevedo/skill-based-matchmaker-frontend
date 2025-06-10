@@ -6,6 +6,8 @@
 //   • *pós*-ajuste para que todos os jogadores terminem com a mesma quantidade
 //     de partidas – ou, na pior hipótese, apenas **uma** partida a mais que
 //     o mínimo observado.
+//   • ***NOVA REGRA***: **nunca** formar uma dupla com jogadores do **mesmo**
+//     nível. (Solicitado em 2025‑06‑10.)
 // ============================================================================
 import type { Player } from '../context/PlayersContext'
 
@@ -20,6 +22,7 @@ export type Match = {
 // ---------------------------------------------------------------------------
 const pairKey = (a: Player, b: Player) => (a.id < b.id ? `${a.id}-${b.id}` : `${b.id}-${a.id}`)
 const levelKey = (p: Player) => p.level
+const sameLevel = (a: Player, b: Player) => levelKey(a) === levelKey(b)
 
 /** Score de equilíbrio entre dois times 2×2.
  *  0 → multiset de níveis idêntico (ideal)
@@ -120,10 +123,15 @@ const balanceEvenParticipation = (matches: Match[]): Match[] => {
 export function generateMatches(players: Player[]): Match[] {
   if (players.length < 4) return []
 
-  // 1. Conjunto de duplas ainda não cobertas (map<key, pair>)
+  // Sanity‑check: precisamos de pelo menos **um** par de jogadores de níveis distintos
+  const hasDistinctLevelPair = players.some((p, i) => players.slice(i + 1).some((q) => !sameLevel(p, q)))
+  if (!hasDistinctLevelPair) return []
+
+  // 1. Conjunto de duplas ainda não cobertas (map<key, pair>) — **apenas** níveis distintos
   const uncovered = new Map<string, [Player, Player]>()
   for (let i = 0; i < players.length; i++) {
     for (let j = i + 1; j < players.length; j++) {
+      if (sameLevel(players[i], players[j])) continue // ***NOVA REGRA***: pular níveis iguais
       uncovered.set(pairKey(players[i], players[j]), [players[i], players[j]])
     }
   }
@@ -152,15 +160,24 @@ export function generateMatches(players: Player[]): Match[] {
       }
     }
 
-    let teamB: [Player, Player]
+    let teamB: [Player, Player] | null = null
     if (bestPair && bestKey) {
       teamB = bestPair
       uncovered.delete(bestKey)
     } else {
-      // Fallback: usa primeiros dois disponíveis que não estejam em teamA, ou repete A.
+      // Fallback: tenta encontrar qualquer dupla válida (níveis distintos) entre os "others"
       const others = players.filter((p) => p.id !== teamA[0].id && p.id !== teamA[1].id)
-      teamB = others.length >= 2 ? [others[0], others[1]] : [teamA[0], teamA[1]]
+      outer: for (let i = 0; i < others.length; i++) {
+        for (let j = i + 1; j < others.length; j++) {
+          if (!sameLevel(others[i], others[j])) {
+            teamB = [others[i], others[j]]
+            break outer
+          }
+        }
+      }
     }
+
+    if (!teamB) break // não há como formar mais partidas válidas
 
     matches.push({ teamA, teamB })
   }
