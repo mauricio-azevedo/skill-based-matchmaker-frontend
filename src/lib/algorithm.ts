@@ -1,18 +1,26 @@
 // ============================================================================
-// src/lib/algorithm.ts – geração de partidas 2×2 com:
-//   • cobertura de duplas (quando possível)
-//   • balanceamento de níveis entre times (ideal/aceitável)
-//   • remoção de jogos muito desbalanceados (score ≥ 2)
-//   • *pós*-ajuste para que todos os jogadores terminem com a mesma quantidade
-//     de partidas – ou, na pior hipótese, apenas **uma** partida a mais que
-//     o mínimo observado.
-//   • ***NOVA REGRA***: **nunca** formar uma dupla com jogadores do **mesmo**
-//     nível. (Solicitado em 2025‑06‑10.)
+// src/lib/algorithm.ts – geração de partidas 2×2
 // ============================================================================
+//  ➤ Regras de negócio implementadas
+//  ---------------------------------------------------------------------------
+//  1. Cobrir o máximo possível de *duplas* exclusivas (cada par A‑B deve
+//     aparecer pelo menos uma vez, quando possível).
+//  2. Balancear o nível dos times: preferência por partidas com *score* 0
+//     (multisets de níveis idênticos). Permite‑se *score* 1, mas partidas
+//     com *score* ≥ 2 são removidas.
+//  3. Pós‑ajuste de participação: no resultado final, nenhum jogador pode ter
+//     mais de **uma** partida de diferença para o mínimo observado.
+//  4. ***NOVA REGRA (2025‑06‑10)***: **nunca** formar uma dupla em que ambos
+//     os jogadores tenham o **mesmo nível**.
+//
+//  Observação: O código está dividido em seções independentes. Cada função
+//  possui JSDoc detalhando sua responsabilidade e as regras que faz cumprir.
+// ============================================================================
+
 import type { Player } from '../context/PlayersContext'
 
 /** Cada partida contém dois times de dois jogadores. */
-export type Match = {
+export interface Match {
   teamA: Player[]
   teamB: Player[]
 }
@@ -20,23 +28,42 @@ export type Match = {
 // ---------------------------------------------------------------------------
 // Utilidades internas
 // ---------------------------------------------------------------------------
+
+/**
+ * Gera uma chave única (e ordenada) para um par de jogadores.
+ * Usada para rastrear quais duplas já foram "cobertas" em alguma partida.
+ */
 const pairKey = (a: Player, b: Player) => (a.id < b.id ? `${a.id}-${b.id}` : `${b.id}-${a.id}`)
+
+/** Chave (inteiro) que representa o nível de um jogador. */
 const levelKey = (p: Player) => p.level
+
+/** Retorna *true* se ambos os jogadores possuem o mesmo nível. */
 const sameLevel = (a: Player, b: Player) => levelKey(a) === levelKey(b)
 
-/** Score de equilíbrio entre dois times 2×2.
- *  0 → multiset de níveis idêntico (ideal)
- *  1 → soma das diferenças absolutas ≤ 1  (aceitável)
- *  2 → qualquer coisa maior                (ruim) – evitado/​removido
+/**
+ * Calcula o *score* de balanceamento entre dois times 2×2.
+ *
+ *  • 0 → multiset de níveis idêntico (melhor caso)
+ *  • 1 → soma das diferenças absolutas ≤ 1 (ainda aceitável)
+ *  • 2 → qualquer valor maior (considerado ruim; evitaremos ou removeremos)
  */
 const pairScore = (a: [Player, Player], b: [Player, Player]): number => {
   const la = [levelKey(a[0]), levelKey(a[1])].sort((x, y) => x - y)
   const lb = [levelKey(b[0]), levelKey(b[1])].sort((x, y) => x - y)
+
+  // Caso ideal: mesmíssimo multiset de níveis.
   if (la[0] === lb[0] && la[1] === lb[1]) return 0
+
+  // Caso aceitável: diferença somada das posições ≤ 1.
   const diff = Math.abs(la[0] - lb[0]) + Math.abs(la[1] - lb[1])
   return diff <= 1 ? 1 : 2
 }
 
+/**
+ * Verifica se há sobreposição de jogadores entre uma dupla e um time.
+ * Usado para garantir que um jogador não apareça em ambos os lados da partida.
+ */
 const overlap = (pair: [Player, Player], team: [Player, Player]) =>
   pair[0].id === team[0].id || pair[0].id === team[1].id || pair[1].id === team[0].id || pair[1].id === team[1].id
 
@@ -44,9 +71,15 @@ const overlap = (pair: [Player, Player], team: [Player, Player]) =>
 // Estatísticas auxiliares
 // ---------------------------------------------------------------------------
 
-/** Conta quantas partidas cada jogador participou. */
+/**
+ * Conta quantas partidas cada jogador participou.
+ *
+ * Retorna um `Map` no qual a chave é `Player.id` e o valor é a quantidade de
+ * partidas em que o jogador aparece.
+ */
 const countMatches = (matches: Match[]): Map<Player['id'], number> => {
   const counts = new Map<Player['id'], number>()
+
   for (const { teamA, teamB } of matches) {
     for (const p of [...teamA, ...teamB]) {
       counts.set(p.id, (counts.get(p.id) ?? 0) + 1)
@@ -56,61 +89,68 @@ const countMatches = (matches: Match[]): Map<Player['id'], number> => {
 }
 
 // ---------------------------------------------------------------------------
-//  ⌁ balanceEvenParticipation – remove partidas de quem tem “sobras” ⌁
+// ⚖️  balanceEvenParticipation – remove partidas de quem tem “sobras”
 // ---------------------------------------------------------------------------
 /**
  * Garante que ninguém jogue mais de **uma** partida além do mínimo observado.
  *
- * Estratégia:
- *   • enquanto maxCount − minCount > 1:
- *       1. identifique jogadores no grupo de maxCount;
- *       2. procure partida que envolva pelo menos **um** desses jogadores e
- *          **nenhum** do grupo minCount;
- *       3. escolha a partida menos equilibrada (score 1 antes de 0) para
- *          minimizar impacto, depois remova-a e atualize contagens.
+ * Estratégia (gananciosa):
+ *   1. Enquanto a diferença (max − min) > 1…
+ *      a. Identificar jogadores com `max` partidas.
+ *      b. Remover a partida *menos equilibrada* (maior *score*) que:
+ *         • contenha **pelo menos um** jogador do grupo `max`,
+ *         • **nenhum** jogador do grupo `min`.
+ *   2. Repetir até ficar impossível (ou desnecessário) remover partidas.
  *
- *   • se não houver partida elegível → não faz mais nada (já atingimos limite
- *     ou nenhum ajuste possível sem tocar quem tem o mínimo).
+ * Observação: Não adicionamos novas partidas — apenas removemos para equilibrar
+ * participações. Isso não afeta a cobertura de duplas já alcançada.
  */
 const balanceEvenParticipation = (matches: Match[]): Match[] => {
   const mutable = [...matches] // cópia mutável
   let counts = countMatches(mutable)
 
+  /** Calcula rapidamente os valores mínimo e máximo atuais. */
   const getMinMax = () => {
     const vals = [...counts.values()]
     return { min: Math.min(...vals), max: Math.max(...vals) }
   }
 
-  // ————————————————————————————————————————————————————————————————
+  // ---------------------------------------------------------------------
+  // Loop até que max − min ≤ 1, ou não haja mais partidas "removíveis".
+  // ---------------------------------------------------------------------
   while (true) {
     const { min, max } = getMinMax()
     if (max - min <= 1) break // já equilibrado
 
+    // ➤ Identifica jogadores nos extremos
     const maxPlayers = new Set([...counts.entries()].filter(([, n]) => n === max).map(([id]) => id))
     const minPlayers = new Set([...counts.entries()].filter(([, n]) => n === min).map(([id]) => id))
 
-    // Filtra partidas elegíveis: contém alguém do maxPlayers e ninguém do minPlayers
+    // ➤ Seleciona partidas elegíveis para remoção
     type ScoredMatch = { idx: number; score: number }
     const candidates: ScoredMatch[] = []
+
     mutable.forEach((m, idx) => {
-      const playersIds = [...m.teamA, ...m.teamB].map((p) => p.id)
-      const hasMax = playersIds.some((id) => maxPlayers.has(id))
-      const hasMin = playersIds.some((id) => minPlayers.has(id))
+      const playerIds = [...m.teamA, ...m.teamB].map((p) => p.id)
+      const hasMax = playerIds.some((id) => maxPlayers.has(id))
+      const hasMin = playerIds.some((id) => minPlayers.has(id))
+
       if (hasMax && !hasMin) {
         const score = pairScore(m.teamA as [Player, Player], m.teamB as [Player, Player])
         candidates.push({ idx, score })
       }
     })
 
-    if (!candidates.length) break // nenhum jogo removível sem afetar mínimos
+    if (!candidates.length) break // não há jogo removível sem afetar mínimos
 
-    // Ordena: preferir remover score 1 depois score 0
-    candidates.sort((a, b) => b.score - a.score) // 1 > 0, ambos < 2 (já filtrado)
+    // Ordena de forma decrescente: score 1 antes de score 0 (queremos remover pior balanceamento)
+    candidates.sort((a, b) => b.score - a.score)
 
-    // Remove a primeira
+    // Remove a partida eleita
     const { idx } = candidates[0]
     mutable.splice(idx, 1)
-    // Recalcula contagens — mais barato que atualizar manualmente
+
+    // Recalcula contagens (mais simples que atualizar manualmente)
     counts = countMatches(mutable)
   }
 
@@ -120,52 +160,69 @@ const balanceEvenParticipation = (matches: Match[]): Match[] => {
 // ---------------------------------------------------------------------------
 // Função principal – geração de partidas
 // ---------------------------------------------------------------------------
+/**
+ * Gera partidas 2×2 atendendo todas as regras de negócio listadas no cabeçalho.
+ *
+ * Passos (alto nível):
+ *   1. Verificações iniciais e construção de *duplas* elegíveis
+ *      (respeitando a NOVA REGRA de níveis distintos).
+ *   2. Processo ganancioso que:
+ *        • escolhe a primeira dupla não coberta → `teamA`;
+ *        • procura a dupla disjunta mais bem balanceada → `teamB`.
+ *      Repetir até não restarem duplas "não cobertas".
+ *   3. Filtrar partidas com *score* ≥ 2 (níveis desequilibrados demais).
+ *   4. Aplicar `balanceEvenParticipation` para equalizar participações.
+ */
 export function generateMatches(players: Player[]): Match[] {
+  // ➤ Pré‑condições básicas --------------------------------------------------
   if (players.length < 4) return []
 
-  // Sanity‑check: precisamos de pelo menos **um** par de jogadores de níveis distintos
+  // Precisamos de pelo menos um par de jogadores com níveis distintos.
   const hasDistinctLevelPair = players.some((p, i) => players.slice(i + 1).some((q) => !sameLevel(p, q)))
   if (!hasDistinctLevelPair) return []
 
-  // 1. Conjunto de duplas ainda não cobertas (map<key, pair>) — **apenas** níveis distintos
+  // ➤ 1. Construção do conjunto "uncovered" -------------------------------
+  //    Map<string, [Player, Player]> onde a chave é o par e o valor a dupla.
   const uncovered = new Map<string, [Player, Player]>()
   for (let i = 0; i < players.length; i++) {
     for (let j = i + 1; j < players.length; j++) {
-      if (sameLevel(players[i], players[j])) continue // ***NOVA REGRA***: pular níveis iguais
+      if (sameLevel(players[i], players[j])) continue // ✱ NOVA REGRA ✱
       uncovered.set(pairKey(players[i], players[j]), [players[i], players[j]])
     }
   }
 
   const matches: Match[] = []
 
-  // 2. Geração gananciosa cobrindo (até) duas duplas por iteração
+  // ➤ 2. Loop ganancioso cobrindo até duas duplas por iteração -------------
   while (uncovered.size) {
-    // 2.1 primeira dupla não coberta → teamA
+    // 2.1 Primeira dupla pendente → `teamA`
     const [, teamA] = uncovered.entries().next().value as [string, [Player, Player]]
     uncovered.delete(pairKey(teamA[0], teamA[1]))
 
-    // 2.2 procura melhor dupla disjunta → teamB
+    // 2.2 Melhor dupla disjunta possível → `teamB`
     let bestKey: string | null = null
     let bestPair: [Player, Player] | null = null
     let bestScore = Infinity
 
     for (const [key, pair] of uncovered.entries()) {
-      if (overlap(pair, teamA)) continue
+      if (overlap(pair, teamA)) continue // não pode repetir jogador
+
       const s = pairScore(teamA, pair)
       if (s < bestScore) {
         bestScore = s
         bestKey = key
         bestPair = pair
-        if (s === 0) break // já é ideal
+        if (s === 0) break // já é o equilíbrio ideal
       }
     }
 
+    // Caso não exista par disjunto em `uncovered`, tentamos compor manualmente.
     let teamB: [Player, Player] | null = null
     if (bestPair && bestKey) {
       teamB = bestPair
       uncovered.delete(bestKey)
     } else {
-      // Fallback: tenta encontrar qualquer dupla válida (níveis distintos) entre os "others"
+      // Fallback: qualquer dupla válida (níveis distintos) entre os restantes.
       const others = players.filter((p) => p.id !== teamA[0].id && p.id !== teamA[1].id)
       outer: for (let i = 0; i < others.length; i++) {
         for (let j = i + 1; j < others.length; j++) {
@@ -177,14 +234,14 @@ export function generateMatches(players: Player[]): Match[] {
       }
     }
 
-    if (!teamB) break // não há como formar mais partidas válidas
+    if (!teamB) break // não há mais partidas válidas
 
     matches.push({ teamA, teamB })
   }
 
-  // 3. Remove partidas cuja variação de níveis seja ≥ 2
+  // ➤ 3. Remove partidas muito desbalanceadas (score ≥ 2) ------------------
   const filtered = matches.filter((m) => pairScore(m.teamA as [Player, Player], m.teamB as [Player, Player]) < 2)
 
-  // 4. Balanceia participação – equaliza ou deixa diferença ≤ 1
+  // ➤ 4. Equaliza participação entre jogadores ----------------------------
   return balanceEvenParticipation(filtered)
 }
