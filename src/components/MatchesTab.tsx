@@ -1,41 +1,45 @@
 // src/components/MatchesTab.tsx
+
 import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import { generateSchedule } from '../lib/algorithm'
 import { toast, Toaster } from 'react-hot-toast'
 import type { Player, Round } from '../types/players'
 
+// constants
 const PLAYERS_PER_MATCH = 4 as const
 const STORAGE_KEY_COURTS = 'match_courts'
 const STORAGE_KEY_ROUNDS = 'match_rounds'
 
+// helper to create a responsive grid
 const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` })
 
 const MatchesTab: React.FC = () => {
   const { players } = usePlayers()
 
-  // quadras
+  // number of courts (persisted)
   const [courts, setCourts] = useState<number>(() => {
     const raw = localStorage.getItem(STORAGE_KEY_COURTS)
     return raw ? Number(raw) : 2
   })
 
-  // rounds persistidos
+  // past rounds (persisted)
   const [rounds, setRounds] = useState<Round[]>(() => {
     const raw = localStorage.getItem(STORAGE_KEY_ROUNDS)
     return raw ? JSON.parse(raw) : []
   })
 
-  // atualizar quadras no localStorage
+  // persist courts when changed
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_COURTS, String(courts))
   }, [courts])
 
-  // persistir rounds
+  // persist rounds when changed
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_ROUNDS, JSON.stringify(rounds))
   }, [rounds])
 
+  // count how many matches each player has played
   const matchCounts = React.useMemo(() => {
     const counts = new Map<string, number>()
     for (const round of rounds) {
@@ -48,78 +52,42 @@ const MatchesTab: React.FC = () => {
     return counts
   }, [rounds])
 
-  // --- NOVO: log do máximo de rodadas consecutivas no banco ---
-  useEffect(() => {
-    if (rounds.length === 0) return
-
-    // 1) CÁLCULO DE STREAKS NO BANCO
-    const streaks: Record<string, { current: number; max: number }> = {}
+  // --- NEW: build a map of how many times each pair has teamed up ---
+  const partnerCounts = React.useMemo(() => {
+    // initialize a nested map: playerId -> (otherId -> times teamed)
+    const counts = new Map<string, Map<string, number>>()
     players.forEach((p) => {
-      streaks[p.id] = { current: 0, max: 0 }
-    })
-
-    for (const round of rounds) {
-      const played = new Set<string>()
-      for (const match of round.matches) {
-        for (const p of [...match.teamA, ...match.teamB]) {
-          played.add(p.id)
-        }
-      }
-      players.forEach((p) => {
-        if (played.has(p.id)) {
-          streaks[p.id].current = 0
-        } else {
-          streaks[p.id].current += 1
-          if (streaks[p.id].current > streaks[p.id].max) {
-            streaks[p.id].max = streaks[p.id].current
-          }
-        }
-      })
-    }
-
-    console.log('Máximo de partidas consecutivas no banco por jogador:')
-    players.forEach((p) => {
-      console.log(`– ${p.name}: ${streaks[p.id].max}`)
-    })
-
-    // 2) CÁLCULO DE PARCERIAS
-    // inicializa contador para cada par
-    const partnerCounts: Record<string, Record<string, number>> = {}
-    players.forEach((p) => {
-      partnerCounts[p.id] = {}
+      const inner = new Map<string, number>()
       players.forEach((q) => {
-        if (p.id !== q.id) partnerCounts[p.id][q.id] = 0
+        if (p.id !== q.id) {
+          inner.set(q.id, 0)
+        }
       })
+      counts.set(p.id, inner)
     })
 
-    // conta quantas vezes cada dupla jogou junta (em A ou B)
+    // iterate through past rounds and increment each partnership
     for (const round of rounds) {
       for (const match of round.matches) {
         for (const team of [match.teamA, match.teamB] as Player[][]) {
           const [p1, p2] = team
-          partnerCounts[p1.id][p2.id]++
-          partnerCounts[p2.id][p1.id]++
+          const map1 = counts.get(p1.id)!
+          map1.set(p2.id, (map1.get(p2.id) || 0) + 1)
+          const map2 = counts.get(p2.id)!
+          map2.set(p1.id, (map2.get(p1.id) || 0) + 1)
         }
       }
     }
 
-    console.log('Número de vezes que cada jogador jogou com outro:')
-    // só imprime cada par uma vez
-    const seen = new Set<string>()
-    players.forEach((p) => {
-      players.forEach((q) => {
-        if (p.id === q.id) return
-        const key = [p.id, q.id].sort().join('|')
-        if (seen.has(key)) return
-        seen.add(key)
-        console.log(`– ${p.name} & ${q.name}: ${partnerCounts[p.id][q.id]}`)
-      })
-    })
+    console.log(counts)
+
+    return counts
   }, [rounds, players])
 
   const generate = () => {
     try {
-      const newRound = generateSchedule(players, courts, matchCounts)
+      // now include partnerCounts to help balance pairings over time
+      const newRound = generateSchedule(players, courts, matchCounts, partnerCounts)
       setRounds((prev) => [...prev, newRound])
       toast.success('Rodada gerada e salva!', { duration: 3000 })
     } catch (err) {
@@ -131,7 +99,7 @@ const MatchesTab: React.FC = () => {
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
       <Toaster position="top-right" />
 
-      {/* CONTROLES */}
+      {/* CONTROLS */}
       <div className="flex items-end gap-4">
         <label className="form-control w-32">
           <span className="label-text">Quadras</span>
@@ -152,7 +120,7 @@ const MatchesTab: React.FC = () => {
         </button>
       </div>
 
-      {/* LISTA DE RODADAS */}
+      {/* ROUNDS LIST */}
       {rounds.length === 0 ? (
         <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
       ) : (
