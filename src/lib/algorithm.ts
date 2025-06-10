@@ -47,52 +47,90 @@ const ALLOWED_MATCH_DIFF = 0
 /** Nº máximo de *rounds* incompletos permitido (0 → todos completos). */
 const ALLOWED_INCOMPLETE_ROUNDS = 0
 
+const MAX_IDLE_ROUNDS = 3 // ninguém pode ficar > 3 rounds sem atuar
+const MAX_ORDER_RETRIES = 10 // repete a tentativa de ordenação até
+
 // ---------------------------------------------------------------------------
 // Utilidades internas
 // ---------------------------------------------------------------------------
-
 /**
- * Reordena os rounds para minimizar o maior intervalo em que um jogador
- * fica sem atuar.  Estratégia:
+ * Reordena os rounds garantindo que nenhum jogador permaneça mais
+ * que `MAX_IDLE_ROUNDS` consecutivos fora.
  *
- *   • Mantém uma lista de rounds “restantes” e um vetor `ordered` vazio.
- *   • Em cada passo escolhe o round cujo “score” soma, para cada atleta nele,
- *     há quanto tempo ele não joga (quanto maior, melhor).
- *   • Atualiza `lastPlayed` e repete até acabar.
+ * Estratégia (greedy + verificação de viabilidade):
+ *   • Mantém `wait[id]` = quantos rounds seguidos o atleta está fora.
+ *   • Na posição `idx`, avalia todos os rounds restantes e filtra
+ *     apenas os que não estourariam `MAX_IDLE_ROUNDS`.
+ *   • Entre os viáveis, escolhe o que:
+ *        1. Minimiza o novo maior `waitMax` (max-min);
+ *        2. Desempata pela soma dos gaps (como antes).
+ *   • Se nenhum round for viável → não existe solução com a regra
+ *     atual (lança erro; o gerador externo tentará nova chave).
  *
- *  ➤  Complexidade O(R²·P) – R ≤ nº de rounds / P ≤ jogadores por round.
- *     Para ligas amadoras (dezenas de rounds) é mais que suficiente.
+ * Complexidade: O(R²·P) – idêntica ao heurístico anterior.
  */
 const reorderRoundsForSpacing = (rounds: Round[]): Round[] => {
-  const remaining = [...rounds] // cópia mutável
+  const remaining = [...rounds]
   const ordered: Round[] = []
-  const lastPlayed = new Map<Player['id'], number>() // -∞ → nunca jogou
+
+  // Coleta todos os IDs de atletas presentes na chave
+  const allIds = new Set<Player['id']>()
+  for (const { matches } of rounds)
+    for (const { teamA, teamB } of matches) for (const p of [...teamA, ...teamB]) allIds.add(p.id)
+
+  // Mapa “há quantos rounds seguidos está de fora”
+  const wait = new Map<Player['id'], number>()
+  allIds.forEach((id) => wait.set(id, 0))
 
   for (let idx = 0; remaining.length; idx++) {
-    let bestIdx = 0
-    let bestScore = -Infinity
+    let bestIdx = -1
+    let bestWaitMax = Infinity
+    let bestSumGaps = -Infinity
 
     for (let i = 0; i < remaining.length; i++) {
       const round = remaining[i]
-      let score = 0
 
-      for (const { teamA, teamB } of round.matches) {
-        for (const p of [...teamA, ...teamB]) {
-          score += idx - (lastPlayed.get(p.id) ?? -Infinity)
+      // Calcula wait após jogar este round
+      let feasible = true
+      let waitMax = 0
+      let sumGaps = 0
+
+      for (const id of allIds) {
+        const playsHere = round.matches.some(
+          (m) => m.teamA.some((p) => p.id === id) || m.teamB.some((p) => p.id === id),
+        )
+        const newWait = playsHere ? 0 : wait.get(id)! + 1
+
+        if (newWait > MAX_IDLE_ROUNDS) {
+          feasible = false
+          break
         }
+        if (newWait > waitMax) waitMax = newWait
+        sumGaps += newWait
       }
-      if (score > bestScore) {
-        bestScore = score
+
+      if (!feasible) continue
+
+      // Critério: menor waitMax; empate → maior soma (beneficia quem espera mais)
+      if (waitMax < bestWaitMax || (waitMax === bestWaitMax && sumGaps > bestSumGaps)) {
         bestIdx = i
+        bestWaitMax = waitMax
+        bestSumGaps = sumGaps
       }
+    }
+
+    if (bestIdx === -1) {
+      // Não existe round viável: requisito de 3 rounds é impossível
+      throw new Error(`Impossível ordenar sem exceder ${MAX_IDLE_ROUNDS} rodadas ociosas`)
     }
 
     const [chosen] = remaining.splice(bestIdx, 1)
     ordered.push(chosen)
 
-    // marca quando cada atleta acabou de jogar
-    for (const { teamA, teamB } of chosen.matches) {
-      for (const p of [...teamA, ...teamB]) lastPlayed.set(p.id, idx)
+    // Atualiza espera de todos
+    for (const id of allIds) {
+      const playsHere = chosen.matches.some((m) => m.teamA.some((p) => p.id === id) || m.teamB.some((p) => p.id === id))
+      wait.set(id, playsHere ? 0 : wait.get(id)! + 1)
     }
   }
 
@@ -263,40 +301,66 @@ export function generateSchedule(players: Player[], courts: number): Round[] {
   if (courts < 1) throw new Error('courts must be ≥ 1')
   if (players.length < 4) return []
 
-  /** Avalia quão “boa” é uma solução. Quanto menor, melhor. */
-  const scoreSolution = (rounds: Round[]): { diff: number; incomplete: number } => {
-    const allMatches = rounds.flatMap((r) => r.matches)
-    const counts = countMatches(allMatches)
-    const values = [...counts.values()]
-    const diff = Math.max(...values) - Math.min(...values)
-    const incomplete = rounds.filter((r) => r.matches.length < courts).length
-    return { diff, incomplete }
+  /** Métrica de qualidade da solução. Quanto menor, melhor. */
+  const scoreSolution = (rounds: Round[]) => {
+    const counts = countMatches(rounds.flatMap((r) => r.matches))
+    const vals = [...counts.values()]
+    return {
+      diff: Math.max(...vals) - Math.min(...vals),
+      incomplete: rounds.filter((r) => r.matches.length < courts).length,
+    }
   }
 
   let bestRounds: Round[] = []
-  let bestScore: { diff: number; incomplete: number } = { diff: Infinity, incomplete: Infinity }
+  let bestScore = { diff: Infinity, incomplete: Infinity }
 
-  for (let attempt = 0; attempt < MAX_REGENERATIONS; attempt++) {
-    // 1. Geração de partidas + balanceamento preexistente
+  // ➊ tenta gerar e ordenar até MAX_REGENERATIONS combinações diferentes
+  outer: for (let attempt = 0; attempt < MAX_REGENERATIONS; attempt++) {
     const matches = generateMatches(shuffle(players))
-    const rounds = generateScheduleSingle(matches, courts)
+    const roundsBase = generateScheduleSingle(matches, courts)
 
-    const { diff, incomplete } = scoreSolution(rounds)
+    // ➋ para cada geração, tenta ordenar até MAX_ORDER_RETRIES vezes
+    for (let retry = 0; retry < MAX_ORDER_RETRIES; retry++) {
+      let rounds: Round[]
+      try {
+        rounds = reorderRoundsForSpacing(roundsBase)
+      } catch (err) {
+        const msg = (err as Error).message
+        // Erro de espaçamento? → volta ao topo do loop `retry`
+        if (msg.includes('rodadas ociosas')) continue
+        // Erro diferente? → propaga
+        throw err
+      }
 
-    // Solução perfeita? Retorna imediatamente.
-    if (diff === ALLOWED_MATCH_DIFF && incomplete === ALLOWED_INCOMPLETE_ROUNDS) {
-      return reorderRoundsForSpacing(rounds)
-    }
+      const { diff, incomplete } = scoreSolution(rounds)
 
-    // Atualiza “menos pior”.
-    if (diff < bestScore.diff || (diff === bestScore.diff && incomplete < bestScore.incomplete)) {
-      bestRounds = rounds
-      bestScore = { diff, incomplete }
+      // Solução perfeita? Encerra imediatamente
+      if (diff === ALLOWED_MATCH_DIFF && incomplete === ALLOWED_INCOMPLETE_ROUNDS) {
+        return rounds
+      }
+
+      // Melhor resultado até agora?
+      if (diff < bestScore.diff || (diff === bestScore.diff && incomplete < bestScore.incomplete)) {
+        bestRounds = rounds
+        bestScore = { diff, incomplete }
+      }
+
+      // Não é perfeita → quebra o laço interno e volta ao `outer` para
+      // gerar um novo conjunto de partidas totalmente diferente.
+      break
     }
   }
 
-  // Não houve solução perfeita; devolve‑se a melhor encontrada.
-  return reorderRoundsForSpacing(bestRounds)
+  // ➌ Se chegou aqui, *todas* as tentativas falharam
+  if (!bestRounds.length) {
+    throw new Error(
+      `Não foi possível gerar um cronograma sem exceder ${MAX_IDLE_ROUNDS} ` +
+        `rodadas ociosas após ${MAX_REGENERATIONS * MAX_ORDER_RETRIES} ` +
+        `tentativas. Ajuste as restrições ou o número de jogadores e tente novamente.`,
+    )
+  }
+
+  return bestRounds
 }
 
 // ---------------------------------------------------------------------------
