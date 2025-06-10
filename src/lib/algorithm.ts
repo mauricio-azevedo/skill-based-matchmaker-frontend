@@ -11,10 +11,12 @@
 //  3. **Participação uniforme**: no resultado final, todos os jogadores devem
 //     ter **exatamente** o mesmo número de partidas. Caso contrário, o
 //     algoritmo tenta uma nova geração (até `MAX_REGENERATIONS`).
-//  4. ***NOVA REGRA (2025‑06‑10)***: **nunca** formar uma dupla em que ambos
+//  4. **Nunca** formar uma dupla em que ambos
 //     os jogadores tenham o **mesmo nível**.
-//  5. ***NOVA REGRA (2025‑06‑10)***: se existir ao menos um *round* com menos
+//  5. Se existir ao menos um *round* com menos
 //     partidas do que o número de `courts`, inicia‑se uma nova geração.
+//  6. Reorganiza os rounds já calculados para “espalhar” ao máximo a presença
+//     de cada jogador.
 //
 //  Observação: O código está dividido em seções independentes. Cada função
 //  possui JSDoc detalhando sua responsabilidade e as regras que faz cumprir.
@@ -48,6 +50,54 @@ const ALLOWED_INCOMPLETE_ROUNDS = 0
 // ---------------------------------------------------------------------------
 // Utilidades internas
 // ---------------------------------------------------------------------------
+
+/**
+ * Reordena os rounds para minimizar o maior intervalo em que um jogador
+ * fica sem atuar.  Estratégia:
+ *
+ *   • Mantém uma lista de rounds “restantes” e um vetor `ordered` vazio.
+ *   • Em cada passo escolhe o round cujo “score” soma, para cada atleta nele,
+ *     há quanto tempo ele não joga (quanto maior, melhor).
+ *   • Atualiza `lastPlayed` e repete até acabar.
+ *
+ *  ➤  Complexidade O(R²·P) – R ≤ nº de rounds / P ≤ jogadores por round.
+ *     Para ligas amadoras (dezenas de rounds) é mais que suficiente.
+ */
+const reorderRoundsForSpacing = (rounds: Round[]): Round[] => {
+  const remaining = [...rounds] // cópia mutável
+  const ordered: Round[] = []
+  const lastPlayed = new Map<Player['id'], number>() // -∞ → nunca jogou
+
+  for (let idx = 0; remaining.length; idx++) {
+    let bestIdx = 0
+    let bestScore = -Infinity
+
+    for (let i = 0; i < remaining.length; i++) {
+      const round = remaining[i]
+      let score = 0
+
+      for (const { teamA, teamB } of round.matches) {
+        for (const p of [...teamA, ...teamB]) {
+          score += idx - (lastPlayed.get(p.id) ?? -Infinity)
+        }
+      }
+      if (score > bestScore) {
+        bestScore = score
+        bestIdx = i
+      }
+    }
+
+    const [chosen] = remaining.splice(bestIdx, 1)
+    ordered.push(chosen)
+
+    // marca quando cada atleta acabou de jogar
+    for (const { teamA, teamB } of chosen.matches) {
+      for (const p of [...teamA, ...teamB]) lastPlayed.set(p.id, idx)
+    }
+  }
+
+  return ordered
+}
 
 /** Retorna *true* se as duas partidas compartilham algum jogador. */
 const sharesPlayer = (a: Match, b: Match) => {
@@ -235,7 +285,7 @@ export function generateSchedule(players: Player[], courts: number): Round[] {
 
     // Solução perfeita? Retorna imediatamente.
     if (diff === ALLOWED_MATCH_DIFF && incomplete === ALLOWED_INCOMPLETE_ROUNDS) {
-      return rounds
+      return reorderRoundsForSpacing(rounds)
     }
 
     // Atualiza “menos pior”.
@@ -246,7 +296,7 @@ export function generateSchedule(players: Player[], courts: number): Round[] {
   }
 
   // Não houve solução perfeita; devolve‑se a melhor encontrada.
-  return bestRounds
+  return reorderRoundsForSpacing(bestRounds)
 }
 
 // ---------------------------------------------------------------------------
