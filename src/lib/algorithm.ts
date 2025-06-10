@@ -1,20 +1,20 @@
 // ============================================================================
-// src/lib/algorithm.ts – Coração da lógica de balanceamento (REV 2)
+// src/lib/algorithm.ts – Coração da lógica de balanceamento
 // ----------------------------------------------------------------------------
-// Alteração principal:
-//   • Evita escolher repetidamente a mesma pessoa dentro da MESMA rodada
-//     incrementando o contador `played` no momento em que o jogador é
-//     selecionado para um par.
-//   • Com isso, o passo final que antes somava +1 é dispensado (já contamos
-//     durante a montagem dos pares).
+// Alterações nesta revisão:
+//   • remove o parâmetro `teamSize`; o algoritmo agora gera APENAS partidas 2‑v‑2.
+//   • simplificação de variáveis e loops para priorizar clareza.
+//   • comentários revisados para serem mais objetivos.
 //
-// Resultado: após um sorteio, cada jogador aparece no mapa exatamente tantas
-// vezes quanto partidas disputou ― nunca 2‑3x em um único sorteio sem precisar.
+// Resultado: para cada sorteio, cada jogador aparece no mapa `played` apenas
+// uma vez por partida disputada, garantindo distribuição justa.
 // ============================================================================
 import type { Player } from '../context/PlayersContext.tsx'
 
-// Tipagens auxiliares – simplificam leitura em outros módulos.
-export interface Team extends Array<Player> {}
+// ----------------------
+// Tipos auxiliares
+// ----------------------
+export type Team = [Player, Player] // exatamente 2 jogadores
 export interface Match {
   teamA: Team
   teamB: Team
@@ -22,122 +22,98 @@ export interface Match {
 
 /**
  * Mapa id → nº de partidas – mantém histórico de uso para priorizar quem jogou
- * menos.  Mantido fora de Player para não sujar UI com dados de sessão.
+ * menos.  Mantido fora de Player para não misturar dados de UI com sessão.
  */
 export type PlayedMap = Record<string, number>
 
 /**
- * Gera partidas equilibradas por nível:
- *   – Cada partida contém dois times (A/B) com o MESMO multiconjunto de níveis.
- *   – Exemplo: teamSize=2 → [1,2] vs [1,2].
- *   – Jogadores "solteiros" são pareados reutilizando quem jogou menos.
+ * Gera partidas 2‑v‑2 equilibradas por nível (`Player.level`):
  *
- * Retorna { matches, played } onde played já vem incrementado.
+ *  • Em cada nível, cria pares (A,B) com o MESMO multiconjunto de níveis.
+ *  • Singles (jogadores sobrando) são pareados reutilizando quem jogou menos.
+ *  • Retorna `{ matches, played }` onde `played` já vem incrementado.
+ *
+ * A cada chamada considera o histórico acumulado em `played`, permitindo
+ * várias rodadas sem reinicializar contadores.
  */
-export function generateMatches(
-  players: Player[],
-  teamSize = 2,
-  played: PlayedMap = {},
-): { matches: Match[]; played: PlayedMap } {
-  // -------------------------------------------------------------------------
-  // 1. Normaliza played: garante entrada para todo jogador.
-  // -------------------------------------------------------------------------
+export function generateMatches(players: Player[], played: PlayedMap = {}): { matches: Match[]; played: PlayedMap } {
+  // -----------------------------------------------------------------------
+  // 1. Normaliza `played` – garante entrada para todo jogador.
+  // -----------------------------------------------------------------------
   for (const p of players) {
     if (played[p.id] == null) played[p.id] = 0
   }
 
-  // -------------------------------------------------------------------------
-  // 1.1 Helper: marca uso IMEDIATO de um jogador.
-  //     Ao incrementar já aqui, evitamos que o mesmo nome seja escolhido
-  //     novamente dentro da mesma rodada apenas porque ainda "parece"
-  //     ter o menor contador.
-  // -------------------------------------------------------------------------
-  const markUsed = (p: Player) => {
-    played[p.id] += 1
-  }
+  // Helper: marca uso IMEDIATO de um jogador para esta rodada.
+  const markUsed = (p: Player) => void (played[p.id] += 1)
 
-  // -------------------------------------------------------------------------
-  // 2. Agrupa jogadores por nível e ordena cada fila por quem jogou menos.
-  //    Isso torna a escolha greedy simples e justa.
-  // -------------------------------------------------------------------------
+  // -----------------------------------------------------------------------
+  // 2. Agrupa por nível e ordena cada fila por quem jogou menos.
+  // -----------------------------------------------------------------------
   const byLevel: Record<number, Player[]> = {}
-  for (const p of players) {
-    ;(byLevel[p.level] ??= []).push(p)
-  }
+  for (const p of players) (byLevel[p.level] ??= []).push(p)
+
   for (const queue of Object.values(byLevel)) {
     queue.sort((a, b) => played[a.id] - played[b.id])
   }
 
+  // -----------------------------------------------------------------------
+  // 3. Forma pares (A,B) dentro de cada nível.
+  // -----------------------------------------------------------------------
   type Pair = { level: number; a: Player; b: Player }
-  const pairs: Pair[] = [] // pares formados (um p/ cada time)
-  const singles: Player[] = [] // jogadores sobrando em cada nível
+  const pairs: Pair[] = []
+  const singles: Player[] = []
 
-  // -------------------------------------------------------------------------
-  // 3. Dentro de cada nível, forma pares A/B até não der mais.
-  // -------------------------------------------------------------------------
-  for (const [lvl, queue] of Object.entries(byLevel)) {
+  for (const [level, queue] of Object.entries(byLevel)) {
     while (queue.length >= 2) {
-      const a = queue.shift()! // menor contador first
+      const a = queue.shift()!
       const b = queue.shift()!
-      pairs.push({ level: +lvl, a, b })
+      pairs.push({ level: +level, a, b })
       markUsed(a)
       markUsed(b)
     }
-    if (queue.length) singles.push(queue.shift()!) // sobrou 1 → marcar para reuse
+    if (queue.length) singles.push(queue.shift()!)
   }
 
-  // -------------------------------------------------------------------------
-  // 4. Garante que singles também joguem: cria par reutilizando quem jogou menos
-  //    no mesmo nível (pode duplicar uso de alguém, mas mantendo equilíbrio).
-  // -------------------------------------------------------------------------
+  // -----------------------------------------------------------------------
+  // 4. Faz singles jogarem – reutiliza quem jogou menos no mesmo nível.
+  // -----------------------------------------------------------------------
   for (const s of singles) {
-    const candidato = players
+    const cand = players
       .filter((p) => p.level === s.level && p.id !== s.id)
       .sort((x, y) => played[x.id] - played[y.id])[0]
 
-    if (candidato) {
-      pairs.push({ level: s.level, a: s, b: candidato })
-      markUsed(s)
-      markUsed(candidato)
-    }
+    if (!cand) continue
+    pairs.push({ level: s.level, a: s, b: cand })
+    markUsed(s)
+    markUsed(cand)
   }
 
-  // -------------------------------------------------------------------------
-  // 5. Se nº de pares não fecha múltiplo de teamSize, cria pares extras
-  //    reutilizando gente que jogou menos no nível mais "populoso".
-  // -------------------------------------------------------------------------
-  while (pairs.length % teamSize !== 0) {
-    const levelWithMost = Object.entries(byLevel).sort(([, a], [, b]) => b.length - a.length)[0]?.[0]
-    if (levelWithMost == null) break // sem dados extremos, deve raro
+  // -----------------------------------------------------------------------
+  // 5. Garante número par de pares (necessário para formar 2‑v‑2).
+  //    Se ímpar, cria par extra com menor‐uso do nível mais populoso.
+  // -----------------------------------------------------------------------
+  while (pairs.length % 2 !== 0) {
+    const [lvl] = Object.entries(byLevel).sort(([, a], [, b]) => b.length - a.length)[0] ?? []
+    if (lvl == null) break
 
-    const baseLevel = +levelWithMost
-    const candidatos = players.filter((p) => p.level === baseLevel).sort((x, y) => played[x.id] - played[y.id])
+    const cand = players.filter((p) => p.level === +lvl).sort((x, y) => played[x.id] - played[y.id])
 
-    if (candidatos.length >= 2) {
-      pairs.push({ level: baseLevel, a: candidatos[0], b: candidatos[1] })
-      markUsed(candidatos[0])
-      markUsed(candidatos[1])
-    } else {
-      break // não há mais como completar – sairá com partidas a menos
-    }
+    if (cand.length >= 2) {
+      pairs.push({ level: +lvl, a: cand[0], b: cand[1] })
+      markUsed(cand[0])
+      markUsed(cand[1])
+    } else break
   }
 
-  // -------------------------------------------------------------------------
-  // 6. Transforma pares em partidas.  Cada partida precisa de teamSize pares.
-  //    Exemplos:
-  //      teamSize = 1 → (a,b) já forma uma partida
-  //      teamSize = 2 → usa 2 pares: (a1,b1)+(a2,b2) -> [a1,a2] vs [b1,b2]
-  // -------------------------------------------------------------------------
+  // -----------------------------------------------------------------------
+  // 6. Converte pares em partidas (2 pares = 1 partida 2‑v‑2).
+  // -----------------------------------------------------------------------
   const matches: Match[] = []
-  for (let i = 0; i + teamSize - 1 < pairs.length; i += teamSize) {
-    const teamA: Team = []
-    const teamB: Team = []
-    for (let j = 0; j < teamSize; j++) {
-      const { a, b } = pairs[i + j]
-      teamA.push(a)
-      teamB.push(b)
-    }
-    matches.push({ teamA, teamB })
+  for (let i = 0; i + 1 < pairs.length; i += 2) {
+    const { a: a1, b: b1 } = pairs[i]
+    const { a: a2, b: b2 } = pairs[i + 1]
+    matches.push({ teamA: [a1, a2], teamB: [b1, b2] })
   }
 
   return { matches, played }
