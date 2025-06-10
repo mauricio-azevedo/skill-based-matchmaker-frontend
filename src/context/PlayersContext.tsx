@@ -2,18 +2,7 @@
 // src/context/PlayersContext.tsx – Estado global de jogadores
 // ============================================================================
 import React, { createContext, useContext, useEffect, useState } from 'react'
-
-// ---------------------------------------------------------------------------
-// Interface que representa um jogador único:
-//   • id – UUID v4 para chave primária
-//   • name – string livre informada pelo usuário
-//   • level – inteiro >= 1 que representa habilidade; usado p/ balancear times
-// ---------------------------------------------------------------------------
-export interface Player {
-  id: string
-  name: string
-  level: number // 1..N – maior = melhor
-}
+import type { Player } from '../types/players'
 
 // API pública exposta pelo contexto: lista + operações CRUD minimais.
 type Ctx = {

@@ -1,0 +1,22 @@
+// ---------------------------------------------------------------------------
+// Interface que representa um jogador único:
+//   • id – UUID v4 para chave primária
+//   • name – string livre informada pelo usuário
+//   • level – inteiro >= 1 que representa habilidade; usado p/ balancear times
+// ---------------------------------------------------------------------------
+export interface Player {
+  id: string
+  name: string
+  level: number // 1..N – maior = melhor
+}
+
+/** Cada partida contém dois times de dois jogadores. */
+export interface Match {
+  teamA: Player[]
+  teamB: Player[]
+}
+
+/** Conjunto de partidas que podem acontecer simultaneamente. */
+export interface Round {
+  matches: Match[] // ≤ courts partidas, sem jogadores repetidos
+}
