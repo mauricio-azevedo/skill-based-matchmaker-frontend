@@ -15,14 +15,15 @@ type Ctx = {
 const PlayersContext = createContext<Ctx | undefined>(undefined)
 
 export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [players, setPlayers] = useState<Player[]>([])
+  const [players, setPlayers] = useState<Player[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sbm_players') || '[]')
+    } catch {
+      return []
+    }
+  })
 
-  // ---- localStorage persistence ------------------------------------------
-  useEffect(() => {
-    const raw = localStorage.getItem('sbm_players')
-    if (raw) setPlayers(JSON.parse(raw))
-  }, [])
-
+  // only one effect, writes *after* any real change
   useEffect(() => {
     localStorage.setItem('sbm_players', JSON.stringify(players))
   }, [players])
