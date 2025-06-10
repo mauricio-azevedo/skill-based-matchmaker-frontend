@@ -2,11 +2,18 @@
 
 import type { Player, Round } from '../types/players'
 
-// minimum number of players required for one match
+// mínimo de jogadores necessários para uma rodada
 const MIN_PLAYERS = 4 as const
 
+// constantes de peso para o cálculo de score
+const WEIGHT = {
+  SKILL_IMBALANCE: 2, // α: peso para diferença de habilidade total do time
+  MATCH_COUNT: 1, // β: peso para quantidade de partidas já jogadas
+  PARTNER_COUNT: 1, // γ: peso para frequência de parceria passada
+}
+
 /**
- * Shuffle an array in-place using Fisher-Yates algorithm.
+ * Embaralha um array in-place (Fisher–Yates).
  */
 function shuffle<T>(array: T[]): void {
   for (let i = array.length - 1; i > 0; i--) {
@@ -16,16 +23,117 @@ function shuffle<T>(array: T[]): void {
 }
 
 /**
- * Generates a single round balanced across:
- *  - individual skill differences (α)
- *  - total team skill differences (α)
- *  - games played imbalance (β)
- *  - partnership frequency imbalance (γ)
- *
- * @param players Array of all players
- * @param courts Number of courts (matches) to schedule
- * @param matchCounts Map of playerId -> total matches played
- * @param partnerCounts Map of playerId -> (otherId -> times paired)
+ * Gera todos os pares únicos de jogadores.
+ */
+function generatePairs(players: Player[]): [Player, Player][] {
+  const pairs: [Player, Player][] = []
+  for (let i = 0; i < players.length; i++) {
+    for (let j = i + 1; j < players.length; j++) {
+      pairs.push([players[i], players[j]])
+    }
+  }
+  return pairs
+}
+
+type InternalMatch = {
+  teamA: [Player, Player]
+  teamB: [Player, Player]
+  score: number
+}
+
+/**
+ * Calcula o "score" de balanceamento para dois pares formarem uma partida.
+ * Quanto menor o score, mais balanceada a partida.
+ */
+function calculateMatchScore(
+  a1: Player,
+  a2: Player,
+  b1: Player,
+  b2: Player,
+  matchCounts: Map<string, number>,
+  partnerCounts: Map<string, Map<string, number>>,
+): number {
+  // 1) diferença de skill individual (α)
+  const diff1 = Math.abs(a1.level - b1.level) + Math.abs(a2.level - b2.level)
+  const diff2 = Math.abs(a1.level - b2.level) + Math.abs(a2.level - b1.level)
+  const skillPairImbalance = Math.min(diff1, diff2)
+
+  // 2) diferença de skill total do time (α)
+  const teamTotalA = a1.level + a2.level
+  const teamTotalB = b1.level + b2.level
+  const teamImbalance = Math.abs(teamTotalA - teamTotalB)
+
+  // 3) quantas partidas já jogadas por todos (β)
+  const playedSum =
+    (matchCounts.get(a1.id) || 0) +
+    (matchCounts.get(a2.id) || 0) +
+    (matchCounts.get(b1.id) || 0) +
+    (matchCounts.get(b2.id) || 0)
+
+  // 4) quantas vezes esses pares já jogaram juntos (γ)
+  const pastA = partnerCounts.get(a1.id)?.get(a2.id) || 0
+  const pastB = partnerCounts.get(b1.id)?.get(b2.id) || 0
+  const pastPairSum = pastA + pastB
+
+  // pontuação final (menor = melhor)
+  return (
+    skillPairImbalance +
+    WEIGHT.SKILL_IMBALANCE * teamImbalance +
+    WEIGHT.MATCH_COUNT * playedSum +
+    WEIGHT.PARTNER_COUNT * pastPairSum
+  )
+}
+
+/**
+ * Constrói todas as partidas possíveis (dois pares distintos).
+ */
+function generateAllMatches(
+  pairs: [Player, Player][],
+  matchCounts: Map<string, number>,
+  partnerCounts: Map<string, Map<string, number>>,
+): InternalMatch[] {
+  const matches: InternalMatch[] = []
+
+  for (let i = 0; i < pairs.length; i++) {
+    const [a1, a2] = pairs[i]
+    for (let j = i + 1; j < pairs.length; j++) {
+      const [b1, b2] = pairs[j]
+
+      // pula se repetir jogador
+      const idsA = new Set([a1.id, a2.id])
+      if (idsA.has(b1.id) || idsA.has(b2.id)) continue
+
+      const score = calculateMatchScore(a1, a2, b1, b2, matchCounts, partnerCounts)
+      matches.push({ teamA: [a1, a2], teamB: [b1, b2], score })
+    }
+  }
+
+  return matches
+}
+
+/**
+ * Seleciona as melhores partidas até o número de quadras, garantindo
+ * que nenhum jogador seja usado em mais de uma partida nesta rodada.
+ */
+function selectTopMatches(matches: InternalMatch[], courts: number): InternalMatch[] {
+  const selected: InternalMatch[] = []
+  const usedIds = new Set<string>()
+
+  for (const match of matches) {
+    if (selected.length >= courts) break
+
+    const ids = [...match.teamA, ...match.teamB].map((p) => p.id)
+    if (ids.some((id) => usedIds.has(id))) continue
+
+    ids.forEach((id) => usedIds.add(id))
+    selected.push(match)
+  }
+
+  return selected
+}
+
+/**
+ * Gera um Round com partidas balanceadas.
  */
 export function generateSchedule(
   players: Player[],
@@ -37,78 +145,21 @@ export function generateSchedule(
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
-  // weight constants
-  const alpha = 2 // skill imbalance weight
-  const beta = 1 // match count imbalance weight
-  const gamma = 1 // partnership frequency imbalance weight
+  // 1) combina pares e gera todas as possibilidades
+  const pairs = generatePairs(players)
+  const allMatches = generateAllMatches(pairs, matchCounts, partnerCounts)
 
-  // 1) build all unique player pairs
-  const pairs: [Player, Player][] = []
-  for (let i = 0; i < players.length; i++) {
-    for (let j = i + 1; j < players.length; j++) {
-      pairs.push([players[i], players[j]])
-    }
+  // 2) embaralha para desempatar scores iguais
+  shuffle(allMatches)
+
+  // 3) ordena por score ascendente (mais balanceadas primeiro)
+  allMatches.sort((m1, m2) => m1.score - m2.score)
+
+  // 4) seleciona as melhores sem reusar jogadores
+  const best = selectTopMatches(allMatches, courts)
+
+  // retorna apenas a estrutura externa esperada
+  return {
+    matches: best.map(({ teamA, teamB }) => ({ teamA, teamB })),
   }
-
-  // 2) build all possible matches (two pairs)
-  type InternalMatch = { teamA: Player[]; teamB: Player[]; score: number }
-  const matches: InternalMatch[] = []
-
-  for (let i = 0; i < pairs.length; i++) {
-    const [a1, a2] = pairs[i]
-    for (let j = i + 1; j < pairs.length; j++) {
-      const [b1, b2] = pairs[j]
-
-      // skip if any player repeats
-      const idsA = new Set([a1.id, a2.id])
-      if (idsA.has(b1.id) || idsA.has(b2.id)) continue
-
-      // α: calculate individual skill imbalances
-      const diff1 = Math.abs(a1.level - b1.level) + Math.abs(a2.level - b2.level)
-      const diff2 = Math.abs(a1.level - b2.level) + Math.abs(a2.level - b1.level)
-      const skillImbalance = Math.min(diff1, diff2)
-
-      // α: calculate team total skill difference
-      const totalA = a1.level + a2.level
-      const totalB = b1.level + b2.level
-      const teamImbalance = Math.abs(totalA - totalB)
-
-      // β: sum of matches already played by all four
-      const sumMatchCounts =
-        (matchCounts.get(a1.id) || 0) +
-        (matchCounts.get(a2.id) || 0) +
-        (matchCounts.get(b1.id) || 0) +
-        (matchCounts.get(b2.id) || 0)
-
-      // γ: sum of past partnership counts for each team
-      const pastPairA = partnerCounts.get(a1.id)?.get(a2.id) || 0
-      const pastPairB = partnerCounts.get(b1.id)?.get(b2.id) || 0
-      const sumPartnerCounts = pastPairA + pastPairB
-
-      // final score: lower is more balanced and more likely selected
-      const score = skillImbalance + alpha * teamImbalance + beta * sumMatchCounts + gamma * sumPartnerCounts
-
-      matches.push({ teamA: [a1, a2], teamB: [b1, b2], score })
-    }
-  }
-
-  // 3) randomize order to break ties
-  shuffle(matches)
-
-  // 4) sort by ascending score (best matches first)
-  matches.sort((m1, m2) => m1.score - m2.score)
-
-  // 5) pick top matches without player reuse
-  const selected: InternalMatch[] = []
-  const usedIds = new Set<string>()
-  for (const m of matches) {
-    if (selected.length >= courts) break
-    const ids = [...m.teamA, ...m.teamB].map((p) => p.id)
-    if (ids.some((id) => usedIds.has(id))) continue
-    ids.forEach((id) => usedIds.add(id))
-    selected.push(m)
-  }
-
-  // return only the team arrays for the round
-  return { matches: selected.map(({ teamA, teamB }) => ({ teamA, teamB })) }
 }
