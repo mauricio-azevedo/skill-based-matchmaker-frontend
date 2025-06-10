@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import type { Player } from '../context/PlayersContext'
 import { generateSchedule, type Match, type Round } from '../lib/algorithm'
+import { Toaster, toast } from 'react-hot-toast'
 
 const PLAYERS_PER_MATCH = 4 as const
 
@@ -23,9 +24,14 @@ const MatchesTab: React.FC = () => {
   const [rounds, setRounds] = useState<Round[]>([])
 
   const generate = () => {
-    const newRounds = generateSchedule(players, courts)
-    setRounds(newRounds) // substitui, não soma
-    printMatchCounts(newRounds.flatMap((r) => r.matches))
+    try {
+      const newRounds = generateSchedule(players, courts)
+      setRounds(newRounds) // substitui, não soma
+      printMatchCounts(newRounds.flatMap((r) => r.matches))
+    } catch (err) {
+      // ➋ qualquer erro → toast vermelho no canto superior-direito
+      toast.error((err as Error).message, { duration: 6000 })
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -33,6 +39,9 @@ const MatchesTab: React.FC = () => {
   // -------------------------------------------------------------------------
   return (
     <div className="p-4 space-y-4 max-w-2xl mx-auto">
+      {/* ➌ container de toasts (obrigatório) */}
+      <Toaster position="top-right" />
+
       {/* ---------- CONTROLES ---------- */}
       <div className="flex items-center space-x-2">
         <label className="label">Quadras:</label>
