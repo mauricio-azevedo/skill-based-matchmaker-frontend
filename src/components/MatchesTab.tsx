@@ -79,7 +79,18 @@ const MatchesTab: React.FC = () => {
       }
     }
 
-    console.log(counts)
+    // Converte Map<Map> em objeto simples: { [playerId]: { [otherId]: count } }
+    const legibleCounts: Record<string, Record<string, number>> = {}
+    counts.forEach((innerMap, playerId) => {
+      // cria objeto para cada jogador
+      legibleCounts[playerId] = {}
+      innerMap.forEach((count, otherId) => {
+        legibleCounts[playerId][otherId] = count
+      })
+    })
+
+    // Log em formato de tabela (colunas = parceiros)
+    console.table(legibleCounts)
 
     return counts
   }, [rounds, players])
