@@ -48,6 +48,75 @@ const MatchesTab: React.FC = () => {
     return counts
   }, [rounds])
 
+  // --- NOVO: log do máximo de rodadas consecutivas no banco ---
+  useEffect(() => {
+    if (rounds.length === 0) return
+
+    // 1) CÁLCULO DE STREAKS NO BANCO
+    const streaks: Record<string, { current: number; max: number }> = {}
+    players.forEach((p) => {
+      streaks[p.id] = { current: 0, max: 0 }
+    })
+
+    for (const round of rounds) {
+      const played = new Set<string>()
+      for (const match of round.matches) {
+        for (const p of [...match.teamA, ...match.teamB]) {
+          played.add(p.id)
+        }
+      }
+      players.forEach((p) => {
+        if (played.has(p.id)) {
+          streaks[p.id].current = 0
+        } else {
+          streaks[p.id].current += 1
+          if (streaks[p.id].current > streaks[p.id].max) {
+            streaks[p.id].max = streaks[p.id].current
+          }
+        }
+      })
+    }
+
+    console.log('Máximo de partidas consecutivas no banco por jogador:')
+    players.forEach((p) => {
+      console.log(`– ${p.name}: ${streaks[p.id].max}`)
+    })
+
+    // 2) CÁLCULO DE PARCERIAS
+    // inicializa contador para cada par
+    const partnerCounts: Record<string, Record<string, number>> = {}
+    players.forEach((p) => {
+      partnerCounts[p.id] = {}
+      players.forEach((q) => {
+        if (p.id !== q.id) partnerCounts[p.id][q.id] = 0
+      })
+    })
+
+    // conta quantas vezes cada dupla jogou junta (em A ou B)
+    for (const round of rounds) {
+      for (const match of round.matches) {
+        for (const team of [match.teamA, match.teamB] as Player[][]) {
+          const [p1, p2] = team
+          partnerCounts[p1.id][p2.id]++
+          partnerCounts[p2.id][p1.id]++
+        }
+      }
+    }
+
+    console.log('Número de vezes que cada jogador jogou com outro:')
+    // só imprime cada par uma vez
+    const seen = new Set<string>()
+    players.forEach((p) => {
+      players.forEach((q) => {
+        if (p.id === q.id) return
+        const key = [p.id, q.id].sort().join('|')
+        if (seen.has(key)) return
+        seen.add(key)
+        console.log(`– ${p.name} & ${q.name}: ${partnerCounts[p.id][q.id]}`)
+      })
+    })
+  }, [rounds, players])
+
   const generate = () => {
     try {
       const newRound = generateSchedule(players, courts, matchCounts)
