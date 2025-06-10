@@ -36,9 +36,21 @@ const MatchesTab: React.FC = () => {
     localStorage.setItem(STORAGE_KEY_ROUNDS, JSON.stringify(rounds))
   }, [rounds])
 
+  const matchCounts = React.useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const round of rounds) {
+      for (const match of round.matches) {
+        for (const p of [...match.teamA, ...match.teamB]) {
+          counts.set(p.id, (counts.get(p.id) || 0) + 1)
+        }
+      }
+    }
+    return counts
+  }, [rounds])
+
   const generate = () => {
     try {
-      const newRound = generateSchedule(players, courts)
+      const newRound = generateSchedule(players, courts, matchCounts)
       setRounds((prev) => [...prev, newRound])
       toast.success('Rodada gerada e salva!', { duration: 3000 })
     } catch (err) {
