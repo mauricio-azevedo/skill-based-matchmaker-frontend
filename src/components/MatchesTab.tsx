@@ -5,7 +5,8 @@ import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import { generateSchedule } from '../lib/algorithm'
 import { toast, Toaster } from 'react-hot-toast'
-import type { Player, Round } from '../types/players'
+import type { Player } from '../types/players'
+import { useRounds } from '../context/RoundsContext'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -14,7 +15,6 @@ import type { Player, Round } from '../types/players'
 const PLAYERS_PER_MATCH = 4 as const
 // Keys to persist data in localStorage
 const STORAGE_KEY_COURTS = 'match_courts'
-const STORAGE_KEY_ROUNDS = 'match_rounds'
 
 // -----------------------------------------------------------------------------
 // Hook: useLocalStorage
@@ -40,11 +40,6 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
   return [value, setValue]
 }
 
-/** Clona profundamente um objeto usando structuredClone com fallback. */
-function deepCopy<T>(obj: T): T {
-  return typeof structuredClone === 'function' ? structuredClone(obj) : JSON.parse(JSON.stringify(obj))
-}
-
 // -----------------------------------------------------------------------------
 // Utility: CSS grid template for displaying matches
 // -----------------------------------------------------------------------------
@@ -55,12 +50,12 @@ const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${court
 // -----------------------------------------------------------------------------
 const MatchesTab: React.FC = () => {
   const { players, updatePlayers } = usePlayers()
+  const { rounds, addRound, markWinner, clear } = useRounds()
   // só considera jogadores ativos na geração de rodada
   const activePlayers = players.filter((p) => p.active)
 
   // Persisted state from localStorage:
   const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
-  const [rounds, setRounds] = useLocalStorage<Round[]>(STORAGE_KEY_ROUNDS, [])
 
   /**
    * Handler for "Gerar" button click:
@@ -71,7 +66,7 @@ const MatchesTab: React.FC = () => {
     try {
       // 1) Gera rodada balanceada
       const newRound = generateSchedule(activePlayers, courts)
-      setRounds((prev) => [...prev, newRound])
+      addRound(newRound)
 
       // 2) Atualiza matchCount e partnerCounts de cada player
       updatePlayers((prev) => {
@@ -125,7 +120,7 @@ const MatchesTab: React.FC = () => {
 
   const handleClear = () => {
     // Remove todas as rodadas
-    setRounds([])
+    clear()
     // Reseta estatísticas de cada jogador, mantendo-os no estado
     updatePlayers((prev) =>
       prev.map((player) => ({
@@ -137,13 +132,7 @@ const MatchesTab: React.FC = () => {
     toast.success('Rodadas e estatísticas reiniciadas!', { duration: 3000 })
   }
 
-  const markWinner = (roundIdx: number, matchId: string, winner: 'A' | 'B') =>
-    setRounds((prev) => {
-      const copy = deepCopy(prev)
-      const match = copy[roundIdx]?.matches.find((m) => m.id === matchId)
-      if (match) match.winner = winner
-      return copy
-    })
+  const mark = (roundIdx: number, matchId: string, w: 'A' | 'B') => markWinner(roundIdx, matchId, w)
 
   return (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
@@ -194,16 +183,8 @@ const MatchesTab: React.FC = () => {
 
                     {/* Controle de vencedor */}
                     <div className="flex justify-center gap-2">
-                      <WinnerBtn
-                        label="Vitória A"
-                        active={m.winner === 'A'}
-                        onClick={() => markWinner(idx, m.id, 'A')}
-                      />
-                      <WinnerBtn
-                        label="Vitória B"
-                        active={m.winner === 'B'}
-                        onClick={() => markWinner(idx, m.id, 'B')}
-                      />
+                      <WinnerBtn label="Vitória A" active={m.winner === 'A'} onClick={() => mark(idx, m.id, 'A')} />
+                      <WinnerBtn label="Vitória B" active={m.winner === 'B'} onClick={() => mark(idx, m.id, 'B')} />
                     </div>
                   </div>
                 </li>
