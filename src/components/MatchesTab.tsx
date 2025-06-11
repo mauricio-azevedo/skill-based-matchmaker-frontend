@@ -69,8 +69,8 @@ const MatchesTab: React.FC = () => {
       setRounds((prev) => [...prev, newRound])
 
       // 2) Atualiza matchCount e partnerCounts de cada player
-      updatePlayers((prev) =>
-        prev.map((player) => {
+      updatePlayers((prev) => {
+        const updated = prev.map((player) => {
           let addedMatches = 0
           const updatedPartners = { ...player.partnerCounts }
 
@@ -96,8 +96,21 @@ const MatchesTab: React.FC = () => {
             matchCount: player.matchCount + addedMatches,
             partnerCounts: updatedPartners,
           }
-        }),
-      )
+        })
+
+        // 3) Log do número de partidas de cada jogador (apenas números)
+        console.log(
+          'Número de partidas por jogador após geração:',
+          updated.map((p) => {
+            return {
+              name: p.name,
+              count: p.matchCount,
+            }
+          }),
+        )
+
+        return updated
+      })
 
       toast.success('Rodada gerada e estatísticas atualizadas!', { duration: 3000 })
     } catch (error) {

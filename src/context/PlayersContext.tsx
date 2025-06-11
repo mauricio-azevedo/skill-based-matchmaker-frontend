@@ -8,6 +8,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { Player } from '../types/players'
 
+// ----------------------------------------------------------------------------
+// Helper: retorna o menor matchCount entre um conjunto de players
+// ----------------------------------------------------------------------------
+function getMinMatchCount(players: Player[]): number {
+  if (players.length === 0) return 0
+  // começa com o matchCount do primeiro e vai achando o mínimo
+  return players.reduce((min, p) => Math.min(min, p.matchCount), players[0].matchCount)
+}
+
 // Interface pública do contexto
 type Ctx = {
   players: Player[]
@@ -54,7 +63,7 @@ export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const add = (name: string, level: number) =>
     setPlayers((prev) => {
       // Se houver jogadores, pega o menor matchCount entre os existentes
-      const minCount = prev.length > 0 ? prev.reduce((min, pl) => Math.min(min, pl.matchCount), prev[0].matchCount) : 0
+      const minCount = getMinMatchCount(prev.filter((pl) => pl.active))
 
       return [
         ...prev,
@@ -92,22 +101,12 @@ export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       if (willActivate) {
         // Computa o menor matchCount entre quem já está ativo
-        const activeCounts = prev.filter((pl) => pl.active).map((pl) => pl.matchCount)
-        const minCount = activeCounts.length > 0 ? Math.min(...activeCounts) : target.matchCount
-        // Ajusta para o mínimo, sem ultrapassar
-        newMatchCount = minCount
+        const activePlayers = prev.filter((pl) => pl.active)
+        newMatchCount = getMinMatchCount(activePlayers)
       }
 
       // Atualiza somente o player em questão
-      return prev.map((pl) =>
-        pl.id === id
-          ? {
-              ...pl,
-              active: willActivate,
-              matchCount: newMatchCount,
-            }
-          : pl,
-      )
+      return prev.map((pl) => (pl.id === id ? { ...pl, active: willActivate, matchCount: newMatchCount } : pl))
     })
 
   // -----------------------------------------------------------------------------
