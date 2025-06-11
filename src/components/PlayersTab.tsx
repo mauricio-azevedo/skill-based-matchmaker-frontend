@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
+import * as React from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
-import { usePlayers } from '../context/PlayersContext'
+import { usePlayers } from '@/context/PlayersContext'
 
 /**
  * Player manager — animação FLIP robusta

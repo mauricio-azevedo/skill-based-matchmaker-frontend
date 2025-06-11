@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import * as React from 'react'
 import PlayersTab from './components/PlayersTab'
 import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'

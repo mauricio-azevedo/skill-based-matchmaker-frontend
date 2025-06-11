@@ -1,8 +1,8 @@
-import React from 'react'
-import { usePlayers } from '../context/PlayersContext'
-import { useRounds } from '../context/RoundsContext'
+import * as React from 'react'
+import { usePlayers } from '@/context/PlayersContext'
+import { useRounds } from '@/context/RoundsContext'
 import { Info } from 'lucide-react'
-import type { PlayerLBRow } from '../types/players.js'
+import type { PlayerLBRow } from '@/types/players'
 
 type Stat = { W: number; L: number; GP: number; GC: number }
 type PairStat = { gp: number; gc: number } // games pró / contra

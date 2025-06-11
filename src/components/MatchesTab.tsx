@@ -1,12 +1,13 @@
 // MatchesTab.tsx
 // Component responsible for generating and displaying balanced match rounds.
 
-import React, { useState, useEffect } from 'react'
-import { usePlayers } from '../context/PlayersContext'
-import { generateSchedule } from '../lib/algorithm'
+import { useState, useEffect } from 'react'
+import * as React from 'react'
+import { usePlayers } from '@/context/PlayersContext'
+import { generateSchedule } from '@/lib/algorithm'
 import { toast, Toaster } from 'react-hot-toast'
-import type { Player } from '../types/players'
-import { useRounds } from '../context/RoundsContext'
+import type { Player } from '@/types/players'
+import { useRounds } from '@/context/RoundsContext'
 
 // -----------------------------------------------------------------------------
 // Constants
