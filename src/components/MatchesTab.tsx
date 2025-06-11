@@ -191,12 +191,26 @@ const MatchesTab: React.FC = () => {
     }
   }
 
+  const handleClear = () => {
+    // Remove todas as rodadas
+    setRounds([])
+    // Reseta estatísticas de cada jogador, mantendo-os no estado
+    updatePlayers((prev) =>
+      prev.map((player) => ({
+        ...player,
+        matchCount: 0,
+        partnerCounts: {},
+      })),
+    )
+    toast.success('Rodadas e estatísticas reiniciadas!', { duration: 3000 })
+  }
+
   return (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
       {/* Notification container */}
       <Toaster position="top-right" />
 
-      {/* Controls: number of courts selector and generate button */}
+      {/* Controls: number of courts selector, generate and clear buttons */}
       <div className="flex items-end gap-4">
         <label className="form-control w-32">
           <span className="label-text">Quadras</span>
@@ -214,6 +228,9 @@ const MatchesTab: React.FC = () => {
           disabled={players.length < PLAYERS_PER_MATCH}
         >
           Gerar
+        </button>
+        <button className="btn btn-secondary rounded-full" onClick={handleClear} disabled={rounds.length === 0}>
+          Limpar
         </button>
       </div>
 
