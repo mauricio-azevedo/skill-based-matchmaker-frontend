@@ -1,80 +1,71 @@
+// App.tsx — versão que usa shadcn/ui
+// Pré-requisitos: shadcn add tabs switch button (e theme-provider, que já vem no template)
+
 import { useEffect, useState } from 'react'
-import * as React from 'react'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
 import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'
 
-const App: React.FC = () => {
-  const [tab, setTab] = useState<'players' | 'matches' | 'leaderboard'>('players')
+// Se você tiver copiado o ThemeProvider do boilerplate do shadcn,
+// descomente estas duas linhas e envolva o <App /> no ThemeProvider no entry (main.tsx).
+// import { ThemeProvider } from "@/components/theme-provider"
+//
+// <ThemeProvider>
+//    <App />
+// </ThemeProvider>
+
+export default function App() {
+  // controla o modo; se preferir, troque por useTheme() do next-themes
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
+  // aplica a classe "dark" na <html> root
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
+    document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      {/* NavBar */}
-      <header className="navbar bg-base-200 px-4">
-        <a className="btn btn-ghost text-xl">Skill‑Based Matchmaker</a>
-        <div className="ml-auto flex items-center space-x-2">
-          <label className="swap swap-rotate">
-            <input type="checkbox" onChange={(e) => setTheme(e.target.checked ? 'dark' : 'light')} />
-            <svg
-              className="swap-on fill-current w-6 h-6"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              data-set-theme="dark"
-            >
-              <path d="M5.64 17.64A9 9 0 0 1 12 3v9z" />
-            </svg>
-            <svg
-              className="swap-off fill-current w-6 h-6"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              data-set-theme="light"
-            >
-              <path d="M5 12a7 7 0 0 1 14 0" />
-            </svg>
-          </label>
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* ---------- Header ---------- */}
+      <header className="flex items-center border-b px-4 py-2">
+        <h1 className="text-xl font-semibold tracking-tight">Skill-Based Matchmaker</h1>
+        <div className="ml-auto flex items-center gap-2">
+          {/* Switch do shadcn controla o tema */}
+          <Switch
+            id="theme-toggle"
+            checked={theme === 'dark'}
+            onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+            aria-label="Toggle dark mode"
+          />
         </div>
       </header>
 
-      {/* Tabs Bar */}
-      <div role="tablist" className="tabs tabs-boxed join mb-4 mx-auto mt-4">
-        <button
-          role="tab"
-          className={`tab join-item${tab === 'players' ? ' tab-active' : ''}`}
-          onClick={() => setTab('players')}
-        >
-          Players
-        </button>
-        <button
-          role="tab"
-          className={`tab join-item${tab === 'matches' ? ' tab-active' : ''}`}
-          onClick={() => setTab('matches')}
-        >
-          Matches
-        </button>
-        <button
-          role="tab"
-          className={`tab join-item${tab === 'leaderboard' ? ' tab-active' : ''}`}
-          onClick={() => setTab('leaderboard')}
-        >
-          Leaderboard
-        </button>
-      </div>
+      {/* ---------- Tabs ---------- */}
+      <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden">
+        {/* Barra de triggers */}
+        <TabsList className="self-center mt-4">
+          <TabsTrigger value="players">Players</TabsTrigger>
+          <TabsTrigger value="matches">Matches</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+        </TabsList>
 
-      {/* Content */}
-      <main className="flex-grow overflow-hidden">
-        {tab === 'players' && <PlayersTab />}
-        {tab === 'matches' && <MatchesTab />}
-        {tab === 'leaderboard' && <LeaderboardTab />}
-      </main>
+        {/* Conteúdo */}
+        <main className="flex-grow overflow-hidden">
+          <TabsContent value="players" asChild>
+            <PlayersTab />
+          </TabsContent>
+          <TabsContent value="matches" asChild>
+            <MatchesTab />
+          </TabsContent>
+          <TabsContent value="leaderboard" asChild>
+            <LeaderboardTab />
+          </TabsContent>
+        </main>
+      </Tabs>
 
-      <footer className="p-4 text-center text-xs opacity-60">© 2025 Skill‑Based Matchmaker</footer>
+      {/* ---------- Footer ---------- */}
+      <footer className="border-t p-4 text-center text-xs opacity-60">© 2025 Skill-Based Matchmaker</footer>
     </div>
   )
 }
-
-export default App
