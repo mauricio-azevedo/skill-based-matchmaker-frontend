@@ -1,62 +1,145 @@
-// ============================================================================
-// src/components/MatchesTab.tsx – Interface de geração de partidas (versão 2)
-// Design minimalista e "gamificado" inspirada no cuidado de produto da Apple
-// ============================================================================
-import React, { useState } from 'react'
+// MatchesTab.tsx
+// Component responsible for generating and displaying balanced match rounds.
+
+import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../context/PlayersContext'
-import type { Player } from '../context/PlayersContext'
-import { generateSchedule, type Match, type Round } from '../lib/algorithm'
-import { Toaster, toast } from 'react-hot-toast'
+import { generateSchedule } from '../lib/algorithm'
+import { toast, Toaster } from 'react-hot-toast'
+import type { Player } from '../types/players'
+import { useRounds } from '../context/RoundsContext'
 
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+// Number of participants required for a single match
 const PLAYERS_PER_MATCH = 4 as const
+// Keys to persist data in localStorage
+const STORAGE_KEY_COURTS = 'match_courts'
 
-// Quantas colunas deve ter o grid de partidas.  Mantemos inline style porque o
-// valor vem de um state dinâmico (courts).
+// -----------------------------------------------------------------------------
+// Hook: useLocalStorage
+// -----------------------------------------------------------------------------
+/**
+ * Custom hook that syncs React state with localStorage.
+ * @param key localStorage key
+ * @param initialValue value to use if no entry exists
+ * @returns current value and setter function
+ */
+function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  // Initialize state from localStorage on first render
+  const [value, setValue] = useState<T>(() => {
+    const stored = localStorage.getItem(key)
+    return stored ? (JSON.parse(stored) as T) : initialValue
+  })
+
+  // Write back to localStorage whenever the state changes
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value))
+  }, [key, value])
+
+  return [value, setValue]
+}
+
+// -----------------------------------------------------------------------------
+// Utility: CSS grid template for displaying matches
+// -----------------------------------------------------------------------------
 const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` })
 
-// ---------------------------------------------------------------------------
-// Componente principal – controles + rounds + scoreboard
-// ---------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// Main component: MatchesTab
+// -----------------------------------------------------------------------------
 const MatchesTab: React.FC = () => {
-  // players – estado global
-  const { players } = usePlayers()
+  const { players, updatePlayers } = usePlayers()
+  const { rounds, addRound, markWinner, clear } = useRounds()
+  // só considera jogadores ativos na geração de rodada
+  const activePlayers = players.filter((p) => p.active)
 
-  // número de quadras (usuário)
-  const [courts, setCourts] = useState<number>(2)
-  const [rounds, setRounds] = useState<Round[]>([])
+  // Persisted state from localStorage:
+  const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
 
-  // scoreboard: Map<playerId, n de partidas>
-  const [matchCounts, setMatchCounts] = useState<Map<Player['id'], number>>(new Map())
-
-  // -------------------------------------------------------------------------
-  // Gera tabelas a partir do algoritmo + actualiza scoreboard
-  // -------------------------------------------------------------------------
-  const generate = () => {
+  /**
+   * Handler for "Gerar" button click:
+   * - Generates a new balanced round using counts.
+   * - Persists the new round and shows a success toast.
+   */
+  const handleGenerate = () => {
     try {
-      const newRounds = generateSchedule(players, courts)
-      setRounds(newRounds)
+      // 1) Gera rodada balanceada
+      const newRound = generateSchedule(activePlayers, courts)
+      addRound(newRound)
 
-      const flatMatches = newRounds.flatMap((r) => r.matches)
-      setMatchCounts(countMatches(flatMatches))
+      // 2) Atualiza matchCount e partnerCounts de cada player
+      updatePlayers((prev) => {
+        const updated = prev.map((player) => {
+          let addedMatches = 0
+          const updatedPartners = { ...player.partnerCounts }
 
-      printMatchCounts(flatMatches) // consola para debug
-    } catch (err) {
-      toast.error((err as Error).message, { duration: 6000 })
+          newRound.matches.forEach(({ teamA, teamB }) => {
+            // equipe A
+            const [a1, a2] = teamA
+            if (player.id === a1.id || player.id === a2.id) {
+              addedMatches++
+              const partnerId = player.id === a1.id ? a2.id : a1.id
+              updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + 1
+            }
+            // equipe B
+            const [b1, b2] = teamB
+            if (player.id === b1.id || player.id === b2.id) {
+              addedMatches++
+              const partnerId = player.id === b1.id ? b2.id : b1.id
+              updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + 1
+            }
+          })
+
+          return {
+            ...player,
+            matchCount: player.matchCount + addedMatches,
+            partnerCounts: updatedPartners,
+          }
+        })
+
+        // 3) Log do número de partidas de cada jogador (apenas números)
+        console.log(
+          'Número de partidas por jogador após geração:',
+          updated.map((p) => {
+            return {
+              name: p.name,
+              count: p.matchCount,
+            }
+          }),
+        )
+
+        return updated
+      })
+
+      toast.success('Rodada gerada e estatísticas atualizadas!', { duration: 3000 })
+    } catch (error) {
+      toast.error((error as Error).message, { duration: 6000 })
     }
   }
 
-  // valor máximo para normalizar a barra de progresso
-  const maxMatches = React.useMemo(() => Math.max(1, ...Array.from(matchCounts.values())), [matchCounts])
+  const handleClear = () => {
+    // Remove todas as rodadas
+    clear()
+    // Reseta estatísticas de cada jogador, mantendo-os no estado
+    updatePlayers((prev) =>
+      prev.map((player) => ({
+        ...player,
+        matchCount: 0,
+        partnerCounts: {},
+      })),
+    )
+    toast.success('Rodadas e estatísticas reiniciadas!', { duration: 3000 })
+  }
 
-  // -------------------------------------------------------------------------
-  // Renderização declarativa DaisyUI
-  // -------------------------------------------------------------------------
+  const mark = (roundIdx: number, matchId: string, w: 'A' | 'B') => markWinner(roundIdx, matchId, w)
+
   return (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
-      {/* container de toasts */}
+      {/* Notification container */}
       <Toaster position="top-right" />
 
-      {/* ---------- CONTROLES ---------- */}
+      {/* Controls: number of courts selector, generate and clear buttons */}
       <div className="flex items-end gap-4">
         <label className="form-control w-32">
           <span className="label-text">Quadras</span>
@@ -70,32 +153,38 @@ const MatchesTab: React.FC = () => {
         </label>
         <button
           className="btn btn-primary rounded-full"
-          onClick={generate}
+          onClick={handleGenerate}
           disabled={players.length < PLAYERS_PER_MATCH}
         >
           Gerar
         </button>
+        <button className="btn btn-secondary rounded-full" onClick={handleClear} disabled={rounds.length === 0}>
+          Limpar
+        </button>
       </div>
 
-      {/* ---------- LISTA DE RODADAS ---------- */}
+      {/* Display list of generated rounds or placeholder text */}
       {rounds.length === 0 ? (
         <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
       ) : (
-        rounds.map((round, rIdx) => (
-          <article key={rIdx} className="space-y-4 mt-10">
-            {/* Título da rodada */}
-            <h2 className="text-xl font-bold border-l-4 border-primary pl-3">Rodada {rIdx + 1}</h2>
-
-            {/* Grid de partidas desta rodada */}
+        rounds.map((round, idx) => (
+          <article key={idx} className="space-y-4 mt-10">
+            <h2 className="text-xl font-bold border-l-4 border-primary pl-3">Rodada {idx + 1}</h2>
             <ol className="grid gap-6" style={gridTemplate(courts)}>
-              {round.matches.map((match, mIdx) => (
-                <li key={mIdx} className="card bg-base-200 shadow-lg rounded-2xl">
-                  <div className="card-body p-4">
+              {round.matches.map((m, i) => (
+                <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
+                  <div className="card-body p-4 space-y-2">
+                    {/* Times */}
                     <div className="flex justify-between items-start gap-4">
-                      {/* Equipes A e B */}
-                      <TeamView title="Equipe A" team={match.teamA} />
+                      <TeamView title="Equipe A" team={m.teamA} />
                       <span className="self-center text-lg font-bold opacity-70">vs</span>
-                      <TeamView title="Equipe B" team={match.teamB} />
+                      <TeamView title="Equipe B" team={m.teamB} />
+                    </div>
+
+                    {/* Controle de vencedor */}
+                    <div className="flex justify-center gap-2">
+                      <WinnerBtn label="Vitória A" active={m.winner === 'A'} onClick={() => mark(idx, m.id, 'A')} />
+                      <WinnerBtn label="Vitória B" active={m.winner === 'B'} onClick={() => mark(idx, m.id, 'B')} />
                     </div>
                   </div>
                 </li>
@@ -104,70 +193,43 @@ const MatchesTab: React.FC = () => {
           </article>
         ))
       )}
-
-      {/* ---------- SCOREBOARD ---------- */}
-      {matchCounts.size > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Placar</h2>
-          {[...matchCounts.entries()]
-            .sort(([, a], [, b]) => b - a)
-            .map(([id, count]) => {
-              const player = players.find((p) => p.id === id)
-              if (!player) return null
-              return (
-                <div key={id} className="space-y-1">
-                  <div className="flex justify-between text-sm font-medium">
-                    <span>{player.name}</span>
-                    <span>{count}</span>
-                  </div>
-                  <progress className="progress progress-primary w-full h-2" value={count} max={maxMatches} />
-                </div>
-              )
-            })}
-        </div>
-      )}
     </div>
   )
 }
 
-// ---------------------------------------------------------------------------
-// TeamView – componente presentational (stateless)
-// ---------------------------------------------------------------------------
-const TeamView: React.FC<{ title: string; team: Player[] }> = ({ title, team }) => (
+// -----------------------------------------------------------------------------
+// Sub-component: TeamView
+// -----------------------------------------------------------------------------
+/**
+ * Displays a team's players and their levels in a simple list.
+ */
+interface TeamViewProps {
+  title: string
+  team: Player[]
+}
+const TeamView: React.FC<TeamViewProps> = ({ title, team }) => (
   <div className="space-y-1">
     <h3 className="font-medium text-lg opacity-75 mb-1">{title}</h3>
     <ul className="space-y-1">
       {team.map((p) => (
         <li key={p.id} className="flex items-end gap-1 text-md">
-          {p.name}
-          <span className="text-sm text-secondary">Lv {p.level}</span>
+          {/* Player name and level badge */}
+          {p.name} <span className="text-sm text-secondary">Lv {p.level}</span>
         </li>
       ))}
     </ul>
   </div>
 )
 
+type WinnerBtnProps = {
+  active: boolean
+  onClick: () => void
+  label: string
+}
+const WinnerBtn: React.FC<WinnerBtnProps> = ({ active, onClick, label }) => (
+  <button className={`btn btn-xs sm:btn-sm rounded-full ${active ? 'btn-success' : 'btn-outline'}`} onClick={onClick}>
+    {label}
+  </button>
+)
+
 export default MatchesTab
-
-// ---------------------------------------------------------------------------
-// Estatísticas de participação por jogador
-// ---------------------------------------------------------------------------
-function countMatches(playersMatches: Match[]): Map<Player['id'], number> {
-  const counts = new Map<Player['id'], number>()
-
-  for (const { teamA, teamB } of playersMatches) {
-    for (const p of [...teamA, ...teamB]) {
-      counts.set(p.id, (counts.get(p.id) ?? 0) + 1)
-    }
-  }
-
-  return counts
-}
-
-function printMatchCounts(playersMatches: Match[]): void {
-  const counts = countMatches(playersMatches)
-  console.log('Partidas jogadas por jogador:')
-  ;[...counts.entries()]
-    .sort(([, a], [, b]) => b - a)
-    .forEach(([id, n]) => console.log(`• Jogador ${id}: ${n} partida(s)`))
-}

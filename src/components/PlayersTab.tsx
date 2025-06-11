@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 
 const PlayersTab: React.FC = () => {
-  const { players, add, remove } = usePlayers()
+  const { players, add, remove, toggleActive } = usePlayers()
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
 
@@ -39,9 +39,21 @@ const PlayersTab: React.FC = () => {
       <ul className="space-y-2">
         {players.map((p) => (
           <li key={p.id} className="flex justify-between items-center p-2 border rounded">
-            <span>
-              {p.name} <span className="badge badge-secondary ml-2">Lv {p.level}</span>
-            </span>
+            <div className="flex items-center gap-4">
+              <span>
+                {p.name} <span className="badge badge-secondary ml-2">Lv {p.level}</span>
+              </span>
+              {/* Toggle de ativo/inativo */}
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  className="toggle toggle-sm"
+                  checked={p.active}
+                  onChange={() => toggleActive(p.id)}
+                />
+                <span className="text-sm">{p.active ? 'Ativo' : 'Inativo'}</span>
+              </label>
+            </div>
             <button className="btn btn-sm btn-error" onClick={() => remove(p.id)}>
               ✕
             </button>
