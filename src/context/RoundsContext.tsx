@@ -7,11 +7,16 @@ export const STORAGE_KEY_ROUNDS = 'match_rounds'
 type Ctx = {
   rounds: Round[]
   addRound: (round: Round) => void
-  markWinner: (roundIdx: number, matchId: string, winner: 'A' | 'B') => void
+  setGames: (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) => void
   clear: () => void
 }
 
 const RoundsContext = createContext<Ctx | undefined>(undefined)
+
+/** Decide vencedor a partir dos games. Se ainda não tiver ambos, devolve null. */
+function calcWinner(gA: number | null, gB: number | null): 'A' | 'B' | null {
+  return gA !== null && gB !== null ? (gA > gB ? 'A' : 'B') : null
+}
 
 export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [rounds, setRounds] = useState<Round[]>(() => {
@@ -28,17 +33,21 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const addRound = (round: Round) => setRounds((prev) => [...prev, round])
 
-  const markWinner = (roundIdx: number, matchId: string, winner: 'A' | 'B') =>
+  const setGames = (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) =>
     setRounds((prev) => {
       const copy = structuredClone(prev)
       const match = copy[roundIdx]?.matches.find((m) => m.id === matchId)
-      if (match) match.winner = winner
+      if (match) {
+        if (team === 'A') match.gamesA = games
+        else match.gamesB = games
+        match.winner = calcWinner(match.gamesA, match.gamesB)
+      }
       return copy
     })
 
   const clear = () => setRounds([])
 
-  return <RoundsContext.Provider value={{ rounds, addRound, markWinner, clear }}>{children}</RoundsContext.Provider>
+  return <RoundsContext.Provider value={{ rounds, addRound, setGames, clear }}>{children}</RoundsContext.Provider>
 }
 
 export const useRounds = () => {

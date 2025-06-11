@@ -50,7 +50,7 @@ const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${court
 // -----------------------------------------------------------------------------
 const MatchesTab: React.FC = () => {
   const { players, updatePlayers } = usePlayers()
-  const { rounds, addRound, markWinner, clear } = useRounds()
+  const { rounds, addRound, setGames, clear } = useRounds()
   // só considera jogadores ativos na geração de rodada
   const activePlayers = players.filter((p) => p.active)
 
@@ -132,7 +132,22 @@ const MatchesTab: React.FC = () => {
     toast.success('Rodadas e estatísticas reiniciadas!', { duration: 3000 })
   }
 
-  const mark = (roundIdx: number, matchId: string, w: 'A' | 'B') => markWinner(roundIdx, matchId, w)
+  type ScoreInputProps = {
+    value: number | null
+    onChange: (v: number | null) => void
+  }
+  const ScoreInput: React.FC<ScoreInputProps> = ({ value, onChange }) => (
+    <input
+      type="number"
+      min={0}
+      className="input input-xs w-16 text-center"
+      value={value ?? ''}
+      onChange={(e) => {
+        const v = e.target.value
+        onChange(v === '' ? null : Number(v))
+      }}
+    />
+  )
 
   return (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
@@ -173,18 +188,23 @@ const MatchesTab: React.FC = () => {
             <ol className="grid gap-6" style={gridTemplate(courts)}>
               {round.matches.map((m, i) => (
                 <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
-                  <div className="card-body p-4 space-y-2">
-                    {/* Times */}
-                    <div className="flex justify-between items-start gap-4">
+                  {/* Times + placar */}
+                  <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                    {/* Team A  */}
+                    <div className={m.winner === 'A' ? 'ring ring-success rounded-lg p-1' : ''}>
                       <TeamView title="Equipe A" team={m.teamA} />
-                      <span className="self-center text-lg font-bold opacity-70">vs</span>
-                      <TeamView title="Equipe B" team={m.teamB} />
                     </div>
 
-                    {/* Controle de vencedor */}
-                    <div className="flex justify-center gap-2">
-                      <WinnerBtn label="Vitória A" active={m.winner === 'A'} onClick={() => mark(idx, m.id, 'A')} />
-                      <WinnerBtn label="Vitória B" active={m.winner === 'B'} onClick={() => mark(idx, m.id, 'B')} />
+                    {/* Placar */}
+                    <div className="flex flex-col items-center gap-1">
+                      <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
+                      <span className="font-bold">×</span>
+                      <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
+                    </div>
+
+                    {/* Team B  */}
+                    <div className={m.winner === 'B' ? 'ring ring-success rounded-lg p-1' : ''}>
+                      <TeamView title="Equipe B" team={m.teamB} />
                     </div>
                   </div>
                 </li>
@@ -219,17 +239,6 @@ const TeamView: React.FC<TeamViewProps> = ({ title, team }) => (
       ))}
     </ul>
   </div>
-)
-
-type WinnerBtnProps = {
-  active: boolean
-  onClick: () => void
-  label: string
-}
-const WinnerBtn: React.FC<WinnerBtnProps> = ({ active, onClick, label }) => (
-  <button className={`btn btn-xs sm:btn-sm rounded-full ${active ? 'btn-success' : 'btn-outline'}`} onClick={onClick}>
-    {label}
-  </button>
 )
 
 export default MatchesTab

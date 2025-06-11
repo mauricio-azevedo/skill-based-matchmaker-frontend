@@ -20,6 +20,8 @@ export interface Match {
   id: string
   teamA: Player[]
   teamB: Player[]
+  gamesA: number | null
+  gamesB: number | null
   winner: 'A' | 'B' | null
 }
 

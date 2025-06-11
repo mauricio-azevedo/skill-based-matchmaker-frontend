@@ -127,6 +127,8 @@ export function generateSchedule(players: Player[], courts: number): Round {
       id: crypto.randomUUID(),
       teamA,
       teamB,
+      gamesA: null,
+      gamesB: null,
       winner: null,
     })),
   }
