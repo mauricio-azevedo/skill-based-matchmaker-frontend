@@ -108,7 +108,7 @@ const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${court
 // Main component: MatchesTab
 // -----------------------------------------------------------------------------
 const MatchesTab: React.FC = () => {
-  const { players } = usePlayers()
+  const { players, updatePlayers } = usePlayers()
   // só considera jogadores ativos na geração de rodada
   const activePlayers = players.filter((p) => p.active)
 
@@ -150,10 +150,42 @@ const MatchesTab: React.FC = () => {
    */
   const handleGenerate = () => {
     try {
-      // Generate and persist the new round
-      const newRound = generateSchedule(activePlayers, courts, matchCounts, partnerCounts)
+      // 1) Gera rodada balanceada
+      const newRound = generateSchedule(activePlayers, courts)
       setRounds((prev) => [...prev, newRound])
-      toast.success('Rodada gerada e salva!', { duration: 3000 })
+
+      // 2) Atualiza matchCount e partnerCounts de cada player
+      updatePlayers((prev) =>
+        prev.map((player) => {
+          let addedMatches = 0
+          const updatedPartners = { ...player.partnerCounts }
+
+          newRound.matches.forEach(({ teamA, teamB }) => {
+            // equipe A
+            const [a1, a2] = teamA
+            if (player.id === a1.id || player.id === a2.id) {
+              addedMatches++
+              const partnerId = player.id === a1.id ? a2.id : a1.id
+              updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + 1
+            }
+            // equipe B
+            const [b1, b2] = teamB
+            if (player.id === b1.id || player.id === b2.id) {
+              addedMatches++
+              const partnerId = player.id === b1.id ? b2.id : b1.id
+              updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + 1
+            }
+          })
+
+          return {
+            ...player,
+            matchCount: player.matchCount + addedMatches,
+            partnerCounts: updatedPartners,
+          }
+        }),
+      )
+
+      toast.success('Rodada gerada e estatísticas atualizadas!', { duration: 3000 })
     } catch (error) {
       toast.error((error as Error).message, { duration: 6000 })
     }

@@ -9,6 +9,10 @@ export interface Player {
   name: string
   level: number // 1..N – maior = melhor
   active: boolean
+  /** Quantas partidas já jogou */
+  matchCount: number
+  /** Histórico de parcerias: parceiroId → vezes jogadas juntos */
+  partnerCounts: Record<string, number>
 }
 
 /** Cada partida contém dois times de dois jogadores. */

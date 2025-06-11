@@ -45,37 +45,21 @@ type InternalMatch = {
  * Calcula o "score" de balanceamento para dois pares formarem uma partida.
  * Quanto menor o score, mais balanceada a partida.
  */
-function calculateMatchScore(
-  a1: Player,
-  a2: Player,
-  b1: Player,
-  b2: Player,
-  matchCounts: Map<string, number>,
-  partnerCounts: Map<string, Map<string, number>>,
-): number {
-  // 1) diferença de skill individual (α)
+function calculateMatchScore(a1: Player, a2: Player, b1: Player, b2: Player): number {
+  // diferença de skill individual
   const diff1 = Math.abs(a1.level - b1.level) + Math.abs(a2.level - b2.level)
   const diff2 = Math.abs(a1.level - b2.level) + Math.abs(a2.level - b1.level)
   const skillPairImbalance = Math.min(diff1, diff2)
 
-  // 2) diferença de skill total do time (α)
-  const teamTotalA = a1.level + a2.level
-  const teamTotalB = b1.level + b2.level
-  const teamImbalance = Math.abs(teamTotalA - teamTotalB)
+  // diferença de skill total dos times
+  const teamImbalance = Math.abs(a1.level + a2.level - (b1.level + b2.level))
 
-  // 3) quantas partidas já jogadas por todos (β)
-  const playedSum =
-    (matchCounts.get(a1.id) || 0) +
-    (matchCounts.get(a2.id) || 0) +
-    (matchCounts.get(b1.id) || 0) +
-    (matchCounts.get(b2.id) || 0)
+  // quantas partidas já jogou cada um
+  const playedSum = a1.matchCount + a2.matchCount + b1.matchCount + b2.matchCount
 
-  // 4) quantas vezes esses pares já jogaram juntos (γ)
-  const pastA = partnerCounts.get(a1.id)?.get(a2.id) || 0
-  const pastB = partnerCounts.get(b1.id)?.get(b2.id) || 0
-  const pastPairSum = pastA + pastB
+  // quantas vezes já foram parceiros
+  const pastPairSum = (a1.partnerCounts[a2.id] || 0) + (b1.partnerCounts[b2.id] || 0)
 
-  // pontuação final (menor = melhor)
   return (
     skillPairImbalance +
     WEIGHT.SKILL_IMBALANCE * teamImbalance +
@@ -87,27 +71,17 @@ function calculateMatchScore(
 /**
  * Constrói todas as partidas possíveis (dois pares distintos).
  */
-function generateAllMatches(
-  pairs: [Player, Player][],
-  matchCounts: Map<string, number>,
-  partnerCounts: Map<string, Map<string, number>>,
-): InternalMatch[] {
+function generateAllMatches(pairs: [Player, Player][]): InternalMatch[] {
   const matches: InternalMatch[] = []
-
   for (let i = 0; i < pairs.length; i++) {
     const [a1, a2] = pairs[i]
     for (let j = i + 1; j < pairs.length; j++) {
       const [b1, b2] = pairs[j]
-
-      // pula se repetir jogador
-      const idsA = new Set([a1.id, a2.id])
-      if (idsA.has(b1.id) || idsA.has(b2.id)) continue
-
-      const score = calculateMatchScore(a1, a2, b1, b2, matchCounts, partnerCounts)
+      if (new Set([a1.id, a2.id]).has(b1.id) || new Set([a1.id, a2.id]).has(b2.id)) continue
+      const score = calculateMatchScore(a1, a2, b1, b2)
       matches.push({ teamA: [a1, a2], teamB: [b1, b2], score })
     }
   }
-
   return matches
 }
 
@@ -135,31 +109,17 @@ function selectTopMatches(matches: InternalMatch[], courts: number): InternalMat
 /**
  * Gera um Round com partidas balanceadas.
  */
-export function generateSchedule(
-  players: Player[],
-  courts: number,
-  matchCounts: Map<string, number>,
-  partnerCounts: Map<string, Map<string, number>>,
-): Round {
+export function generateSchedule(players: Player[], courts: number): Round {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
-  // 1) combina pares e gera todas as possibilidades
   const pairs = generatePairs(players)
-  const allMatches = generateAllMatches(pairs, matchCounts, partnerCounts)
+  const allMatches = generateAllMatches(pairs)
 
-  // 2) embaralha para desempatar scores iguais
   shuffle(allMatches)
-
-  // 3) ordena por score ascendente (mais balanceadas primeiro)
   allMatches.sort((m1, m2) => m1.score - m2.score)
 
-  // 4) seleciona as melhores sem reusar jogadores
   const best = selectTopMatches(allMatches, courts)
-
-  // retorna apenas a estrutura externa esperada
-  return {
-    matches: best.map(({ teamA, teamB }) => ({ teamA, teamB })),
-  }
+  return { matches: best.map(({ teamA, teamB }) => ({ teamA, teamB })) }
 }
