@@ -150,7 +150,7 @@ const MatchesTab: React.FC = () => {
   )
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl mx-auto">
+    <div className="p-6 flex flex-col h-full overflow-hidden max-w-3xl mx-auto">
       {/* Notification container */}
       <Toaster position="top-right" />
 
@@ -179,40 +179,42 @@ const MatchesTab: React.FC = () => {
       </div>
 
       {/* Display list of generated rounds or placeholder text */}
-      {rounds.length === 0 ? (
-        <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
-      ) : (
-        rounds.map((round, idx) => (
-          <article key={idx} className="space-y-4 mt-10">
-            <h2 className="text-xl font-bold border-l-4 border-primary pl-3">Rodada {idx + 1}</h2>
-            <ol className="grid gap-6" style={gridTemplate(courts)}>
-              {round.matches.map((m, i) => (
-                <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
-                  {/* Times + placar */}
-                  <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                    {/* Team A  */}
-                    <div className={m.winner === 'A' ? 'ring ring-success rounded-lg p-1' : ''}>
-                      <TeamView title="Equipe A" team={m.teamA} />
-                    </div>
+      <div className="rounds-scroll flex-grow overflow-y-auto overflow-x-hidden pr-1 space-y-10 mt-6">
+        {rounds.length === 0 ? (
+          <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
+        ) : (
+          rounds.map((round, idx) => (
+            <article key={idx} className="space-y-4 mt-10">
+              <h2 className="text-xl font-bold border-l-4 border-primary pl-3">Rodada {idx + 1}</h2>
+              <ol className="grid gap-6" style={gridTemplate(courts)}>
+                {round.matches.map((m, i) => (
+                  <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
+                    {/* Times + placar */}
+                    <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                      {/* Team A  */}
+                      <div className={m.winner === 'A' ? 'ring ring-success rounded-lg p-1' : ''}>
+                        <TeamView title="Equipe A" team={m.teamA} />
+                      </div>
 
-                    {/* Placar */}
-                    <div className="flex flex-col items-center gap-1">
-                      <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
-                      <span className="font-bold">×</span>
-                      <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
-                    </div>
+                      {/* Placar */}
+                      <div className="flex flex-col items-center gap-1">
+                        <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
+                        <span className="font-bold">×</span>
+                        <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
+                      </div>
 
-                    {/* Team B  */}
-                    <div className={m.winner === 'B' ? 'ring ring-success rounded-lg p-1' : ''}>
-                      <TeamView title="Equipe B" team={m.teamB} />
+                      {/* Team B  */}
+                      <div className={m.winner === 'B' ? 'ring ring-success rounded-lg p-1' : ''}>
+                        <TeamView title="Equipe B" team={m.teamB} />
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </article>
-        ))
-      )}
+                  </li>
+                ))}
+              </ol>
+            </article>
+          ))
+        )}
+      </div>
     </div>
   )
 }

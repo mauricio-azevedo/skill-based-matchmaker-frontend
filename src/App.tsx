@@ -12,7 +12,7 @@ const App: React.FC = () => {
   }, [theme])
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* NavBar */}
       <header className="navbar bg-base-200 px-4">
         <a className="btn btn-ghost text-xl">Skill‑Based Matchmaker</a>
@@ -65,7 +65,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Content */}
-      <main className="flex-grow">
+      <main className="flex-grow overflow-hidden">
         {tab === 'players' && <PlayersTab />}
         {tab === 'matches' && <MatchesTab />}
         {tab === 'leaderboard' && <LeaderboardTab />}

@@ -1,2 +1,16 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+/* Bloqueia qualquer rolagem global */
+html, body, #root {
+    @apply h-full overflow-hidden;
+    @apply h-full overflow-x-hidden;
+}
+
+/* Segurança extra: qualquer <div> flex/ grid recebe min-w-0 */
+*,
+::before,
+::after {
+    min-width: 0;          /* evita children que alargam flex/grid */
+    box-sizing: border-box; /* mantém as larguras previsíveis      */
+}

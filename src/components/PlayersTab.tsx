@@ -34,9 +34,9 @@ const PlayersTab: React.FC = () => {
   }
 
   return (
-    <section className="mx-auto max-w-md px-4 py-8 space-y-8">
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body space-y-6">
+    <section className="mx-auto max-w-md px-4 py-8 space-y-8 flex flex-col h-full">
+      <div className="card bg-base-100 shadow-xl min-h-0">
+        <div className="card-body space-y-6 p-6 overflow-hidden">
           {/* Formulário */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-control">
@@ -68,51 +68,53 @@ const PlayersTab: React.FC = () => {
           <div className="divider m-0" />
 
           {/* Lista com FLIP */}
-          <LayoutGroup>
-            <motion.ul layout className="flex flex-col gap-3" initial={false}>
-              <AnimatePresence initial={false}>
-                {players.map((p) => (
-                  <motion.li
-                    key={p.id}
-                    layout="position"
-                    variants={itemVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={spring}
-                    whileHover={{ scale: 1.02 }}
-                    className="flex items-center justify-between rounded-xl px-3 py-2 bg-base-100 hover:bg-base-200"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="font-medium">
-                        {p.name}
-                        <span className="badge badge-secondary ml-2">Lv {p.level}</span>
-                      </span>
-
-                      {/* Toggle ativo/inativo */}
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          className="toggle toggle-sm"
-                          checked={p.active}
-                          onChange={() => toggleActive(p.id)}
-                        />
-                        <span className="text-sm opacity-70">{p.active ? 'Ativo' : 'Inativo'}</span>
-                      </label>
-                    </div>
-
-                    <button
-                      aria-label={`Remove ${p.name}`}
-                      className="btn btn-sm btn-ghost text-error"
-                      onClick={() => remove(p.id)}
+          <div className="rounds-scroll flex-1 overflow-y-auto overflow-x-hidden pr-1 space-y-10 mt-6 min-h-0">
+            <LayoutGroup>
+              <motion.ul layout className="flex flex-col gap-3" initial={false}>
+                <AnimatePresence initial={false}>
+                  {players.map((p) => (
+                    <motion.li
+                      key={p.id}
+                      layout="position"
+                      variants={itemVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={spring}
+                      whileHover={{ scale: 1.02 }}
+                      className="flex items-center justify-between rounded-xl px-3 py-2 bg-base-100 hover:bg-base-200"
                     >
-                      ✕
-                    </button>
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </motion.ul>
-          </LayoutGroup>
+                      <div className="flex items-center gap-4">
+                        <span className="font-medium">
+                          {p.name}
+                          <span className="badge badge-secondary ml-2">Lv {p.level}</span>
+                        </span>
+
+                        {/* Toggle ativo/inativo */}
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            className="toggle toggle-sm"
+                            checked={p.active}
+                            onChange={() => toggleActive(p.id)}
+                          />
+                          <span className="text-sm opacity-70">{p.active ? 'Ativo' : 'Inativo'}</span>
+                        </label>
+                      </div>
+
+                      <button
+                        aria-label={`Remove ${p.name}`}
+                        className="btn btn-sm btn-ghost text-error"
+                        onClick={() => remove(p.id)}
+                      >
+                        ✕
+                      </button>
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </motion.ul>
+            </LayoutGroup>
+          </div>
         </div>
       </div>
     </section>
