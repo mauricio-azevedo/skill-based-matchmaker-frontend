@@ -102,7 +102,8 @@ export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       if (willActivate) {
         // Computa o menor matchCount entre quem já está ativo
         const activePlayers = prev.filter((pl) => pl.active)
-        newMatchCount = getMinMatchCount(activePlayers)
+        const minMatchCount = getMinMatchCount(activePlayers)
+        newMatchCount = minMatchCount > target.matchCount ? minMatchCount : target.matchCount
       }
 
       // Atualiza somente o player em questão
