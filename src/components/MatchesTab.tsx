@@ -1,6 +1,5 @@
 // MatchesTab.tsx
 // Component responsible for generating and displaying balanced match rounds.
-// Implements veteran snapshot and dual match counts to ensure fair scheduling for both veterans and newcomers.
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { usePlayers } from '../context/PlayersContext'
@@ -16,7 +15,6 @@ const PLAYERS_PER_MATCH = 4 as const
 // Keys to persist data in localStorage
 const STORAGE_KEY_COURTS = 'match_courts'
 const STORAGE_KEY_ROUNDS = 'match_rounds'
-const STORAGE_KEY_INITIAL_PLAYERS = 'initial_player_ids'
 
 // -----------------------------------------------------------------------------
 // Hook: useLocalStorage
@@ -43,13 +41,12 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 }
 
 // -----------------------------------------------------------------------------
-// Hook: useRealMatchCounts
+// Hook: useMatchCounts
 // -----------------------------------------------------------------------------
 /**
  * Computes how many matches each player has actually played across all stored rounds.
- * This map is shown directly to the user.
  */
-function useRealMatchCounts(rounds: Round[]): Map<string, number> {
+function useMatchCounts(rounds: Round[]): Map<string, number> {
   return useMemo(() => {
     const counts = new Map<string, number>()
 
@@ -65,49 +62,6 @@ function useRealMatchCounts(rounds: Round[]): Map<string, number> {
 
     return counts
   }, [rounds])
-}
-
-// -----------------------------------------------------------------------------
-// Hook: useAlgoMatchCounts
-// -----------------------------------------------------------------------------
-/**
- * Builds the match count map used by the scheduling algorithm.
- * - Veterans (present in initial snapshot) keep their real match count.
- * - Newcomers start at the minimum veteran count (baseline) so they don't leapfrog.
- * - Before first generation (no snapshot), treat everyone as a veteran.
- */
-function useAlgoMatchCounts(
-  players: Player[],
-  realCounts: Map<string, number>,
-  initialIds: string[],
-): Map<string, number> {
-  return useMemo(() => {
-    // 0) First click: no snapshot yet, all are veterans
-    if (initialIds.length === 0) {
-      return new Map(realCounts)
-    }
-
-    // 1) Calculate baseline = minimum real count among veterans
-    const veteranCounts = initialIds.map((id) => realCounts.get(id) || 0)
-    const baseline = veteranCounts.length > 0 ? Math.min(...veteranCounts) : 0
-
-    // 2) Build adjusted counts map
-    const counts = new Map<string, number>()
-    players.forEach((p) => {
-      const real = realCounts.get(p.id) || 0
-      const isVeteran = initialIds.includes(p.id)
-
-      if (isVeteran) {
-        // Veteran: use true match count
-        counts.set(p.id, real)
-      } else {
-        // Newcomer: start at baseline to avoid absolute zero advantage
-        counts.set(p.id, baseline)
-      }
-    })
-
-    return counts
-  }, [players, realCounts, initialIds])
 }
 
 // -----------------------------------------------------------------------------
@@ -155,39 +109,32 @@ const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${court
 // -----------------------------------------------------------------------------
 const MatchesTab: React.FC = () => {
   const { players } = usePlayers()
+  // só considera jogadores ativos na geração de rodada
+  const activePlayers = players.filter((p) => p.active)
 
   // Persisted state from localStorage:
   const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
   const [rounds, setRounds] = useLocalStorage<Round[]>(STORAGE_KEY_ROUNDS, [])
-  const [initialPlayerIds, setInitialPlayerIds] = useLocalStorage<string[]>(STORAGE_KEY_INITIAL_PLAYERS, [])
 
   // Compute both real and algorithm-adjusted match counts
-  const realMatchCounts = useRealMatchCounts(rounds)
-  const algoMatchCounts = useAlgoMatchCounts(players, realMatchCounts, initialPlayerIds)
+  const matchCounts = useMatchCounts(rounds)
   const partnerCounts = usePartnerCounts(rounds, players)
 
   // Debugging: print sorted entries to verify both maps match when expected
   useEffect(() => {
     const sortEntries = (map: Map<string, number>) => Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
-    console.log('Real counts:', sortEntries(realMatchCounts))
-    console.log('Algo counts:', sortEntries(algoMatchCounts))
-  }, [realMatchCounts, algoMatchCounts])
+    console.log('matchCounts:', sortEntries(matchCounts))
+  }, [matchCounts])
 
   /**
    * Handler for "Gerar" button click:
-   * - On first click, captures snapshot of current player IDs (veterans).
-   * - Generates a new balanced round using adjusted counts.
+   * - Generates a new balanced round using counts.
    * - Persists the new round and shows a success toast.
    */
   const handleGenerate = () => {
     try {
-      if (initialPlayerIds.length === 0) {
-        // Save veteran IDs for future baseline calculations
-        setInitialPlayerIds(players.map((p) => p.id))
-      }
-
       // Generate and persist the new round
-      const newRound = generateSchedule(players, courts, algoMatchCounts, partnerCounts)
+      const newRound = generateSchedule(activePlayers, courts, matchCounts, partnerCounts)
       setRounds((prev) => [...prev, newRound])
       toast.success('Rodada gerada e salva!', { duration: 3000 })
     } catch (error) {

@@ -9,6 +9,7 @@ type Ctx = {
   players: Player[]
   add: (name: string, level: number) => void
   remove: (id: string) => void
+  toggleActive: (id: string) => void
 }
 
 // Contexto criado com valor undefined para forçar hook guard.
@@ -22,9 +23,11 @@ export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Estado inicial é lido de localStorage UMA ÚNICA VEZ no primeiro render.
   const [players, setPlayers] = useState<Player[]>(() => {
     try {
-      return JSON.parse(localStorage.getItem('sbm_players') || '[]') as Player[]
+      const stored = JSON.parse(localStorage.getItem('sbm_players') || '[]') as Player[]
+      // Garante que todo player tenha `active` (default true)
+      return stored.map((p) => ({ ...p, active: p.active !== false }))
     } catch {
-      return [] // fallback se storage estiver corrompido
+      return []
     }
   })
 
@@ -34,12 +37,17 @@ export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [players])
 
   // Adiciona novo jogador – gera UUID, mantém imutabilidade com spread.
-  const add = (name: string, level: number) => setPlayers((p) => [...p, { id: crypto.randomUUID(), name, level }])
+  const add = (name: string, level: number) =>
+    setPlayers((p) => [...p, { id: crypto.randomUUID(), name, level, active: true }])
 
   // Remove por id – filtragem simples.
   const remove = (id: string) => setPlayers((p) => p.filter((pl) => pl.id !== id))
 
-  return <PlayersContext.Provider value={{ players, add, remove }}>{children}</PlayersContext.Provider>
+  // Alterna o estado ativo/inativo de um jogador
+  const toggleActive = (id: string) =>
+    setPlayers((p) => p.map((pl) => (pl.id === id ? { ...pl, active: !pl.active } : pl)))
+
+  return <PlayersContext.Provider value={{ players, add, remove, toggleActive }}>{children}</PlayersContext.Provider>
 }
 
 // Hook auxiliar: garante que o código consumidor esteja dentro do Provider.

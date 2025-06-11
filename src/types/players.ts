@@ -8,6 +8,7 @@ export interface Player {
   id: string
   name: string
   level: number // 1..N – maior = melhor
+  active: boolean
 }
 
 /** Cada partida contém dois times de dois jogadores. */
