@@ -9,8 +9,12 @@
     // skip type-checking inside node_modules
     "types": [
       "node"
-    ]
+    ],
     // pull in Node’s built-ins
+    "baseUrl": ".",              // ← novo
+    "paths": {                   // ← novo
+      "@/*": ["src/*"]
+    }
   },
   "include": [
     "src/**/*",
