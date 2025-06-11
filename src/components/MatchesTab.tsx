@@ -1,7 +1,7 @@
 // MatchesTab.tsx
 // Component responsible for generating and displaying balanced match rounds.
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import { generateSchedule } from '../lib/algorithm'
 import { toast, Toaster } from 'react-hot-toast'
@@ -41,65 +41,6 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 }
 
 // -----------------------------------------------------------------------------
-// Hook: useMatchCounts
-// -----------------------------------------------------------------------------
-/**
- * Computes how many matches each player has actually played across all stored rounds.
- */
-function useMatchCounts(rounds: Round[]): Map<string, number> {
-  return useMemo(() => {
-    const counts = new Map<string, number>()
-
-    // Tally one count per match participation
-    rounds.forEach((round) => {
-      round.matches.forEach((match) => {
-        const participants = [...match.teamA, ...match.teamB]
-        participants.forEach((player) => {
-          counts.set(player.id, (counts.get(player.id) || 0) + 1)
-        })
-      })
-    })
-
-    return counts
-  }, [rounds])
-}
-
-// -----------------------------------------------------------------------------
-// Hook: usePartnerCounts
-// -----------------------------------------------------------------------------
-/**
- * Tallies how often each pair of players has teamed up in past rounds.
- * This supports the algorithm's partner-frequency penalty.
- */
-function usePartnerCounts(rounds: Round[], players: Player[]): Map<string, Map<string, number>> {
-  return useMemo(() => {
-    const counts = new Map<string, Map<string, number>>()
-
-    // Initialize nested map with zeros
-    players.forEach((p) => {
-      const inner = new Map<string, number>()
-      players.forEach((q) => {
-        if (p.id !== q.id) inner.set(q.id, 0)
-      })
-      counts.set(p.id, inner)
-    })
-
-    // Increment for each historical partnership
-    rounds.forEach((round) => {
-      round.matches.forEach((match) => {
-        ;[match.teamA, match.teamB].forEach((team) => {
-          const [p1, p2] = team
-          counts.get(p1.id)!.set(p2.id, (counts.get(p1.id)!.get(p2.id) || 0) + 1)
-          counts.get(p2.id)!.set(p1.id, (counts.get(p2.id)!.get(p1.id) || 0) + 1)
-        })
-      })
-    })
-
-    return counts
-  }, [rounds, players])
-}
-
-// -----------------------------------------------------------------------------
 // Utility: CSS grid template for displaying matches
 // -----------------------------------------------------------------------------
 const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` })
@@ -115,33 +56,6 @@ const MatchesTab: React.FC = () => {
   // Persisted state from localStorage:
   const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
   const [rounds, setRounds] = useLocalStorage<Round[]>(STORAGE_KEY_ROUNDS, [])
-
-  // Compute both real and algorithm-adjusted match counts
-  const matchCounts = useMatchCounts(rounds)
-  const partnerCounts = usePartnerCounts(rounds, players)
-
-  // Debugging: print sorted entries to verify both maps match when expected
-  useEffect(() => {
-    // Helper to sort map entries by player ID
-    const sortEntries = (map: Map<string, number>) => Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
-
-    // Log matchCounts as sorted array
-    console.log('matchCounts:', sortEntries(matchCounts))
-
-    // Build a plain object of objects for partnerCounts
-    const tableData: Record<string, Record<string, number>> = {}
-    partnerCounts.forEach((innerMap, playerId) => {
-      tableData[playerId] = {}
-      Array.from(innerMap.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .forEach(([partnerId, count]) => {
-          tableData[playerId][partnerId] = count
-        })
-    })
-
-    // Dump partnerCounts to the console as a table for easy inspection
-    console.table(tableData)
-  }, [matchCounts, partnerCounts])
 
   /**
    * Handler for "Gerar" button click:
