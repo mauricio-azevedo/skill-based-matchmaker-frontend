@@ -12,6 +12,13 @@ const LeaderboardTab: React.FC = () => {
   const stats = new Map<string, Stat>()
   const get = (id: string) => stats.get(id) ?? { W: 0, L: 0, GP: 0, GC: 0 }
 
+  const h2h = new Map<string, Map<string, number>>() // winnerId → (loserId → vitórias)
+  const incH2H = (w: string, l: string) => {
+    const inner = h2h.get(w) ?? new Map<string, number>()
+    inner.set(l, (inner.get(l) ?? 0) + 1)
+    h2h.set(w, inner)
+  }
+
   for (const r of rounds) {
     for (const m of r.matches) {
       if (m.gamesA === null || m.gamesB === null) continue
@@ -21,7 +28,6 @@ const LeaderboardTab: React.FC = () => {
       const losers = gA > gB ? m.teamB : m.teamA
       const winningGames = gA > gB ? gA : gB
       const losingGames = gA > gB ? gB : gA
-
       winners.forEach((p) => {
         const s = get(p.id)
         s.W += 1
@@ -37,6 +43,8 @@ const LeaderboardTab: React.FC = () => {
         s.GC += winningGames
         stats.set(p.id, s)
       })
+
+      winners.forEach((pW) => losers.forEach((pL) => incH2H(pW.id, pL.id)))
     }
   }
 
@@ -49,10 +57,23 @@ const LeaderboardTab: React.FC = () => {
     return { ...p, P, SV, SG }
   })
 
+  function comparePlayers(a: (typeof rows)[number], b: (typeof rows)[number]): number {
+    if (b.P !== a.P) return b.P - a.P
+    if (b.SV !== a.SV) return b.SV - a.SV
+    if (b.SG !== a.SG) return b.SG - a.SG
+
+    // — Confronto direto —
+    const winsA = h2h.get(a.id)?.get(b.id) ?? 0
+    const winsB = h2h.get(b.id)?.get(a.id) ?? 0
+    if (winsA !== winsB) return winsB - winsA // quem venceu mais fica na frente
+
+    // Último critério
+    return a.name.localeCompare(b.name)
+  }
+
   // 3. ordena desc por pontos, depois nome p/ desempate
-  rows.sort((a, b) =>
-    b.P !== a.P ? b.P - a.P : b.SV !== a.SV ? b.SV - a.SV : b.SG !== a.SG ? b.SG - a.SG : a.name.localeCompare(b.name),
-  )
+  rows.sort(comparePlayers)
+
   return (
     <div className="p-4 max-w-md mx-auto">
       {rows.length === 0 ? (
