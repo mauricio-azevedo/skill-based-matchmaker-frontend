@@ -5,6 +5,8 @@ import { Info } from 'lucide-react'
 import type { PlayerLBRow } from '../types/players.js'
 
 type Stat = { W: number; L: number; GP: number; GC: number }
+type PairStat = { gp: number; gc: number } // games pró / contra
+type Pair = Map<string, Map<string, PairStat>>
 
 const LeaderboardTab: React.FC = () => {
   const { players } = usePlayers()
@@ -20,11 +22,12 @@ const LeaderboardTab: React.FC = () => {
     inner.set(l, (inner.get(l) ?? 0) + 1)
     h2h.set(w, inner)
   }
-  const gDiff = new Map<string, Map<string, number>>()
-  const incGD = (p: string, opp: string, diff: number) => {
-    const inner = gDiff.get(p) ?? new Map<string, number>()
-    inner.set(opp, (inner.get(opp) ?? 0) + diff)
-    gDiff.set(p, inner)
+  const pair: Pair = new Map<string, Map<string, PairStat>>() // A → B → {gp,gc}
+  const incPair = (pId: string, oppId: string, gp: number, gc: number) => {
+    const inner = pair.get(pId) ?? new Map<string, PairStat>()
+    const cur = inner.get(oppId) ?? { gp: 0, gc: 0 }
+    inner.set(oppId, { gp: cur.gp + gp, gc: cur.gc + gc })
+    pair.set(pId, inner)
   }
 
   for (const r of rounds) {
@@ -56,8 +59,8 @@ const LeaderboardTab: React.FC = () => {
 
       m.teamA.forEach((pA) =>
         m.teamB.forEach((pB) => {
-          incGD(pA.id, pB.id, gA - gB) // positivo para quem fez mais games
-          incGD(pB.id, pA.id, gB - gA)
+          incPair(pA.id, pB.id, gA, gB)
+          incPair(pB.id, pA.id, gB, gA)
         }),
       )
     }
@@ -105,26 +108,9 @@ const LeaderboardTab: React.FC = () => {
     while (j < rows.length && equalPrimary(rows[i], rows[j])) j++
 
     if (j - i > 1) {
-      const group = rows.slice(i, j)
-      const ids = group.map((p) => p.id)
-
-      // calcula saldo de games só dentro da mini-liga
-      group.forEach((p) => {
-        let mini = 0
-        ids.forEach((opp) => {
-          if (opp === p.id) return
-          mini += gDiff.get(p.id)?.get(opp) ?? 0
-        })
-        p.miniSG = mini // anexa campo temporário
-      })
-
-      group.sort((a, b) => {
-        const diff = (b.miniSG ?? 0) - (a.miniSG ?? 0)
-        return diff !== 0 ? diff : a.name.localeCompare(b.name)
-      })
-      rows.splice(i, group.length, ...group)
+      const adjusted = applyMiniTieBreak(rows.slice(i, j), pair)
+      rows.splice(i, j - i, ...adjusted)
     }
-
     i = j
   }
 
@@ -146,8 +132,7 @@ const LeaderboardTab: React.FC = () => {
           </thead>
           <tbody>
             {rows.map((p, idx) => {
-              console.log(p)
-              const mini = p.miniSG as number | undefined
+              const tip = formatMiniTooltip(p, rows)
 
               return (
                 <tr key={p.id} className={idx === 0 ? 'font-bold' : ''}>
@@ -157,8 +142,8 @@ const LeaderboardTab: React.FC = () => {
                   <td className="text-right">{p.SV}</td>
                   <td className="text-right">{p.SG}</td>
                   <td className="text-center">
-                    {mini !== undefined && (
-                      <div className="tooltip tooltip-left" data-tip={`Saldo interno: ${mini >= 0 ? '+' : ''}${mini}`}>
+                    {p.miniSG !== undefined && p.miniSG !== 0 && (
+                      <div className="tooltip tooltip-left" data-tip={tip}>
                         <Info className="w-4 h-4 inline-block opacity-70" />
                       </div>
                     )}
@@ -171,6 +156,44 @@ const LeaderboardTab: React.FC = () => {
       )}
     </div>
   )
+}
+
+/** Aplica mini-desempate sobre um trecho de rows já empatados.
+ *  Retorna rows reordenadas e com campos miniSG, GPmini, GCmini, oppMini preenchidos. */
+function applyMiniTieBreak(rows: PlayerLBRow[], pair: Pair): PlayerLBRow[] {
+  const ids = rows.map((p) => p.id)
+
+  const enriched = rows.map((p) => {
+    let gp = 0,
+      gc = 0
+    ids.forEach((opp) => {
+      if (opp === p.id) return
+      const vs = pair.get(p.id)?.get(opp)
+      if (vs) {
+        gp += vs.gp
+        gc += vs.gc
+      }
+    })
+    return { ...p, GPmini: gp, GCmini: gc, miniSG: gp - gc, oppMini: ids.filter((id) => id !== p.id) }
+  })
+
+  enriched.sort((a, b) => (b.miniSG! !== a.miniSG! ? b.miniSG! - a.miniSG! : a.name.localeCompare(b.name)))
+  return enriched
+}
+
+function formatMiniTooltip(row: PlayerLBRow, all: PlayerLBRow[]): string {
+  if (row.miniSG === undefined) return ''
+
+  const sign = row.miniSG >= 0 ? '+' : ''
+  const GPplural = row.GPmini === 1 ? 'game' : 'games'
+  const msg = `você ganhou ${row.GPmini} ${GPplural} e perdeu ${row.GCmini} (saldo ${sign}${row.miniSG}).`
+
+  if (row.oppMini && row.oppMini.length === 1) {
+    const oppName = all.find((r) => r.id === row.oppMini?.[0])?.name ?? 'adversário'
+    return `Nos jogos contra ${oppName}, ` + msg
+  }
+
+  return `Nos jogos contra ${row.oppMini!.length + 1} jogadores, ` + msg
 }
 
 export default LeaderboardTab

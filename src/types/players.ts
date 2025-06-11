@@ -30,12 +30,16 @@ export interface Round {
   matches: Match[] // ≤ courts partidas, sem jogadores repetidos
 }
 
-export type PlayerLBRow = {
-  id: string
-  name: string
+export interface PlayerLBRow extends Player {
   P: number
   SV: number
   SG: number
-  // miniSG opcional, será anexado depois
+  /** saldo interno dentro do bloco empatado (undefined se não houver empate) */
   miniSG?: number
+  /** games pró na mini-liga */
+  GPmini?: number
+  /** games contra na mini-liga */
+  GCmini?: number
+  /** nomes dos adversários no bloco ― útil para tooltip */
+  oppMini?: string[]
 }
