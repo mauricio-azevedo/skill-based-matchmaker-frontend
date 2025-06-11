@@ -1,23 +1,40 @@
+// MatchesTab.tsx
+// Component responsible for generating and displaying balanced match rounds.
+// Implements veteran snapshot and dual match counts to ensure fair scheduling for both veterans and newcomers.
+
 import React, { useState, useEffect, useMemo } from 'react'
 import { usePlayers } from '../context/PlayersContext'
 import { generateSchedule } from '../lib/algorithm'
 import { toast, Toaster } from 'react-hot-toast'
 import type { Player, Round } from '../types/players'
 
+// -----------------------------------------------------------------------------
 // Constants
+// -----------------------------------------------------------------------------
+// Number of participants required for a single match
 const PLAYERS_PER_MATCH = 4 as const
+// Keys to persist data in localStorage
 const STORAGE_KEY_COURTS = 'match_courts'
 const STORAGE_KEY_ROUNDS = 'match_rounds'
-// Persisted snapshot of veteran player IDs
 const STORAGE_KEY_INITIAL_PLAYERS = 'initial_player_ids'
 
-// Custom hook for syncing state with localStorage
+// -----------------------------------------------------------------------------
+// Hook: useLocalStorage
+// -----------------------------------------------------------------------------
+/**
+ * Custom hook that syncs React state with localStorage.
+ * @param key localStorage key
+ * @param initialValue value to use if no entry exists
+ * @returns current value and setter function
+ */
 function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  // Initialize state from localStorage on first render
   const [value, setValue] = useState<T>(() => {
     const stored = localStorage.getItem(key)
     return stored ? (JSON.parse(stored) as T) : initialValue
   })
 
+  // Write back to localStorage whenever the state changes
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(value))
   }, [key, value])
@@ -25,10 +42,18 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
   return [value, setValue]
 }
 
-// Hook: count matches per player across all rounds (real counts shown to user)
+// -----------------------------------------------------------------------------
+// Hook: useRealMatchCounts
+// -----------------------------------------------------------------------------
+/**
+ * Computes how many matches each player has actually played across all stored rounds.
+ * This map is shown directly to the user.
+ */
 function useRealMatchCounts(rounds: Round[]): Map<string, number> {
   return useMemo(() => {
     const counts = new Map<string, number>()
+
+    // Tally one count per match participation
     rounds.forEach((round) => {
       round.matches.forEach((match) => {
         const participants = [...match.teamA, ...match.teamB]
@@ -37,48 +62,66 @@ function useRealMatchCounts(rounds: Round[]): Map<string, number> {
         })
       })
     })
+
     return counts
   }, [rounds])
 }
 
-// Hook: compute match counts for algorithm (veterans vs. novices adjusted by baseline)
+// -----------------------------------------------------------------------------
+// Hook: useAlgoMatchCounts
+// -----------------------------------------------------------------------------
+/**
+ * Builds the match count map used by the scheduling algorithm.
+ * - Veterans (present in initial snapshot) keep their real match count.
+ * - Newcomers start at the minimum veteran count (baseline) so they don't leapfrog.
+ * - Before first generation (no snapshot), treat everyone as a veteran.
+ */
 function useAlgoMatchCounts(
   players: Player[],
   realCounts: Map<string, number>,
   initialIds: string[],
 ): Map<string, number> {
   return useMemo(() => {
-    // 0) If no snapshot yet, treat all as veterans: use real counts directly
+    // 0) First click: no snapshot yet, all are veterans
     if (initialIds.length === 0) {
       return new Map(realCounts)
     }
 
-    // 1) Determine baseline: minimum real count among veterans
+    // 1) Calculate baseline = minimum real count among veterans
     const veteranCounts = initialIds.map((id) => realCounts.get(id) || 0)
     const baseline = veteranCounts.length > 0 ? Math.min(...veteranCounts) : 0
 
-    // 2) Build algorithm-specific counts
+    // 2) Build adjusted counts map
     const counts = new Map<string, number>()
     players.forEach((p) => {
       const real = realCounts.get(p.id) || 0
       const isVeteran = initialIds.includes(p.id)
+
       if (isVeteran) {
-        // veteran: use actual count
+        // Veteran: use true match count
         counts.set(p.id, real)
       } else {
-        console.log({ newbie: p.name, baseline })
-        // novice: start at baseline
+        // Newcomer: start at baseline to avoid absolute zero advantage
         counts.set(p.id, baseline)
       }
     })
+
     return counts
   }, [players, realCounts, initialIds])
 }
 
-// Hook: count how many times each pair of players has teamed up (unchanged)
+// -----------------------------------------------------------------------------
+// Hook: usePartnerCounts
+// -----------------------------------------------------------------------------
+/**
+ * Tallies how often each pair of players has teamed up in past rounds.
+ * This supports the algorithm's partner-frequency penalty.
+ */
 function usePartnerCounts(rounds: Round[], players: Player[]): Map<string, Map<string, number>> {
   return useMemo(() => {
     const counts = new Map<string, Map<string, number>>()
+
+    // Initialize nested map with zeros
     players.forEach((p) => {
       const inner = new Map<string, number>()
       players.forEach((q) => {
@@ -87,14 +130,13 @@ function usePartnerCounts(rounds: Round[], players: Player[]): Map<string, Map<s
       counts.set(p.id, inner)
     })
 
+    // Increment for each historical partnership
     rounds.forEach((round) => {
       round.matches.forEach((match) => {
         ;[match.teamA, match.teamB].forEach((team) => {
           const [p1, p2] = team
-          const map1 = counts.get(p1.id)!
-          const map2 = counts.get(p2.id)!
-          map1.set(p2.id, (map1.get(p2.id) || 0) + 1)
-          map2.set(p1.id, (map2.get(p1.id) || 0) + 1)
+          counts.get(p1.id)!.set(p2.id, (counts.get(p1.id)!.get(p2.id) || 0) + 1)
+          counts.get(p2.id)!.set(p1.id, (counts.get(p2.id)!.get(p1.id) || 0) + 1)
         })
       })
     })
@@ -103,38 +145,48 @@ function usePartnerCounts(rounds: Round[], players: Player[]): Map<string, Map<s
   }, [rounds, players])
 }
 
-// CSS grid template helper
+// -----------------------------------------------------------------------------
+// Utility: CSS grid template for displaying matches
+// -----------------------------------------------------------------------------
 const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` })
 
-// Main component: displays controls and list of rounds
+// -----------------------------------------------------------------------------
+// Main component: MatchesTab
+// -----------------------------------------------------------------------------
 const MatchesTab: React.FC = () => {
   const { players } = usePlayers()
 
-  // 1) Persisted state: number of courts, past rounds, and veteran snapshot
+  // Persisted state from localStorage:
   const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
   const [rounds, setRounds] = useLocalStorage<Round[]>(STORAGE_KEY_ROUNDS, [])
   const [initialPlayerIds, setInitialPlayerIds] = useLocalStorage<string[]>(STORAGE_KEY_INITIAL_PLAYERS, [])
 
-  // 2) Compute counts: real vs. algorithm
+  // Compute both real and algorithm-adjusted match counts
   const realMatchCounts = useRealMatchCounts(rounds)
   const algoMatchCounts = useAlgoMatchCounts(players, realMatchCounts, initialPlayerIds)
   const partnerCounts = usePartnerCounts(rounds, players)
 
-  // Optional: debug logs
+  // Debugging: print sorted entries to verify both maps match when expected
   useEffect(() => {
-    console.log('Real counts:', realMatchCounts)
-    console.log('Algo counts:', algoMatchCounts)
+    const sortEntries = (map: Map<string, number>) => Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
+    console.log('Real counts:', sortEntries(realMatchCounts))
+    console.log('Algo counts:', sortEntries(algoMatchCounts))
   }, [realMatchCounts, algoMatchCounts])
 
-  // 3) Handle "Gerar" click: snapshot veterans, generate, persist
+  /**
+   * Handler for "Gerar" button click:
+   * - On first click, captures snapshot of current player IDs (veterans).
+   * - Generates a new balanced round using adjusted counts.
+   * - Persists the new round and shows a success toast.
+   */
   const handleGenerate = () => {
     try {
-      // Snapshot initial veterans on first generate
       if (initialPlayerIds.length === 0) {
+        // Save veteran IDs for future baseline calculations
         setInitialPlayerIds(players.map((p) => p.id))
       }
 
-      // Generate new round using adjusted counts for algorithm
+      // Generate and persist the new round
       const newRound = generateSchedule(players, courts, algoMatchCounts, partnerCounts)
       setRounds((prev) => [...prev, newRound])
       toast.success('Rodada gerada e salva!', { duration: 3000 })
@@ -148,7 +200,7 @@ const MatchesTab: React.FC = () => {
       {/* Notification container */}
       <Toaster position="top-right" />
 
-      {/* Controls: number of courts and generate button */}
+      {/* Controls: number of courts selector and generate button */}
       <div className="flex items-end gap-4">
         <label className="form-control w-32">
           <span className="label-text">Quadras</span>
@@ -169,7 +221,7 @@ const MatchesTab: React.FC = () => {
         </button>
       </div>
 
-      {/* Display rounds */}
+      {/* Display list of generated rounds or placeholder text */}
       {rounds.length === 0 ? (
         <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
       ) : (
@@ -196,19 +248,24 @@ const MatchesTab: React.FC = () => {
   )
 }
 
+// -----------------------------------------------------------------------------
+// Sub-component: TeamView
+// -----------------------------------------------------------------------------
+/**
+ * Displays a team's players and their levels in a simple list.
+ */
 interface TeamViewProps {
   title: string
   team: Player[]
 }
-
 const TeamView: React.FC<TeamViewProps> = ({ title, team }) => (
   <div className="space-y-1">
     <h3 className="font-medium text-lg opacity-75 mb-1">{title}</h3>
     <ul className="space-y-1">
       {team.map((p) => (
         <li key={p.id} className="flex items-end gap-1 text-md">
-          {p.name}
-          <span className="text-sm text-secondary">Lv {p.level}</span>
+          {/* Player name and level badge */}
+          {p.name} <span className="text-sm text-secondary">Lv {p.level}</span>
         </li>
       ))}
     </ul>
