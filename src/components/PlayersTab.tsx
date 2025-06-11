@@ -1,19 +1,21 @@
-import { useState } from 'react'
-import * as React from 'react'
+// PlayersTab.tsx — migrado para shadcn/ui + Tailwind v4
+// PRÉ-REQUISITOS: execute uma vez no terminal
+// pnpm dlx shadcn add card input button switch badge scroll-area label
+
+import { useState, type FC, type FormEvent } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Label } from '@/components/ui/label'
 import { usePlayers } from '@/context/PlayersContext'
 
-/**
- * Player manager — animação FLIP robusta
- * -------------------------------------------------------------
- * • Usa layout FLIP em UL + LI (layout="position") — reposiciona
- *   os itens com spring suave, sem travar quando remove no meio.
- * • Troquei space-y por flex+gap: evita colapso de margin e resolve
- *   glitch de collapse/expand no meio da lista.
- * • Entrada: fade + slide + scale; saída: shrink + fade.
- */
-
-// Variantes de item
+/* -------------------------------------------------------------------------- */
+/*                        Animações – variantes e spring                       */
+/* -------------------------------------------------------------------------- */
 const itemVariants = {
   initial: { opacity: 0, scale: 0.9, y: 12 },
   animate: { opacity: 1, scale: 1, y: 0 },
@@ -22,54 +24,65 @@ const itemVariants = {
 
 const spring = { type: 'spring', stiffness: 500, damping: 38, mass: 0.9 }
 
-const PlayersTab: React.FC = () => {
+/* -------------------------------------------------------------------------- */
+/*                                PlayersTab                                  */
+/* -------------------------------------------------------------------------- */
+const PlayersTab: FC = () => {
   const { players, add, remove, toggleActive } = usePlayers()
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /* ----------------------------- Handlers ---------------------------------- */
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!name.trim()) return
-    add(name.trim(), level)
+
+    const trimmed = name.trim()
+    if (!trimmed) return
+
+    add(trimmed, level)
     setName('')
   }
 
+  /* ------------------------------ Render ----------------------------------- */
   return (
-    <section className="mx-auto max-w-md px-4 py-8 space-y-8 flex flex-col h-full">
-      <div className="card bg-base-100 shadow-xl min-h-0">
-        <div className="card-body space-y-6 p-6 overflow-hidden">
-          {/* Formulário */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-control">
-              <input
-                aria-label="Player name"
-                type="text"
+    <section className="container mx-auto flex h-full max-w-md flex-col gap-8 px-4 py-8">
+      <Card className="flex min-h-0 flex-col">
+        <CardHeader>
+          <CardTitle>Players</CardTitle>
+        </CardHeader>
+
+        <CardContent className="flex min-h-0 flex-col gap-6 p-6">
+          {/* ----------------------------- Form -------------------------------- */}
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="player-name">Player name</Label>
+              <Input
+                id="player-name"
                 placeholder="Player name"
-                className="input input-bordered w-full"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
-            <div className="form-control">
-              <input
-                aria-label="Player level"
+
+            <div className="grid gap-2">
+              <Label htmlFor="player-level">Player level</Label>
+              <Input
+                id="player-level"
                 type="number"
                 min={1}
                 max={10}
-                className="input input-bordered w-full"
                 value={level}
                 onChange={(e) => setLevel(Number(e.target.value))}
               />
             </div>
-            <button className="btn btn-primary w-full" type="submit">
+
+            <Button type="submit" className="w-full">
               Add player
-            </button>
+            </Button>
           </form>
 
-          <div className="divider m-0" />
-
-          {/* Lista com FLIP */}
-          <div className="rounds-scroll flex-1 overflow-y-auto overflow-x-hidden pr-1 space-y-10 mt-6 min-h-0">
+          {/* ----------------------- Scrollable list -------------------------- */}
+          <ScrollArea className="min-h-0 flex-1 pr-1">
             <LayoutGroup>
               <motion.ul layout className="flex flex-col gap-3" initial={false}>
                 <AnimatePresence initial={false}>
@@ -83,41 +96,37 @@ const PlayersTab: React.FC = () => {
                       exit="exit"
                       transition={spring}
                       whileHover={{ scale: 1.02 }}
-                      className="flex items-center justify-between rounded-xl px-3 py-2 bg-base-100 hover:bg-base-200"
+                      className="flex items-center justify-between rounded-lg border px-3 py-2"
                     >
+                      {/* -------- Left side: name, level, toggle ---------- */}
                       <div className="flex items-center gap-4">
-                        <span className="font-medium">
+                        <span className="font-medium leading-none">
                           {p.name}
-                          <span className="badge badge-secondary ml-2">Lv {p.level}</span>
+                          <Badge variant="secondary" className="ml-2">
+                            Lv {p.level}
+                          </Badge>
                         </span>
 
-                        {/* Toggle ativo/inativo */}
-                        <label className="flex items-center gap-2 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            className="toggle toggle-sm"
-                            checked={p.active}
-                            onChange={() => toggleActive(p.id)}
-                          />
-                          <span className="text-sm opacity-70">{p.active ? 'Ativo' : 'Inativo'}</span>
-                        </label>
+                        <div className="flex items-center gap-2">
+                          <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
+                          <Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">
+                            {p.active ? 'Active' : 'Inactive'}
+                          </Label>
+                        </div>
                       </div>
 
-                      <button
-                        aria-label={`Remove ${p.name}`}
-                        className="btn btn-sm btn-ghost text-error"
-                        onClick={() => remove(p.id)}
-                      >
+                      {/* ------------------- Remove button ------------------ */}
+                      <Button variant="ghost" size="icon" aria-label={`Remove ${p.name}`} onClick={() => remove(p.id)}>
                         ✕
-                      </button>
+                      </Button>
                     </motion.li>
                   ))}
                 </AnimatePresence>
               </motion.ul>
             </LayoutGroup>
-          </div>
-        </div>
-      </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
     </section>
   )
 }
