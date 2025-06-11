@@ -29,3 +29,13 @@ export interface Match {
 export interface Round {
   matches: Match[] // ≤ courts partidas, sem jogadores repetidos
 }
+
+export type PlayerLBRow = {
+  id: string
+  name: string
+  P: number
+  SV: number
+  SG: number
+  // miniSG opcional, será anexado depois
+  miniSG?: number
+}
