@@ -121,5 +121,13 @@ export function generateSchedule(players: Player[], courts: number): Round {
   allMatches.sort((m1, m2) => m1.score - m2.score)
 
   const best = selectTopMatches(allMatches, courts)
-  return { matches: best.map(({ teamA, teamB }) => ({ teamA, teamB })) }
+
+  return {
+    matches: best.map(({ teamA, teamB }) => ({
+      id: crypto.randomUUID(),
+      teamA,
+      teamB,
+      winner: null,
+    })),
+  }
 }

@@ -17,8 +17,10 @@ export interface Player {
 
 /** Cada partida contém dois times de dois jogadores. */
 export interface Match {
+  id: string
   teamA: Player[]
   teamB: Player[]
+  winner: 'A' | 'B' | null
 }
 
 /** Conjunto de partidas que podem acontecer simultaneamente. */

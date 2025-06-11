@@ -40,6 +40,11 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
   return [value, setValue]
 }
 
+/** Clona profundamente um objeto usando structuredClone com fallback. */
+function deepCopy<T>(obj: T): T {
+  return typeof structuredClone === 'function' ? structuredClone(obj) : JSON.parse(JSON.stringify(obj))
+}
+
 // -----------------------------------------------------------------------------
 // Utility: CSS grid template for displaying matches
 // -----------------------------------------------------------------------------
@@ -132,6 +137,14 @@ const MatchesTab: React.FC = () => {
     toast.success('Rodadas e estatísticas reiniciadas!', { duration: 3000 })
   }
 
+  const markWinner = (roundIdx: number, matchId: string, winner: 'A' | 'B') =>
+    setRounds((prev) => {
+      const copy = deepCopy(prev)
+      const match = copy[roundIdx]?.matches.find((m) => m.id === matchId)
+      if (match) match.winner = winner
+      return copy
+    })
+
   return (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
       {/* Notification container */}
@@ -171,11 +184,26 @@ const MatchesTab: React.FC = () => {
             <ol className="grid gap-6" style={gridTemplate(courts)}>
               {round.matches.map((m, i) => (
                 <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
-                  <div className="card-body p-4">
+                  <div className="card-body p-4 space-y-2">
+                    {/* Times */}
                     <div className="flex justify-between items-start gap-4">
                       <TeamView title="Equipe A" team={m.teamA} />
                       <span className="self-center text-lg font-bold opacity-70">vs</span>
                       <TeamView title="Equipe B" team={m.teamB} />
+                    </div>
+
+                    {/* Controle de vencedor */}
+                    <div className="flex justify-center gap-2">
+                      <WinnerBtn
+                        label="Vitória A"
+                        active={m.winner === 'A'}
+                        onClick={() => markWinner(idx, m.id, 'A')}
+                      />
+                      <WinnerBtn
+                        label="Vitória B"
+                        active={m.winner === 'B'}
+                        onClick={() => markWinner(idx, m.id, 'B')}
+                      />
                     </div>
                   </div>
                 </li>
@@ -210,6 +238,17 @@ const TeamView: React.FC<TeamViewProps> = ({ title, team }) => (
       ))}
     </ul>
   </div>
+)
+
+type WinnerBtnProps = {
+  active: boolean
+  onClick: () => void
+  label: string
+}
+const WinnerBtn: React.FC<WinnerBtnProps> = ({ active, onClick, label }) => (
+  <button className={`btn btn-xs sm:btn-sm rounded-full ${active ? 'btn-success' : 'btn-outline'}`} onClick={onClick}>
+    {label}
+  </button>
 )
 
 export default MatchesTab
