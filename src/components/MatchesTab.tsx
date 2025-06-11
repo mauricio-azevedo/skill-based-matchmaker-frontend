@@ -122,9 +122,26 @@ const MatchesTab: React.FC = () => {
 
   // Debugging: print sorted entries to verify both maps match when expected
   useEffect(() => {
+    // Helper to sort map entries by player ID
     const sortEntries = (map: Map<string, number>) => Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
+
+    // Log matchCounts as sorted array
     console.log('matchCounts:', sortEntries(matchCounts))
-  }, [matchCounts])
+
+    // Build a plain object of objects for partnerCounts
+    const tableData: Record<string, Record<string, number>> = {}
+    partnerCounts.forEach((innerMap, playerId) => {
+      tableData[playerId] = {}
+      Array.from(innerMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .forEach(([partnerId, count]) => {
+          tableData[playerId][partnerId] = count
+        })
+    })
+
+    // Dump partnerCounts to the console as a table for easy inspection
+    console.table(tableData)
+  }, [matchCounts, partnerCounts])
 
   /**
    * Handler for "Gerar" button click:
