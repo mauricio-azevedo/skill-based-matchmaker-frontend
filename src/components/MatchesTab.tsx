@@ -150,72 +150,76 @@ const MatchesTab: React.FC = () => {
   )
 
   return (
-    <div className="p-6 flex flex-col h-full overflow-hidden max-w-3xl mx-auto">
-      {/* Notification container */}
-      <Toaster position="top-right" />
+    <section className="mx-auto max-w-md px-4 py-8 space-y-8 flex flex-col h-full">
+      <div className="card bg-base-100 shadow-xl min-h-0">
+        <div className="card-body space-y-6 p-6 overflow-hidden">
+          {/* Notification container */}
+          <Toaster position="top-right" />
 
-      {/* Controls: number of courts selector, generate and clear buttons */}
-      <div className="flex items-end gap-4">
-        <label className="form-control w-32">
-          <span className="label-text">Quadras</span>
-          <input
-            type="number"
-            min={1}
-            value={courts}
-            onChange={(e) => setCourts(Number(e.target.value))}
-            className="input input-bordered"
-          />
-        </label>
-        <button
-          className="btn btn-primary rounded-full"
-          onClick={handleGenerate}
-          disabled={players.length < PLAYERS_PER_MATCH}
-        >
-          Gerar
-        </button>
-        <button className="btn btn-secondary rounded-full" onClick={handleClear} disabled={rounds.length === 0}>
-          Limpar
-        </button>
+          {/* Controls: number of courts selector, generate and clear buttons */}
+          <div className="flex items-end gap-4">
+            <label className="form-control w-32">
+              <span className="label-text">Quadras</span>
+              <input
+                type="number"
+                min={1}
+                value={courts}
+                onChange={(e) => setCourts(Number(e.target.value))}
+                className="input input-bordered"
+              />
+            </label>
+            <button
+              className="btn btn-primary rounded-full"
+              onClick={handleGenerate}
+              disabled={players.length < PLAYERS_PER_MATCH}
+            >
+              Gerar
+            </button>
+            <button className="btn btn-secondary rounded-full" onClick={handleClear} disabled={rounds.length === 0}>
+              Limpar
+            </button>
+          </div>
+
+          {/* Display list of generated rounds or placeholder text */}
+          <div className="rounds-scroll flex-grow overflow-y-auto overflow-x-hidden pr-1 space-y-10 mt-6">
+            {rounds.length === 0 ? (
+              <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
+            ) : (
+              rounds.map((round, idx) => (
+                <article key={idx} className="space-y-4 mt-10">
+                  <h2 className="text-xl font-bold border-l-4 border-primary pl-3">Rodada {idx + 1}</h2>
+                  <ol className="grid gap-6" style={gridTemplate(courts)}>
+                    {round.matches.map((m, i) => (
+                      <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
+                        {/* Times + placar */}
+                        <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                          {/* Team A  */}
+                          <div className={m.winner === 'A' ? 'ring ring-success rounded-lg p-1' : ''}>
+                            <TeamView title="Equipe A" team={m.teamA} />
+                          </div>
+
+                          {/* Placar */}
+                          <div className="flex flex-col items-center gap-1">
+                            <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
+                            <span className="font-bold">×</span>
+                            <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
+                          </div>
+
+                          {/* Team B  */}
+                          <div className={m.winner === 'B' ? 'ring ring-success rounded-lg p-1' : ''}>
+                            <TeamView title="Equipe B" team={m.teamB} />
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </article>
+              ))
+            )}
+          </div>
+        </div>
       </div>
-
-      {/* Display list of generated rounds or placeholder text */}
-      <div className="rounds-scroll flex-grow overflow-y-auto overflow-x-hidden pr-1 space-y-10 mt-6">
-        {rounds.length === 0 ? (
-          <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
-        ) : (
-          rounds.map((round, idx) => (
-            <article key={idx} className="space-y-4 mt-10">
-              <h2 className="text-xl font-bold border-l-4 border-primary pl-3">Rodada {idx + 1}</h2>
-              <ol className="grid gap-6" style={gridTemplate(courts)}>
-                {round.matches.map((m, i) => (
-                  <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
-                    {/* Times + placar */}
-                    <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                      {/* Team A  */}
-                      <div className={m.winner === 'A' ? 'ring ring-success rounded-lg p-1' : ''}>
-                        <TeamView title="Equipe A" team={m.teamA} />
-                      </div>
-
-                      {/* Placar */}
-                      <div className="flex flex-col items-center gap-1">
-                        <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
-                        <span className="font-bold">×</span>
-                        <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
-                      </div>
-
-                      {/* Team B  */}
-                      <div className={m.winner === 'B' ? 'ring ring-success rounded-lg p-1' : ''}>
-                        <TeamView title="Equipe B" team={m.teamB} />
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </article>
-          ))
-        )}
-      </div>
-    </div>
+    </section>
   )
 }
 

@@ -115,46 +115,52 @@ const LeaderboardTab: React.FC = () => {
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      {rows.length === 0 ? (
-        <p className="italic opacity-60">Nenhum jogador cadastrado.</p>
-      ) : (
-        <table className="table w-full">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Jogador</th>
-              <th className="text-right">P</th>
-              <th className="text-right">SV</th>
-              <th className="text-right">SG</th>
-              <th className="w-8" />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((p, idx) => {
-              const tip = formatMiniTooltip(p, rows)
+    <section className="mx-auto max-w-md px-4 py-8 space-y-8 flex flex-col h-full">
+      <div className="card bg-base-100 shadow-xl min-h-0">
+        <div className="card-body space-y-6 p-6 overflow-hidden">
+          <div className="rounds-scroll flex-1 overflow-y-auto overflow-x-hidden pr-1 space-y-10 mt-6 min-h-0">
+            {rows.length === 0 ? (
+              <p className="italic opacity-60">Nenhum jogador cadastrado.</p>
+            ) : (
+              <table className="table w-full">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Jogador</th>
+                    <th className="text-right">P</th>
+                    <th className="text-right">SV</th>
+                    <th className="text-right">SG</th>
+                    <th className="w-8" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((p, idx) => {
+                    const tip = formatMiniTooltip(p, rows)
 
-              return (
-                <tr key={p.id} className={idx === 0 ? 'font-bold' : ''}>
-                  <td>{idx + 1}</td>
-                  <td>{p.name}</td>
-                  <td className="text-right">{p.P}</td>
-                  <td className="text-right">{p.SV}</td>
-                  <td className="text-right">{p.SG}</td>
-                  <td className="text-center">
-                    {p.miniSG !== undefined && p.miniSG !== 0 && (
-                      <div className="tooltip tooltip-left" data-tip={tip}>
-                        <Info className="w-4 h-4 inline-block opacity-70" />
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      )}
-    </div>
+                    return (
+                      <tr key={p.id} className={idx === 0 ? 'font-bold' : ''}>
+                        <td>{idx + 1}</td>
+                        <td>{p.name}</td>
+                        <td className="text-right">{p.P}</td>
+                        <td className="text-right">{p.SV}</td>
+                        <td className="text-right">{p.SG}</td>
+                        <td className="text-center">
+                          {p.miniSG !== undefined && p.miniSG !== 0 && (
+                            <div className="tooltip tooltip-left" data-tip={tip}>
+                              <Info className="w-4 h-4 inline-block opacity-70" />
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 
