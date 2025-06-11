@@ -1,12 +1,32 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { usePlayers } from '../context/PlayersContext'
+
+/**
+ * Player manager — animação FLIP robusta
+ * -------------------------------------------------------------
+ * • Usa layout FLIP em UL + LI (layout="position") — reposiciona
+ *   os itens com spring suave, sem travar quando remove no meio.
+ * • Troquei space-y por flex+gap: evita colapso de margin e resolve
+ *   glitch de collapse/expand no meio da lista.
+ * • Entrada: fade + slide + scale; saída: shrink + fade.
+ */
+
+// Variantes de item
+const itemVariants = {
+  initial: { opacity: 0, scale: 0.9, y: 12 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.8 },
+}
+
+const spring = { type: 'spring', stiffness: 500, damping: 38, mass: 0.9 }
 
 const PlayersTab: React.FC = () => {
   const { players, add, remove, toggleActive } = usePlayers()
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
 
-  const submit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) return
     add(name.trim(), level)
@@ -14,53 +34,88 @@ const PlayersTab: React.FC = () => {
   }
 
   return (
-    <div className="p-4 space-y-6 max-w-md mx-auto">
-      <form onSubmit={submit} className="space-y-2">
-        <input
-          type="text"
-          placeholder="Player name"
-          className="input input-bordered w-full"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          type="number"
-          min={1}
-          max={10}
-          className="input input-bordered w-full"
-          value={level}
-          onChange={(e) => setLevel(Number(e.target.value))}
-        />
-        <button className="btn btn-primary w-full" type="submit">
-          Add player
-        </button>
-      </form>
-
-      <ul className="space-y-2">
-        {players.map((p) => (
-          <li key={p.id} className="flex justify-between items-center p-2 border rounded">
-            <div className="flex items-center gap-4">
-              <span>
-                {p.name} <span className="badge badge-secondary ml-2">Lv {p.level}</span>
-              </span>
-              {/* Toggle de ativo/inativo */}
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  className="toggle toggle-sm"
-                  checked={p.active}
-                  onChange={() => toggleActive(p.id)}
-                />
-                <span className="text-sm">{p.active ? 'Ativo' : 'Inativo'}</span>
-              </label>
+    <section className="mx-auto max-w-md px-4 py-8 space-y-8">
+      <div className="card bg-base-100 shadow-xl">
+        <div className="card-body space-y-6">
+          {/* Formulário */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="form-control">
+              <input
+                aria-label="Player name"
+                type="text"
+                placeholder="Player name"
+                className="input input-bordered w-full"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
-            <button className="btn btn-sm btn-error" onClick={() => remove(p.id)}>
-              ✕
+            <div className="form-control">
+              <input
+                aria-label="Player level"
+                type="number"
+                min={1}
+                max={10}
+                className="input input-bordered w-full"
+                value={level}
+                onChange={(e) => setLevel(Number(e.target.value))}
+              />
+            </div>
+            <button className="btn btn-primary w-full" type="submit">
+              Add player
             </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+          </form>
+
+          <div className="divider m-0" />
+
+          {/* Lista com FLIP */}
+          <LayoutGroup>
+            <motion.ul layout className="flex flex-col gap-3" initial={false}>
+              <AnimatePresence initial={false}>
+                {players.map((p) => (
+                  <motion.li
+                    key={p.id}
+                    layout="position"
+                    variants={itemVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={spring}
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center justify-between rounded-xl px-3 py-2 bg-base-100 hover:bg-base-200"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="font-medium">
+                        {p.name}
+                        <span className="badge badge-secondary ml-2">Lv {p.level}</span>
+                      </span>
+
+                      {/* Toggle ativo/inativo */}
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          className="toggle toggle-sm"
+                          checked={p.active}
+                          onChange={() => toggleActive(p.id)}
+                        />
+                        <span className="text-sm opacity-70">{p.active ? 'Ativo' : 'Inativo'}</span>
+                      </label>
+                    </div>
+
+                    <button
+                      aria-label={`Remove ${p.name}`}
+                      className="btn btn-sm btn-ghost text-error"
+                      onClick={() => remove(p.id)}
+                    >
+                      ✕
+                    </button>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </motion.ul>
+          </LayoutGroup>
+        </div>
+      </div>
+    </section>
   )
 }
 
