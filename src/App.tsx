@@ -6,7 +6,7 @@ import LeaderboardTab from './components/LeaderboardTab'
 
 const App: React.FC = () => {
   const [tab, setTab] = useState<'players' | 'matches' | 'leaderboard'>('players')
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
