@@ -126,7 +126,7 @@ const MatchesTab: FC = () => {
 
   /* ----------------------------- Render ---------------------------- */
   return (
-    <section className="container mx-auto flex h-full max-w-3xl flex-col gap-8 px-4 py-8">
+    <section className="container mx-auto flex h-full max-w-lg flex-col gap-8 px-4 py-8">
       <Card className="flex min-h-0 flex-col">
         <CardHeader>
           <CardTitle>Matches</CardTitle>
@@ -167,7 +167,7 @@ const MatchesTab: FC = () => {
                     {round.matches.map((m) => (
                       <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm">
                         {/* Times + placar */}
-                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                        <div className="flex items-center gap-4">
                           {/* Team A */}
                           <div className={m.winner === 'A' ? 'ring-2 ring-green-500 rounded-lg p-1' : ''}>
                             <TeamView title="Equipe A" team={m.teamA} />
