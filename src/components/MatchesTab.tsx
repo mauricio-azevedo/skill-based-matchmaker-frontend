@@ -1,6 +1,6 @@
 // src/components/MatchesTab.tsx
 
-import { useState, useEffect, type FC, useRef } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -90,7 +90,7 @@ const MatchesTab: FC = () => {
 
       // 5. Atualiza estatísticas dos jogadores
       updatePlayers((prev) => {
-        const updated = prev.map((player) => {
+        return prev.map((player) => {
           let addedMatches = 0
           const updatedPartners = { ...player.partnerCounts }
 
@@ -115,8 +115,6 @@ const MatchesTab: FC = () => {
             partnerCounts: updatedPartners,
           }
         })
-
-        return updated
       })
 
       toast.success('Rodada gerada e estatísticas atualizadas!', {
