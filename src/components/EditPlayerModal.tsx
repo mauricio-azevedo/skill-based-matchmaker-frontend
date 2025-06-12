@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Edit } from 'lucide-react'
+import { Edit, Trash } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import type { Player } from '@/types/players'
 
@@ -107,10 +107,10 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
           </div>
         </div>
 
-        <DialogFooter className="justify-between">
+        <DialogFooter className="flex flex-row justify-between">
           {/* Apagar */}
-          <Button variant="destructive" onClick={handleDelete}>
-            Apagar
+          <Button variant="ghost" onClick={handleDelete} aria-label={`Remover ${player.name}`}>
+            <Trash className="text-destructive" size={16} />
           </Button>
 
           <div className="flex gap-2">
