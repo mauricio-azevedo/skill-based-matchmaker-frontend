@@ -70,7 +70,7 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
 // -----------------------------------------------------------------------------
 function useLocalStorage<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(() => {
-    const stored = localStorage.getItem(key)
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(key) : null
     return stored ? (JSON.parse(stored) as T) : initialValue
   })
 
@@ -79,6 +79,85 @@ function useLocalStorage<T>(key: string, initialValue: T) {
   }, [key, value])
 
   return [value, setValue] as const
+}
+
+// -----------------------------------------------------------------------------
+// ScoreModal sub-component (handles its own local state for robustness)
+// -----------------------------------------------------------------------------
+interface ScoreModalProps {
+  open: boolean
+  onClose: () => void
+  initialScoreA: number | null
+  initialScoreB: number | null
+  onSave: (scoreA: number, scoreB: number) => void
+}
+
+const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initialScoreB, onSave }) => {
+  const [scoreA, setScoreA] = useState<number | null>(initialScoreA)
+  const [scoreB, setScoreB] = useState<number | null>(initialScoreB)
+
+  // Sync whenever the selected match changes
+  useEffect(() => {
+    setScoreA(initialScoreA)
+    setScoreB(initialScoreB)
+  }, [initialScoreA, initialScoreB])
+
+  const renderScoreToggle = (value: number | null, onChange: (v: number) => void) => (
+    <ToggleGroup
+      type="single"
+      value={value !== null ? String(value) : undefined}
+      onValueChange={(val: string) => {
+        if (val === '') return
+        onChange(Number(val))
+      }}
+      className="grid grid-cols-7 gap-1 w-full"
+    >
+      {SCORE_OPTIONS.map((opt) => (
+        <ToggleGroupItem key={opt} value={String(opt)} className="px-2 py-1">
+          {opt}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  )
+
+  const handleSave = () => {
+    if (scoreA === null || scoreB === null) {
+      toast.error('Selecione o placar de ambos os times.')
+      return
+    }
+    onSave(scoreA, scoreB)
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose()
+      }}
+    >
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Inserir placar</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="font-medium mb-1">Time A</p>
+            {renderScoreToggle(scoreA, setScoreA)}
+          </div>
+          <div>
+            <p className="font-medium mb-1">Time B</p>
+            {renderScoreToggle(scoreB, setScoreB)}
+          </div>
+        </div>
+        <DialogFooter className="pt-4">
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSave}>Salvar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 }
 
 // -----------------------------------------------------------------------------
@@ -94,10 +173,14 @@ const MatchesTab: FC = () => {
 
   const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
   const [selectedRoundIndex, setSelectedRoundIndex] = useState<number>(rounds.length > 0 ? rounds.length - 1 : 0)
-  const [scoreModalOpen, setScoreModalOpen] = useState(false)
-  const [editingMatchId, setEditingMatchId] = useState<string | null>(null)
-  const [scoreA, setScoreA] = useState<number | null>(null)
-  const [scoreB, setScoreB] = useState<number | null>(null)
+
+  // Modal state consolidated for robustness
+  const [modalState, setModalState] = useState<{
+    open: boolean
+    matchId: string | null
+    initialA: number | null
+    initialB: number | null
+  }>({ open: false, matchId: null, initialA: null, initialB: null })
 
   // ---------------------------------------------------------------------------
   // Effects
@@ -127,21 +210,11 @@ const MatchesTab: FC = () => {
   // ---------------------------------------------------------------------------
   const handleGenerate = () => {
     try {
-      // 1. Gera a nova rodada
       const newRound = generateSchedule(activePlayers, courts)
-
-      // 2. Calcula o índice que terá essa rodada
       const newIndex = rounds.length
-
-      // 3. Adiciona a rodada ao contexto
       addRound(newRound)
-
-      // 4. Seleciona automaticamente a nova rodada na UI
       setSelectedRoundIndex(newIndex)
-
-      // 5. Atualiza estatísticas dos jogadores
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-
       toast.success(`Rodada #${newIndex + 1} gerada!`, {
         duration: 3000,
       })
@@ -160,29 +233,22 @@ const MatchesTab: FC = () => {
       return
     }
 
-    // Snapshot das rodadas atuais
     const prevRounds = [...rounds]
-    const remainingRounds = prevRounds.slice(0, -1) // todas exceto a última
+    const remainingRounds = prevRounds.slice(0, -1)
 
-    // 1. Limpa rodadas e stats
     clear()
     updatePlayers((prev) => prev.map((p) => ({ ...p, matchCount: 0, partnerCounts: {} })))
 
-    // 2. Reaplica as rodadas que ficaram
     remainingRounds.forEach((r) => {
       addRound(r)
       updatePlayers((prev) => applyRoundStats(prev, r, 1))
     })
 
-    // 3. Gera uma nova rodada para substituir a removida
     try {
       const newRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-
-      // Seleciona a nova rodada (mantém o mesmo índice da removida)
       setSelectedRoundIndex(remainingRounds.length)
-
       toast.success('Rodada embaralhada com sucesso!', { duration: 3000 })
     } catch (error) {
       toast.error((error as Error).message, { duration: 6000 })
@@ -205,185 +271,151 @@ const MatchesTab: FC = () => {
   // Handlers – Scores
   // ---------------------------------------------------------------------------
   const openScoreModalFor = (matchId: string) => {
-    setEditingMatchId(matchId)
     const round = rounds[selectedRoundIndex]
     const match = round.matches.find((m) => m.id === matchId)
-    setScoreA(match?.gamesA ?? null)
-    setScoreB(match?.gamesB ?? null)
-    setScoreModalOpen(true)
+
+    setModalState({
+      open: true,
+      matchId,
+      initialA: match?.gamesA ?? null,
+      initialB: match?.gamesB ?? null,
+    })
   }
 
-  const handleSaveScore = () => {
-    if (!editingMatchId) return
-    if (scoreA === null || scoreB === null) {
-      toast.error('Selecione o placar de ambos os times.')
-      return
-    }
-    setGames(selectedRoundIndex, editingMatchId, 'A', scoreA)
-    setGames(selectedRoundIndex, editingMatchId, 'B', scoreB)
-    setScoreModalOpen(false)
+  const handleSaveScore = (scoreA: number, scoreB: number) => {
+    if (!modalState.matchId) return
+    setGames(selectedRoundIndex, modalState.matchId, 'A', scoreA)
+    setGames(selectedRoundIndex, modalState.matchId, 'B', scoreB)
+    setModalState((prev) => ({ ...prev, open: false }))
     toast.success('Placar salvo!', { duration: 2500 })
   }
-
-  // ---------------------------------------------------------------------------
-  // Render helpers
-  // ---------------------------------------------------------------------------
-  const renderScoreToggle = (value: number | null, onChange: (v: number) => void) => (
-    <ToggleGroup
-      type="single"
-      value={value !== null ? String(value) : undefined}
-      onValueChange={(val: string) => {
-        if (val === '') return
-        onChange(Number(val))
-      }}
-      className="grid grid-cols-7 gap-1"
-    >
-      {SCORE_OPTIONS.map((opt) => (
-        <ToggleGroupItem key={opt} value={String(opt)} className="px-2 py-1">
-          {opt}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  )
 
   // ---------------------------------------------------------------------------
   // JSX
   // ---------------------------------------------------------------------------
   return (
-    <Card>
-      {/* ---------------------- Placar Modal -------------------- */}
-      <Dialog open={scoreModalOpen} onOpenChange={setScoreModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Inserir placar</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <div>
-              <p className="font-medium mb-1">Time A</p>
-              {renderScoreToggle(scoreA, setScoreA)}
+    <>
+      {/* Modal primeiro para ficar fora do fluxo do Card */}
+      <ScoreModal
+        open={modalState.open}
+        onClose={() => setModalState((prev) => ({ ...prev, open: false }))}
+        initialScoreA={modalState.initialA}
+        initialScoreB={modalState.initialB}
+        onSave={handleSaveScore}
+      />
+
+      <Card>
+        {/* ----------------------------- Header ----------------------------- */}
+        <CardHeader>
+          <CardTitle>Partidas</CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          {/* ------------------------ Controls ----------------------- */}
+          <div className="flex flex-wrap items-end gap-4 justify-between">
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="courts">Quadras</Label>
+              <Input
+                className="w-16"
+                id="courts"
+                type="number"
+                min={1}
+                value={courts}
+                onChange={(e) => setCourts(Number(e.target.value))}
+              />
             </div>
-            <div>
-              <p className="font-medium mb-1">Time B</p>
-              {renderScoreToggle(scoreB, setScoreB)}
-            </div>
-          </div>
-          <DialogFooter className="pt-4">
-            <Button variant="secondary" onClick={() => setScoreModalOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveScore}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* ----------------------------- Header ----------------------------- */}
-      <CardHeader>
-        <CardTitle>Partidas</CardTitle>
-      </CardHeader>
+            {rounds.length > 0 && (
+              <div className="flex gap-2">
+                <Button variant="destructive" onClick={handleClear} disabled={rounds.length === 0}>
+                  Limpar
+                </Button>
 
-      <CardContent>
-        {/* ------------------------ Controls ----------------------- */}
-        <div className="flex flex-wrap items-end gap-4 justify-between">
-          <div className="flex flex-col gap-3">
-            <Label htmlFor="courts">Quadras</Label>
-            <Input
-              className="w-16"
-              id="courts"
-              type="number"
-              min={1}
-              value={courts}
-              onChange={(e) => setCourts(Number(e.target.value))}
-            />
-          </div>
-
-          {rounds.length > 0 && (
-            <div className="flex gap-2">
-              <Button variant="destructive" onClick={handleClear} disabled={rounds.length === 0}>
-                Limpar
-              </Button>
-
-              <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {rounds.map((_, idx) => (
-                    <SelectItem key={idx} value={String(idx)}>
-                      Rodada {idx + 1}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
-
-        {/* ---------------------- Rounds list ---------------------- */}
-        <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="scroll">
-          <ul className="h-full w-full flex flex-col gap-2">
-            {rounds.length === 0 ? (
-              <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
-            ) : (
-              (() => {
-                const round = rounds[selectedRoundIndex]
-                return (
-                  <article className="flex flex-col flex-1 gap-2">
-                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
-                      Rodada {selectedRoundIndex + 1}
-                    </h2>
-                    <ol className="flex flex-col gap-6 overflow-hidden flex-1">
-                      {round.matches.map((m) => {
-                        const hasScore = m.gamesA !== null && m.gamesB !== null
-                        return (
-                          <li
-                            key={m.id}
-                            className="rounded-2xl border bg-muted px-3 py-4 shadow-sm overflow-hidden flex-1"
-                          >
-                            {/* Times + placar */}
-                            <div className="flex flex-1 items-center gap-4">
-                              <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                              <div className="flex flex-col items-center gap-1" onClick={() => openScoreModalFor(m.id)}>
-                                {!hasScore && (
-                                  <Button size="sm" variant="ghost">
-                                    Inserir placar
-                                  </Button>
-                                )}
-                                {/* Placar atual */}
-                                {hasScore && (
-                                  <span className="text-sm font-medium">
-                                    {m.gamesA} × {m.gamesB}
-                                  </span>
-                                )}
-                              </div>
-                              <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
-                            </div>
-                          </li>
-                        )
-                      })}
-                    </ol>
-                  </article>
-                )
-              })()
+                <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rounds.map((_, idx) => (
+                      <SelectItem key={idx} value={String(idx)}>
+                        Rodada {idx + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
-          </ul>
-        </ScrollArea>
-      </CardContent>
-      <CardFooter>
-        <div className="flex w-full gap-2">
-          <Button
-            className="flex-1 max-w-fit"
-            variant="ghost"
-            onClick={handleShuffle}
-            disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
-          >
-            Embaralhar
-          </Button>
-          <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
-            Gerar
-          </Button>
-        </div>
-      </CardFooter>
-    </Card>
+          </div>
+
+          {/* ---------------------- Rounds list ---------------------- */}
+          <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="scroll">
+            <ul className="h-full w-full flex flex-col gap-2">
+              {rounds.length === 0 ? (
+                <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
+              ) : (
+                (() => {
+                  const round = rounds[selectedRoundIndex]
+                  return (
+                    <article className="flex flex-col flex-1 gap-2">
+                      <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
+                        Rodada {selectedRoundIndex + 1}
+                      </h2>
+                      <ol className="flex flex-col gap-6 overflow-hidden flex-1">
+                        {round.matches.map((m) => {
+                          const hasScore = m.gamesA !== null && m.gamesB !== null
+                          return (
+                            <li
+                              key={m.id}
+                              className="rounded-2xl border bg-muted px-3 py-4 shadow-sm overflow-hidden flex-1"
+                            >
+                              {/* Times + placar */}
+                              <div className="flex flex-1 items-center gap-4">
+                                <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
+                                <div
+                                  className="flex flex-col items-center gap-1"
+                                  onClick={() => openScoreModalFor(m.id)}
+                                >
+                                  {!hasScore && (
+                                    <Button size="sm" variant="ghost">
+                                      Inserir placar
+                                    </Button>
+                                  )}
+                                  {hasScore && (
+                                    <span className="text-sm font-medium">
+                                      {m.gamesA} × {m.gamesB}
+                                    </span>
+                                  )}
+                                </div>
+                                <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+                              </div>
+                            </li>
+                          )
+                        })}
+                      </ol>
+                    </article>
+                  )
+                })()
+              )}
+            </ul>
+          </ScrollArea>
+        </CardContent>
+        <CardFooter>
+          <div className="flex w-full gap-2">
+            <Button
+              className="flex-1 max-w-fit"
+              variant="ghost"
+              onClick={handleShuffle}
+              disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
+            >
+              Embaralhar
+            </Button>
+            <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
+              Gerar
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    </>
   )
 }
 
@@ -395,6 +427,7 @@ interface TeamViewProps {
   isWinner: boolean
   team: 'A' | 'B'
 }
+
 const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
   <div className={cn('flex flex-1 flex-col gap-2', isWinner && 'ring-2 ring-green-500 rounded-lg p-1')}>
     <div className="flex flex-col max-w-full">
