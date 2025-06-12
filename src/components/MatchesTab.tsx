@@ -273,7 +273,7 @@ const MatchesTab: FC = () => {
                           {/* Times + placar */}
                           <div className="flex flex-1 items-center gap-4">
                             <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                            <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center gap-1">
                               <ScoreInput
                                 value={m.gamesA}
                                 onChange={(v) => setGames(selectedRoundIndex, m.id, 'A', v)}
