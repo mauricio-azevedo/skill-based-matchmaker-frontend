@@ -76,9 +76,19 @@ const MatchesTab: FC = () => {
   /* --------------------------- Handlers --------------------------- */
   const handleGenerate = () => {
     try {
+      // 1. Gera a nova rodada
       const newRound = generateSchedule(activePlayers, courts)
+
+      // 2. Calcula o índice que terá essa rodada
+      const newIndex = rounds.length
+
+      // 3. Adiciona a rodada ao contexto
       addRound(newRound)
 
+      // 4. Seleciona automaticamente a nova rodada na UI
+      setSelectedRoundIndex(newIndex)
+
+      // 5. Atualiza estatísticas dos jogadores
       updatePlayers((prev) => {
         const updated = prev.map((player) => {
           let addedMatches = 0
