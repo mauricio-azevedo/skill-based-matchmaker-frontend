@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
 import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'
+import { Moon, Sun } from 'lucide-react'
 
 // Se você tiver copiado o ThemeProvider do boilerplate do shadcn,
 // descomente estas duas linhas e envolva o <App /> no ThemeProvider no entry (main.tsx).
@@ -32,11 +33,26 @@ export default function App() {
         <h1 className="text-xl font-semibold tracking-tight">Skill-Based Matchmaker</h1>
         <div className="ml-auto flex items-center gap-2">
           {/* Switch do shadcn controla o tema */}
+          {/* Ícone do sol — fica mais “aceso” no modo claro */}
+          <Sun
+            className="h-4 w-4 transition-opacity"
+            aria-hidden="true"
+            style={{ opacity: theme === 'light' ? 1 : 0.35 }}
+          />
+
+          {/* Switch do shadcn controla o tema */}
           <Switch
             id="theme-toggle"
             checked={theme === 'dark'}
             onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
             aria-label="Toggle dark mode"
+          />
+
+          {/* Ícone da lua — fica mais “acesa” no modo escuro */}
+          <Moon
+            className="h-4 w-4 transition-opacity"
+            aria-hidden="true"
+            style={{ opacity: theme === 'dark' ? 1 : 0.25 }}
           />
         </div>
       </header>
