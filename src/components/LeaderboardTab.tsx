@@ -141,6 +141,10 @@ const LeaderboardTab: FC = () => {
     i = j
   }
 
+  const showTooltips = rows.some(
+    (p) => (p.miniSV !== undefined && p.miniSV !== 0) || (p.miniSG !== undefined && p.miniSG !== 0),
+  )
+
   /* ------------------------------ Render ---------------------------------- */
   return (
     <section className="container mx-auto flex h-full max-w-lg flex-col gap-8 px-4 py-8">
@@ -180,31 +184,33 @@ const LeaderboardTab: FC = () => {
                           <TableCell className="text-right">{p.SG}</TableCell>
 
                           {/* tie icons */}
-                          <TableCell className="text-center">
-                            <span className="flex items-center justify-center gap-2">
-                              {p.miniSV !== undefined && p.miniSV == 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Info className="h-4 w-4 opacity-70" />
-                                  </TooltipTrigger>
-                                  <TooltipContent side="left" className="max-w-xs text-xs">
-                                    {tipSV}
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
+                          {showTooltips && (
+                            <TableCell className="text-center">
+                              <span className="flex items-center justify-center gap-2">
+                                {p.miniSV !== undefined && p.miniSV !== 0 && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Info className="h-4 w-4 opacity-70" />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="max-w-xs text-xs">
+                                      {tipSV}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
 
-                              {p.miniSG !== undefined && p.miniSG == 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Info className="h-4 w-4 opacity-70" />
-                                  </TooltipTrigger>
-                                  <TooltipContent side="left" className="max-w-xs text-xs">
-                                    {tipSG}
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </span>
-                          </TableCell>
+                                {p.miniSG !== undefined && p.miniSG !== 0 && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Info className="h-4 w-4 opacity-70" />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="max-w-xs text-xs">
+                                      {tipSG}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </span>
+                            </TableCell>
+                          )}
                         </TableRow>
                       )
                     })}
