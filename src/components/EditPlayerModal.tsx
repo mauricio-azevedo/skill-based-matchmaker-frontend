@@ -64,7 +64,7 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar jogador</DialogTitle>
-          <DialogDescription>Altere nome, nível ou status; ou remova.</DialogDescription>
+          <DialogDescription>{player.name}</DialogDescription>
         </DialogHeader>
 
         {/* Form simples */}
