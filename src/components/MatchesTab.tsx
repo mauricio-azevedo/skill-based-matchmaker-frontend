@@ -1,6 +1,4 @@
-// MatchesTab.tsx — versão shadcn/ui
-// Pré-requisitos (run once):
-// pnpm dlx shadcn add card input button label badge scroll-area
+// src/components/MatchesTab.tsx
 
 import { useState, useEffect, type FC } from 'react'
 import { toast, Toaster } from 'react-hot-toast'

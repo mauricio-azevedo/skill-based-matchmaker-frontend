@@ -1,6 +1,4 @@
-// PlayersTab.tsx — migrado para shadcn/ui + Tailwind v4
-// PRÉ-REQUISITOS: execute uma vez no terminal
-// pnpm dlx shadcn add card input button switch badge scroll-area label
+// src/components/PlayersTab.tsx
 
 import { useState, type FC, type FormEvent } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
