@@ -13,9 +13,9 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -272,7 +272,7 @@ const MatchesTab: FC = () => {
                         >
                           {/* Times + placar */}
                           <div className="flex flex-1 items-center gap-4">
-                            <TeamView title="Equipe A" players={m.teamA} isWinner={m.winner === 'A'} />
+                            <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
                             <div className="flex flex-col items-center gap-1">
                               <ScoreInput
                                 value={m.gamesA}
@@ -284,7 +284,7 @@ const MatchesTab: FC = () => {
                                 onChange={(v) => setGames(selectedRoundIndex, m.id, 'B', v)}
                               />
                             </div>
-                            <TeamView title="Equipe B" players={m.teamB} isWinner={m.winner === 'B'} />
+                            <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
                           </div>
                         </li>
                       ))}
@@ -319,20 +319,20 @@ const MatchesTab: FC = () => {
 // TeamView sub-component
 // -----------------------------------------------------------------------------
 interface TeamViewProps {
-  title: string
   players: Player[]
   isWinner: boolean
+  team: 'A' | 'B'
 }
-const TeamView: FC<TeamViewProps> = ({ title, players, isWinner }) => (
+const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
   <div className={`flex flex-1 flex-col gap-2 ${isWinner ? 'ring-2 ring-green-500 rounded-lg p-1' : ''}`}>
-    <h3 className="text-lg font-medium opacity-75">{title}</h3>
+    {/*<h3 className="text-lg font-medium opacity-75">{title}</h3>*/}
     <div className="flex flex-col max-w-full">
       {players.map((p) => (
-        <div key={p.id} className="flex items-end gap-2 text-base">
+        <div key={p.id} className={cn('flex items-end gap-2 text-base', team === 'B' && 'justify-end')}>
           <p>{p.name}</p>
-          <Badge variant="outline" className="text-xs">
-            Lv {p.level}
-          </Badge>
+          {/*<Badge variant="outline" className="text-xs">*/}
+          {/*  Lv {p.level}*/}
+          {/*</Badge>*/}
         </div>
       ))}
     </div>
