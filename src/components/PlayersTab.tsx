@@ -45,12 +45,12 @@ const PlayersTab: FC = () => {
   /* ------------------------------ Render ----------------------------------- */
   return (
     <section className="container mx-auto flex h-full max-w-md flex-col gap-8 px-4 py-8">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm min-h-0">
         <CardHeader>
           <CardTitle>Jogadores</CardTitle>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-10">
+        <CardContent className="flex flex-col gap-10 min-h-0">
           {/* ----------------------------- Form -------------------------------- */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             {/* ---------------------- Player name input ---------------------- */}
@@ -110,33 +110,38 @@ const PlayersTab: FC = () => {
                       animate="animate"
                       exit="exit"
                       transition={spring}
-                      className="flex items-center justify-between rounded-lg border px-3 py-2"
                     >
-                      {/* -------- Left side: name, level, toggle ---------- */}
-                      <div className="flex items-center gap-4">
-                        <span className="font-medium leading-none">
-                          {p.name}
-                          <Badge variant="secondary" className="ml-2">
-                            Lv {p.level}
-                          </Badge>
-                        </span>
-                      </div>
-                      <div className="flex">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">
-                            Ativo
-                          </Label>
-                          <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
+                      <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                        {/* -------- Left side: name, level, toggle ---------- */}
+                        <div className="flex items-center gap-4">
+                          <span className="font-medium leading-none">
+                            {p.name}
+                            <Badge variant="secondary" className="ml-2">
+                              Lv {p.level}
+                            </Badge>
+                          </span>
                         </div>
-                        {/* ------------------- Remove button ------------------ */}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={`Remove ${p.name}`}
-                          onClick={() => remove(p.id)}
-                        >
-                          ✕
-                        </Button>
+                        <div className="flex">
+                          <div className="flex items-center gap-2">
+                            <Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">
+                              Ativo
+                            </Label>
+                            <Switch
+                              id={`active-${p.id}`}
+                              checked={p.active}
+                              onCheckedChange={() => toggleActive(p.id)}
+                            />
+                          </div>
+                          {/* ------------------- Remove button ------------------ */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Remove ${p.name}`}
+                            onClick={() => remove(p.id)}
+                          >
+                            ✕
+                          </Button>
+                        </div>
                       </div>
                     </motion.li>
                   ))}
