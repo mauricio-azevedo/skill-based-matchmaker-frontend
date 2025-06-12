@@ -1,7 +1,6 @@
 // src/components/MatchesTab.tsx
 
 import { useState, useEffect, type FC } from 'react'
-import { toast, Toaster } from 'react-hot-toast'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -9,6 +8,7 @@ import { generateSchedule } from '@/lib/algorithm'
 import type { Player } from '@/types/players'
 
 // shadcn/ui
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -91,9 +91,14 @@ const MatchesTab: FC = () => {
         return updated
       })
 
-      toast.success('Rodada gerada e estatísticas atualizadas!', { duration: 3000 })
+      toast.success('Rodada gerada e estatísticas atualizadas!', {
+        description: 'Tudo pronto para a próxima rodada.',
+        duration: 3000,
+      })
     } catch (error) {
-      toast.error((error as Error).message, { duration: 6000 })
+      toast.error((error as Error).message, {
+        duration: 6000,
+      })
     }
   }
 
@@ -106,7 +111,7 @@ const MatchesTab: FC = () => {
         partnerCounts: {},
       })),
     )
-    toast.success('Rodadas e estatísticas reiniciadas!', { duration: 3000 })
+    toast.success('Rodada reiniciada!', { duration: 3000 })
   }
 
   /* --------------------------- Score input ------------------------- */
@@ -135,8 +140,6 @@ const MatchesTab: FC = () => {
         </CardHeader>
 
         <CardContent className="flex min-h-0 flex-col gap-6 p-6">
-          <Toaster position="top-right" />
-
           {/* ------------------------ Controls ----------------------- */}
           <div className="flex flex-wrap items-end gap-4">
             <div className="grid w-32 gap-2">
