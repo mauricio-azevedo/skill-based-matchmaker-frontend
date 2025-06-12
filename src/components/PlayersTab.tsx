@@ -1,81 +1,59 @@
 // src/components/PlayersTab.tsx
-
 import { useState, type FC, type FormEvent } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Label } from '@/components/ui/label'
-import { usePlayers } from '@/context/PlayersContext'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { usePlayers } from '@/context/PlayersContext'
+import EditPlayerModal from './EditPlayerModal'
 
-/* -------------------------------------------------------------------------- */
-/*                        Animations – variants & spring                      */
-/* -------------------------------------------------------------------------- */
 const itemVariants = {
   initial: { opacity: 0, scale: 0.9, y: 12 },
   animate: { opacity: 1, scale: 1, y: 0 },
   exit: { opacity: 0, scale: 0.8 },
 }
-
 const spring = { type: 'spring', stiffness: 500, damping: 38, mass: 0.9 }
 
-/* -------------------------------------------------------------------------- */
-/*                                PlayersTab                                  */
-/* -------------------------------------------------------------------------- */
 const PlayersTab: FC = () => {
-  const { players, add, remove, toggleActive } = usePlayers()
+  const { players, add, toggleActive } = usePlayers()
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
 
-  /* ----------------------------- Handlers ---------------------------------- */
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-
     const trimmed = name.trim()
     if (!trimmed) return
-
     add(trimmed, level)
     setName('')
   }
 
-  /* ------------------------------ Render ----------------------------------- */
   return (
     <section className="container mx-auto flex h-full max-w-md flex-col gap-8 px-4 py-8">
       <Card className="w-full max-w-sm min-h-0">
+        {' '}
         <CardHeader>
           <CardTitle>Jogadores</CardTitle>
         </CardHeader>
-
         <CardContent className="flex flex-col gap-10 min-h-0">
-          {/* ----------------------------- Form -------------------------------- */}
+          {/* Formulário de adição */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            {/* ---------------------- Player name input ---------------------- */}
             <div className="grid gap-2">
               <Label htmlFor="player-name">Nome</Label>
               <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
-            {/* ------------- NEW: level picker with ToggleGroup -------------- */}
             <div className="grid gap-2">
               <Label htmlFor="player-level">Nível</Label>
-              {/*
-                We use a **single** ToggleGroup (radio‑style) so only one level
-                can be selected at a time. The chosen value is stored as a
-                number in state.
-              */}
               <ToggleGroup
-                size="default"
                 id="player-level"
                 type="single"
                 value={level.toString()}
-                onValueChange={(val: string) => {
-                  // Ignore empty string when the same item is clicked again
-                  if (val) setLevel(Number(val))
-                }}
+                onValueChange={(val: string) => val && setLevel(Number(val))}
                 className="flex flex-wrap gap-2 w-full"
               >
                 {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
@@ -96,10 +74,10 @@ const PlayersTab: FC = () => {
             </Button>
           </form>
 
-          {/* ----------------------- Scrollable list -------------------------- */}
+          {/* Lista de jogadores */}
           <ScrollArea className="min-h-0 flex-1 pr-1">
             <LayoutGroup>
-              <motion.ul layout className="flex flex-col gap-3" initial={false}>
+              <motion.ul layout initial={false} className="flex flex-col gap-3">
                 <AnimatePresence initial={false}>
                   {players.map((p) => (
                     <motion.li
@@ -110,9 +88,10 @@ const PlayersTab: FC = () => {
                       animate="animate"
                       exit="exit"
                       transition={spring}
+                      className="flex items-center gap-2"
                     >
-                      <div className="flex items-center justify-between rounded-lg border px-3 py-2">
-                        {/* -------- Left side: name, level, toggle ---------- */}
+                      {/* cartão interno */}
+                      <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
                         <div className="flex items-center gap-4">
                           <span className="font-medium leading-none">
                             {p.name}
@@ -121,28 +100,15 @@ const PlayersTab: FC = () => {
                             </Badge>
                           </span>
                         </div>
-                        <div className="flex">
-                          <div className="flex items-center gap-2">
-                            <Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">
-                              Ativo
-                            </Label>
-                            <Switch
-                              id={`active-${p.id}`}
-                              checked={p.active}
-                              onCheckedChange={() => toggleActive(p.id)}
-                            />
-                          </div>
-                          {/* ------------------- Remove button ------------------ */}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={`Remove ${p.name}`}
-                            onClick={() => remove(p.id)}
-                          >
-                            ✕
-                          </Button>
+                        <div className="flex items-center gap-2">
+                          {/*<Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">*/}
+                          {/*  Ativo*/}
+                          {/*</Label>*/}
+                          <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
                         </div>
                       </div>
+                      {/* trigger do modal de edição */}
+                      <EditPlayerModal player={p} />
                     </motion.li>
                   ))}
                 </AnimatePresence>
