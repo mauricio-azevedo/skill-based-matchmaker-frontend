@@ -24,6 +24,46 @@ const PLAYERS_PER_MATCH = 4 as const
 const STORAGE_KEY_COURTS = 'match_courts'
 
 // -----------------------------------------------------------------------------
+// Utility helpers
+// -----------------------------------------------------------------------------
+/**
+ * Apply (or revert) the statistics of a given round to the players array.
+ * @param players Current players array.
+ * @param round   Round whose stats will be applied.
+ * @param factor  +1 to add stats, -1 to remove.
+ */
+function applyRoundStats(players: Player[], round: ReturnType<typeof generateSchedule>, factor: 1 | -1) {
+  return players.map((player) => {
+    let deltaMatches = 0
+    const updatedPartners: Record<string, number> = { ...player.partnerCounts }
+
+    round.matches.forEach(({ teamA, teamB }) => {
+      const [a1, a2] = teamA
+      if (player.id === a1.id || player.id === a2.id) {
+        deltaMatches += 1
+        const partnerId = player.id === a1.id ? a2.id : a1.id
+        updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + factor
+        if (updatedPartners[partnerId] <= 0) delete updatedPartners[partnerId]
+      }
+
+      const [b1, b2] = teamB
+      if (player.id === b1.id || player.id === b2.id) {
+        deltaMatches += 1
+        const partnerId = player.id === b1.id ? b2.id : b1.id
+        updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + factor
+        if (updatedPartners[partnerId] <= 0) delete updatedPartners[partnerId]
+      }
+    })
+
+    return {
+      ...player,
+      matchCount: Math.max(0, player.matchCount + deltaMatches * factor),
+      partnerCounts: updatedPartners,
+    }
+  })
+}
+
+// -----------------------------------------------------------------------------
 // Custom hook: useLocalStorage
 // -----------------------------------------------------------------------------
 function useLocalStorage<T>(key: string, initialValue: T) {
@@ -89,42 +129,52 @@ const MatchesTab: FC = () => {
       setSelectedRoundIndex(newIndex)
 
       // 5. Atualiza estatísticas dos jogadores
-      updatePlayers((prev) => {
-        return prev.map((player) => {
-          let addedMatches = 0
-          const updatedPartners = { ...player.partnerCounts }
-
-          newRound.matches.forEach(({ teamA, teamB }) => {
-            const [a1, a2] = teamA
-            if (player.id === a1.id || player.id === a2.id) {
-              addedMatches++
-              const partnerId = player.id === a1.id ? a2.id : a1.id
-              updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + 1
-            }
-            const [b1, b2] = teamB
-            if (player.id === b1.id || player.id === b2.id) {
-              addedMatches++
-              const partnerId = player.id === b1.id ? b2.id : b1.id
-              updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + 1
-            }
-          })
-
-          return {
-            ...player,
-            matchCount: player.matchCount + addedMatches,
-            partnerCounts: updatedPartners,
-          }
-        })
-      })
+      updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
 
       toast.success(`Rodada #${newIndex + 1} gerada!`, {
-        // description: 'Agora é só partir pro PLAY!.',
         duration: 3000,
       })
     } catch (error) {
       toast.error((error as Error).message, {
         duration: 6000,
       })
+    }
+  }
+
+  const handleShuffle = () => {
+    if (players.length < PLAYERS_PER_MATCH) return
+
+    if (rounds.length === 0) {
+      handleGenerate()
+      return
+    }
+
+    // Snapshot das rodadas atuais
+    const prevRounds = [...rounds]
+    const remainingRounds = prevRounds.slice(0, -1) // todas exceto a última
+
+    // 1. Limpa rodadas e stats
+    clear()
+    updatePlayers((prev) => prev.map((p) => ({ ...p, matchCount: 0, partnerCounts: {} })))
+
+    // 2. Reaplica as rodadas que ficaram
+    remainingRounds.forEach((r) => {
+      addRound(r)
+      updatePlayers((prev) => applyRoundStats(prev, r, 1))
+    })
+
+    // 3. Gera uma nova rodada para substituir a removida
+    try {
+      const newRound = generateSchedule(activePlayers, courts)
+      addRound(newRound)
+      updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
+
+      // Seleciona a nova rodada (mantém o mesmo índice da removida)
+      setSelectedRoundIndex(remainingRounds.length)
+
+      toast.success('Rodada embaralhada com sucesso!', { duration: 3000 })
+    } catch (error) {
+      toast.error((error as Error).message, { duration: 6000 })
     }
   }
 
@@ -181,7 +231,7 @@ const MatchesTab: FC = () => {
 
           {rounds.length > 0 && (
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={handleClear} disabled={rounds.length === 0}>
+              <Button variant="destructive" onClick={handleClear} disabled={rounds.length === 0}>
                 Limpar
               </Button>
 
@@ -247,9 +297,19 @@ const MatchesTab: FC = () => {
         </ScrollArea>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
-          Gerar
-        </Button>
+        <div className="flex w-full gap-2">
+          <Button
+            className="flex-1 max-w-fit"
+            variant="ghost"
+            onClick={handleShuffle}
+            disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
+          >
+            Embaralhar
+          </Button>
+          <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
+            Gerar
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   )
