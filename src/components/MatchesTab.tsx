@@ -1,88 +1,78 @@
-// MatchesTab.tsx
-// Component responsible for generating and displaying balanced match rounds.
+// src/components/MatchesTab.tsx
 
-import React, { useState, useEffect } from 'react'
-import { usePlayers } from '../context/PlayersContext'
-import { generateSchedule } from '../lib/algorithm'
+import { useState, useEffect, type FC } from 'react'
 import { toast, Toaster } from 'react-hot-toast'
-import type { Player } from '../types/players'
-import { useRounds } from '../context/RoundsContext'
+
+import { usePlayers } from '@/context/PlayersContext'
+import { useRounds } from '@/context/RoundsContext'
+import { generateSchedule } from '@/lib/algorithm'
+import type { Player } from '@/types/players'
+
+// shadcn/ui
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
-// Number of participants required for a single match
 const PLAYERS_PER_MATCH = 4 as const
-// Keys to persist data in localStorage
 const STORAGE_KEY_COURTS = 'match_courts'
 
 // -----------------------------------------------------------------------------
-// Hook: useLocalStorage
+// Custom hook: useLocalStorage
 // -----------------------------------------------------------------------------
-/**
- * Custom hook that syncs React state with localStorage.
- * @param key localStorage key
- * @param initialValue value to use if no entry exists
- * @returns current value and setter function
- */
-function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
-  // Initialize state from localStorage on first render
+function useLocalStorage<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(() => {
     const stored = localStorage.getItem(key)
     return stored ? (JSON.parse(stored) as T) : initialValue
   })
 
-  // Write back to localStorage whenever the state changes
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(value))
   }, [key, value])
 
-  return [value, setValue]
+  return [value, setValue] as const
 }
 
 // -----------------------------------------------------------------------------
-// Utility: CSS grid template for displaying matches
+// Utility: grid template helper
 // -----------------------------------------------------------------------------
-const gridTemplate = (courts: number) => ({ gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))` })
+const gridTemplate = (courts: number) => ({
+  gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))`,
+})
 
 // -----------------------------------------------------------------------------
-// Main component: MatchesTab
+// Main component
 // -----------------------------------------------------------------------------
-const MatchesTab: React.FC = () => {
+const MatchesTab: FC = () => {
   const { players, updatePlayers } = usePlayers()
   const { rounds, addRound, setGames, clear } = useRounds()
-  // só considera jogadores ativos na geração de rodada
   const activePlayers = players.filter((p) => p.active)
 
-  // Persisted state from localStorage:
   const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
 
-  /**
-   * Handler for "Gerar" button click:
-   * - Generates a new balanced round using counts.
-   * - Persists the new round and shows a success toast.
-   */
+  /* --------------------------- Handlers --------------------------- */
   const handleGenerate = () => {
     try {
-      // 1) Gera rodada balanceada
       const newRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
 
-      // 2) Atualiza matchCount e partnerCounts de cada player
       updatePlayers((prev) => {
         const updated = prev.map((player) => {
           let addedMatches = 0
           const updatedPartners = { ...player.partnerCounts }
 
           newRound.matches.forEach(({ teamA, teamB }) => {
-            // equipe A
             const [a1, a2] = teamA
             if (player.id === a1.id || player.id === a2.id) {
               addedMatches++
               const partnerId = player.id === a1.id ? a2.id : a1.id
               updatedPartners[partnerId] = (updatedPartners[partnerId] || 0) + 1
             }
-            // equipe B
             const [b1, b2] = teamB
             if (player.id === b1.id || player.id === b2.id) {
               addedMatches++
@@ -98,17 +88,6 @@ const MatchesTab: React.FC = () => {
           }
         })
 
-        // 3) Log do número de partidas de cada jogador (apenas números)
-        console.log(
-          'Número de partidas por jogador após geração:',
-          updated.map((p) => {
-            return {
-              name: p.name,
-              count: p.matchCount,
-            }
-          }),
-        )
-
         return updated
       })
 
@@ -119,9 +98,7 @@ const MatchesTab: React.FC = () => {
   }
 
   const handleClear = () => {
-    // Remove todas as rodadas
     clear()
-    // Reseta estatísticas de cada jogador, mantendo-os no estado
     updatePlayers((prev) =>
       prev.map((player) => ({
         ...player,
@@ -132,15 +109,15 @@ const MatchesTab: React.FC = () => {
     toast.success('Rodadas e estatísticas reiniciadas!', { duration: 3000 })
   }
 
-  type ScoreInputProps = {
+  /* --------------------------- Score input ------------------------- */
+  const ScoreInput: FC<{
     value: number | null
     onChange: (v: number | null) => void
-  }
-  const ScoreInput: React.FC<ScoreInputProps> = ({ value, onChange }) => (
-    <input
+  }> = ({ value, onChange }) => (
+    <Input
       type="number"
       min={0}
-      className="input input-xs w-16 text-center"
+      className="w-16 text-center"
       value={value ?? ''}
       onChange={(e) => {
         const v = e.target.value
@@ -149,52 +126,54 @@ const MatchesTab: React.FC = () => {
     />
   )
 
+  /* ----------------------------- Render ---------------------------- */
   return (
-    <section className="mx-auto max-w-md px-4 py-8 space-y-8 flex flex-col h-full">
-      <div className="card bg-base-100 shadow-xl min-h-0">
-        <div className="card-body space-y-6 p-6 overflow-hidden">
-          {/* Notification container */}
+    <section className="container mx-auto flex h-full max-w-3xl flex-col gap-8 px-4 py-8">
+      <Card className="flex min-h-0 flex-col">
+        <CardHeader>
+          <CardTitle>Matches</CardTitle>
+        </CardHeader>
+
+        <CardContent className="flex min-h-0 flex-col gap-6 p-6">
           <Toaster position="top-right" />
 
-          {/* Controls: number of courts selector, generate and clear buttons */}
-          <div className="flex items-end gap-4">
-            <label className="form-control w-32">
-              <span className="label-text">Quadras</span>
-              <input
+          {/* ------------------------ Controls ----------------------- */}
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="grid w-32 gap-2">
+              <Label htmlFor="courts">Quadras</Label>
+              <Input
+                id="courts"
                 type="number"
                 min={1}
                 value={courts}
                 onChange={(e) => setCourts(Number(e.target.value))}
-                className="input input-bordered"
               />
-            </label>
-            <button
-              className="btn btn-primary rounded-full"
-              onClick={handleGenerate}
-              disabled={players.length < PLAYERS_PER_MATCH}
-            >
+            </div>
+
+            <Button onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
               Gerar
-            </button>
-            <button className="btn btn-secondary rounded-full" onClick={handleClear} disabled={rounds.length === 0}>
+            </Button>
+            <Button variant="secondary" onClick={handleClear} disabled={rounds.length === 0}>
               Limpar
-            </button>
+            </Button>
           </div>
 
-          {/* Display list of generated rounds or placeholder text */}
-          <div className="rounds-scroll flex-grow overflow-y-auto overflow-x-hidden pr-1 space-y-10 mt-6">
+          {/* ---------------------- Rounds list ---------------------- */}
+          <ScrollArea className="min-h-0 flex-1 pr-1">
             {rounds.length === 0 ? (
-              <p className="text-base-content/60 italic">Nenhuma rodada gerada ainda.</p>
+              <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
             ) : (
               rounds.map((round, idx) => (
-                <article key={idx} className="space-y-4 mt-10">
-                  <h2 className="text-xl font-bold border-l-4 border-primary pl-3">Rodada {idx + 1}</h2>
+                <article key={idx} className="space-y-4 pt-8 first:pt-0">
+                  <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
+
                   <ol className="grid gap-6" style={gridTemplate(courts)}>
-                    {round.matches.map((m, i) => (
-                      <li key={i} className="card bg-base-200 shadow-lg rounded-2xl">
+                    {round.matches.map((m) => (
+                      <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm">
                         {/* Times + placar */}
-                        <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                          {/* Team A  */}
-                          <div className={m.winner === 'A' ? 'ring ring-success rounded-lg p-1' : ''}>
+                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                          {/* Team A */}
+                          <div className={m.winner === 'A' ? 'ring-2 ring-green-500 rounded-lg p-1' : ''}>
                             <TeamView title="Equipe A" team={m.teamA} />
                           </div>
 
@@ -205,8 +184,8 @@ const MatchesTab: React.FC = () => {
                             <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
                           </div>
 
-                          {/* Team B  */}
-                          <div className={m.winner === 'B' ? 'ring ring-success rounded-lg p-1' : ''}>
+                          {/* Team B */}
+                          <div className={m.winner === 'B' ? 'ring-2 ring-green-500 rounded-lg p-1' : ''}>
                             <TeamView title="Equipe B" team={m.teamB} />
                           </div>
                         </div>
@@ -216,31 +195,30 @@ const MatchesTab: React.FC = () => {
                 </article>
               ))
             )}
-          </div>
-        </div>
-      </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
     </section>
   )
 }
 
 // -----------------------------------------------------------------------------
-// Sub-component: TeamView
+// TeamView sub-component
 // -----------------------------------------------------------------------------
-/**
- * Displays a team's players and their levels in a simple list.
- */
 interface TeamViewProps {
   title: string
   team: Player[]
 }
-const TeamView: React.FC<TeamViewProps> = ({ title, team }) => (
+const TeamView: FC<TeamViewProps> = ({ title, team }) => (
   <div className="space-y-1">
-    <h3 className="font-medium text-lg opacity-75 mb-1">{title}</h3>
+    <h3 className="mb-1 text-lg font-medium opacity-75">{title}</h3>
     <ul className="space-y-1">
       {team.map((p) => (
-        <li key={p.id} className="flex items-end gap-1 text-md">
-          {/* Player name and level badge */}
-          {p.name} <span className="text-sm text-secondary">Lv {p.level}</span>
+        <li key={p.id} className="flex items-end gap-1 text-base">
+          {p.name}
+          <Badge variant="secondary" className="ml-1 text-xs">
+            Lv {p.level}
+          </Badge>
         </li>
       ))}
     </ul>

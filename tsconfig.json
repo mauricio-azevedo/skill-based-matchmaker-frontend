@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     "module": "esnext",
     // lookup packages like Node does
     "resolveJsonModule": true,
@@ -9,8 +9,14 @@
     // skip type-checking inside node_modules
     "types": [
       "node"
-    ]
+    ],
     // pull in Node’s built-ins
+    "baseUrl": ".",              // ← novo
+    "paths": {                   // ← novo
+      "@/*": ["src/*"]
+    },
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react"
   },
   "include": [
     "src/**/*",

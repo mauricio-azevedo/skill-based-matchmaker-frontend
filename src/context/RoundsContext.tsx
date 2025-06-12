@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import type { Round } from '../types/players'
+import { createContext, useContext, useEffect, useState } from 'react'
+import * as React from 'react'
+import type { Round } from '@/types/players'
 
 // mesmo nome usado em MatchesTab
 export const STORAGE_KEY_ROUNDS = 'match_rounds'
