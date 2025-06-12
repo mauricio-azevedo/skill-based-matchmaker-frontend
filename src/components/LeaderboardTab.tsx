@@ -116,10 +116,28 @@ const LeaderboardTab: FC = () => {
   while (i < rows.length) {
     let j = i + 1
     while (j < rows.length && equalPrimary(rows[i], rows[j])) j++
+
     if (j - i > 1) {
-      const adjusted = applyMiniTieBreak(rows.slice(i, j), pair)
-      rows.splice(i, j - i, ...adjusted)
+      const tied = rows.slice(i, j)
+
+      // 1º mini-SV
+      const afterMiniSV = applyMiniSvTieBreak(tied, pair)
+
+      // se ainda houver empate de miniSV, aplica mini-SG
+      const groups: PlayerLBRow[][] = []
+      let k = 0
+      while (k < afterMiniSV.length) {
+        let l = k + 1
+        while (l < afterMiniSV.length && afterMiniSV[k].miniSV === afterMiniSV[l].miniSV) l++
+        groups.push(afterMiniSV.slice(k, l))
+        k = l
+      }
+
+      const resolved = groups.flatMap((g) => (g.length > 1 ? applyMiniTieBreak(g, pair) : g))
+
+      rows.splice(i, j - i, ...resolved)
     }
+
     i = j
   }
 
@@ -145,13 +163,14 @@ const LeaderboardTab: FC = () => {
                       <TableHead className="text-right">P</TableHead>
                       <TableHead className="text-right">SV</TableHead>
                       <TableHead className="text-right">SG</TableHead>
-                      <TableHead className="w-6" />
                     </TableRow>
                   </TableHeader>
 
                   <TableBody>
                     {rows.map((p, idx) => {
-                      const tip = formatMiniTooltip(p, rows)
+                      const tipSG = formatMiniSgTooltip(p, rows) // saldo de games
+                      const tipSV = formatMiniSvTooltip(p, rows) // saldo de vitórias
+
                       return (
                         <TableRow key={p.id} className={idx === 0 ? 'font-bold' : ''}>
                           <TableCell>{idx + 1}</TableCell>
@@ -159,17 +178,32 @@ const LeaderboardTab: FC = () => {
                           <TableCell className="text-right">{p.P}</TableCell>
                           <TableCell className="text-right">{p.SV}</TableCell>
                           <TableCell className="text-right">{p.SG}</TableCell>
+
+                          {/* tie icons */}
                           <TableCell className="text-center">
-                            {p.miniSG !== undefined && p.miniSG !== 0 && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-4 w-4 opacity-70" />
-                                </TooltipTrigger>
-                                <TooltipContent side="left" className="max-w-xs text-xs">
-                                  {tip}
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
+                            <span className="flex items-center justify-center gap-2">
+                              {p.miniSV !== undefined && p.miniSV == 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-4 w-4 opacity-70" />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="left" className="max-w-xs text-xs">
+                                    {tipSV}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+
+                              {p.miniSG !== undefined && p.miniSG == 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-4 w-4 opacity-70" />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="left" className="max-w-xs text-xs">
+                                    {tipSG}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </span>
                           </TableCell>
                         </TableRow>
                       )
@@ -215,7 +249,29 @@ function applyMiniTieBreak(rows: PlayerLBRow[], pair: Pair): PlayerLBRow[] {
   return enriched
 }
 
-function formatMiniTooltip(row: PlayerLBRow, all: PlayerLBRow[]): string {
+function applyMiniSvTieBreak(rows: PlayerLBRow[], pair: Pair): PlayerLBRow[] {
+  const ids = rows.map((p) => p.id)
+
+  const enriched = rows.map((p) => {
+    let W = 0,
+      L = 0
+    ids.forEach((opp) => {
+      if (opp === p.id) return
+      const vs = pair.get(p.id)?.get(opp)
+      const vsOpp = pair.get(opp)?.get(p.id)
+      if (!vs || !vsOpp) return // nunca se enfrentaram
+      if (vs.gp > vs.gc) W++
+      else if (vs.gp < vs.gc) L++
+    })
+    return { ...p, miniW: W, miniL: L, miniSV: W - L }
+  })
+
+  // ordena primeiro por miniSV, depois nome (fallback simples)
+  enriched.sort((a, b) => (b.miniSV! !== a.miniSV! ? b.miniSV! - a.miniSV! : a.name.localeCompare(b.name)))
+  return enriched
+}
+
+function formatMiniSgTooltip(row: PlayerLBRow, all: PlayerLBRow[]): string {
   if (row.miniSG === undefined) return ''
 
   const sign = row.miniSG >= 0 ? '+' : ''
@@ -227,6 +283,21 @@ function formatMiniTooltip(row: PlayerLBRow, all: PlayerLBRow[]): string {
     return `Nos jogos contra ${oppName}, ${msg}`
   }
   return `Nos jogos contra ${row.oppMini!.length + 1} jogadores, ${msg}`
+}
+
+function formatMiniSvTooltip(row: PlayerLBRow, all: PlayerLBRow[]): string {
+  if (row.miniSV === undefined) return ''
+
+  const sign = row.miniSV >= 0 ? '+' : ''
+  const wPlural = row.miniW === 1 ? 'vitória' : 'vitórias'
+  const lPlural = row.miniL === 1 ? 'derrota' : 'derrotas'
+  const msg = `você teve ${row.miniW} ${wPlural} e ${row.miniL} ${lPlural} (saldo ${sign}${row.miniSV}).`
+
+  if (row.oppMini && row.oppMini.length === 1) {
+    const oppName = all.find((r) => r.id === row.oppMini?.[0])?.name ?? 'adversário'
+    return `Nos confrontos contra ${oppName}, ${msg}`
+  }
+  return `Nos confrontos entre ${row.oppMini!.length + 1} jogadores, ${msg}`
 }
 
 export default LeaderboardTab
