@@ -5,7 +5,7 @@
 // persiste tudo em localStorage e expõe operações CRUD + estatísticas.
 // ============================================================================
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, type FC, type ReactNode } from 'react'
 import type { Player } from '../types/players'
 
 // ----------------------------------------------------------------------------
@@ -33,7 +33,7 @@ const PlayersContext = createContext<Ctx | undefined>(undefined)
 // ---------------------------------------------------------------------------
 // Provider: envolve toda a aplicação e mantém estado de players
 // ---------------------------------------------------------------------------
-export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
   // Inicializa do localStorage na primeira renderização
   const [players, setPlayers] = useState<Player[]>(() => {
     try {
@@ -66,7 +66,6 @@ export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const minCount = getMinMatchCount(prev.filter((pl) => pl.active))
 
       return [
-        ...prev,
         {
           id: crypto.randomUUID(),
           name,
@@ -75,6 +74,7 @@ export const PlayersProvider: React.FC<{ children: React.ReactNode }> = ({ child
           matchCount: minCount, // inicia igual ao menor existente
           partnerCounts: {}, // sem parcerias ainda
         },
+        ...prev,
       ]
     })
 

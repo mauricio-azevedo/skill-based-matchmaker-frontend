@@ -47,7 +47,7 @@ const PlayersTab: FC = () => {
     <section className="container mx-auto flex h-full max-w-md flex-col gap-8 px-4 py-8">
       <Card className="flex min-h-0 flex-col">
         <CardHeader>
-          <CardTitle>Players</CardTitle>
+          <CardTitle>Jogadores</CardTitle>
         </CardHeader>
 
         <CardContent className="flex min-h-0 flex-col gap-6 p-6">
@@ -55,7 +55,7 @@ const PlayersTab: FC = () => {
           <form onSubmit={handleSubmit} className="grid gap-4">
             {/* ---------------------- Player name input ---------------------- */}
             <div className="grid gap-2">
-              <Label htmlFor="player-name">Player name</Label>
+              <Label htmlFor="player-name">Nome</Label>
               <Input
                 id="player-name"
                 placeholder="Player name"
@@ -66,7 +66,7 @@ const PlayersTab: FC = () => {
 
             {/* ------------- NEW: level picker with ToggleGroup -------------- */}
             <div className="grid gap-2">
-              <Label htmlFor="player-level">Player level</Label>
+              <Label htmlFor="player-level">Nível</Label>
               {/*
                 We use a **single** ToggleGroup (radio‑style) so only one level
                 can be selected at a time. The chosen value is stored as a
@@ -96,7 +96,7 @@ const PlayersTab: FC = () => {
             </div>
 
             <Button type="submit" className="w-full">
-              Add player
+              Adicionar
             </Button>
           </form>
 
@@ -125,19 +125,24 @@ const PlayersTab: FC = () => {
                             Lv {p.level}
                           </Badge>
                         </span>
-
-                        <div className="flex items-center gap-2">
-                          <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
-                          <Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">
-                            {p.active ? 'Active' : 'Inactive'}
-                          </Label>
-                        </div>
                       </div>
-
-                      {/* ------------------- Remove button ------------------ */}
-                      <Button variant="ghost" size="icon" aria-label={`Remove ${p.name}`} onClick={() => remove(p.id)}>
-                        ✕
-                      </Button>
+                      <div className="flex">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">
+                            Ativo
+                          </Label>
+                          <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
+                        </div>
+                        {/* ------------------- Remove button ------------------ */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Remove ${p.name}`}
+                          onClick={() => remove(p.id)}
+                        >
+                          ✕
+                        </Button>
+                      </div>
                     </motion.li>
                   ))}
                 </AnimatePresence>
