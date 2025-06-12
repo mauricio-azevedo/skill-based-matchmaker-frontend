@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
+import { Crown } from 'lucide-react'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -129,8 +130,6 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
     }
     onSave(scoreA, scoreB)
   }
-
-  console.log(namesA)
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -454,7 +453,20 @@ interface TeamViewProps {
 }
 
 const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
-  <div className={cn('flex flex-1 flex-col gap-2', isWinner && 'ring-2 ring-green-500 rounded-lg p-1')}>
+  <div className={cn('flex flex-1 items-center gap-4', team === 'B' && 'justify-end')}>
+    {/* crown replaces the old green ring */}
+    {isWinner && (
+      <div>
+        <Crown
+          className={cn(
+            'h-4 w-4 text-yellow-500', // size + brand-friendly color
+            team === 'B' ? 'self-end' : 'self-start',
+          )}
+          aria-label="Winner"
+        />
+      </div>
+    )}
+
     <div className="flex flex-col max-w-full">
       {players.map((p) => (
         <div key={p.id} className={cn('flex items-end gap-2 text-base', team === 'B' && 'justify-end')}>
