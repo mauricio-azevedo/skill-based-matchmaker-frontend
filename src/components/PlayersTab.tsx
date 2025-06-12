@@ -80,9 +80,9 @@ const PlayersTab: FC = () => {
                   // Ignore empty string when the same item is clicked again
                   if (val) setLevel(Number(val))
                 }}
-                className="flex flex-wrap gap-2"
+                className="flex flex-wrap gap-2 w-full"
               >
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((lvl) => (
+                {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
                   <ToggleGroupItem
                     key={lvl}
                     value={lvl.toString()}
