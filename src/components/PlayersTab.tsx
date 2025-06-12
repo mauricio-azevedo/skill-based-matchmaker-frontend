@@ -10,9 +10,10 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
 import { usePlayers } from '@/context/PlayersContext'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 /* -------------------------------------------------------------------------- */
-/*                        Animações – variantes e spring                       */
+/*                        Animations – variants & spring                      */
 /* -------------------------------------------------------------------------- */
 const itemVariants = {
   initial: { opacity: 0, scale: 0.9, y: 12 },
@@ -52,6 +53,7 @@ const PlayersTab: FC = () => {
         <CardContent className="flex min-h-0 flex-col gap-6 p-6">
           {/* ----------------------------- Form -------------------------------- */}
           <form onSubmit={handleSubmit} className="grid gap-4">
+            {/* ---------------------- Player name input ---------------------- */}
             <div className="grid gap-2">
               <Label htmlFor="player-name">Player name</Label>
               <Input
@@ -62,16 +64,35 @@ const PlayersTab: FC = () => {
               />
             </div>
 
+            {/* ------------- NEW: level picker with ToggleGroup -------------- */}
             <div className="grid gap-2">
               <Label htmlFor="player-level">Player level</Label>
-              <Input
+              {/*
+                We use a **single** ToggleGroup (radio‑style) so only one level
+                can be selected at a time. The chosen value is stored as a
+                number in state.
+              */}
+              <ToggleGroup
                 id="player-level"
-                type="number"
-                min={1}
-                max={10}
-                value={level}
-                onChange={(e) => setLevel(Number(e.target.value))}
-              />
+                type="single"
+                value={level.toString()}
+                onValueChange={(val: string) => {
+                  // Ignore empty string when the same item is clicked again
+                  if (val) setLevel(Number(val))
+                }}
+                className="flex flex-wrap gap-2"
+              >
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((lvl) => (
+                  <ToggleGroupItem
+                    key={lvl}
+                    value={lvl.toString()}
+                    aria-label={`Level ${lvl}`}
+                    className="w-8 justify-center"
+                  >
+                    {lvl}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
 
             <Button type="submit" className="w-full">
