@@ -105,21 +105,23 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
           </div>
         </div>
 
-        <DialogFooter className="flex flex-row justify-between">
-          {/* Apagar */}
-          <Button variant="ghost" onClick={handleDelete} aria-label={`Remover ${player.name}`}>
-            <Trash className="text-destructive" size={16} />
-          </Button>
+        <DialogFooter>
+          <div className="flex flex-row justify-between w-full">
+            {/* Apagar */}
+            <Button variant="ghost" onClick={handleDelete} aria-label={`Remover ${player.name}`}>
+              <Trash className="text-destructive" size={16} />
+            </Button>
 
-          <div className="flex gap-2">
-            <DialogClose asChild>
-              <Button variant="outline">Cancelar</Button>
-            </DialogClose>
-            <DialogClose asChild>
-              <Button type="submit" onClick={handleSave}>
-                Salvar
-              </Button>
-            </DialogClose>
+            <div className="flex gap-2">
+              <DialogClose asChild>
+                <Button variant="outline">Cancelar</Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button type="submit" onClick={handleSave}>
+                  Salvar
+                </Button>
+              </DialogClose>
+            </div>
           </div>
         </DialogFooter>
       </DialogContent>
