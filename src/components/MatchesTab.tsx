@@ -9,7 +9,7 @@ import type { Player } from '@/types/players'
 
 // shadcn/ui
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -161,15 +161,16 @@ const MatchesTab: FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Matches</CardTitle>
+        <CardTitle>Partidas</CardTitle>
       </CardHeader>
 
       <CardContent>
         {/* ------------------------ Controls ----------------------- */}
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="grid w-32 gap-2">
+        <div className="flex flex-wrap items-end gap-4 justify-between">
+          <div className="flex flex-col gap-3">
             <Label htmlFor="courts">Quadras</Label>
             <Input
+              className="w-16"
               id="courts"
               type="number"
               min={1}
@@ -178,29 +179,27 @@ const MatchesTab: FC = () => {
             />
           </div>
 
-          <Button onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
-            Gerar
-          </Button>
-          <Button variant="secondary" onClick={handleClear} disabled={rounds.length === 0}>
-            Limpar
-          </Button>
+          {rounds.length > 0 && (
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={handleClear} disabled={rounds.length === 0}>
+                Limpar
+              </Button>
+
+              <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {rounds.map((_, idx) => (
+                    <SelectItem key={idx} value={String(idx)}>
+                      Rodada {idx + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
-        {rounds.length > 0 && (
-          <div className="grid gap-2">
-            <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                {rounds.map((_, idx) => (
-                  <SelectItem key={idx} value={String(idx)}>
-                    Rodada {idx + 1}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
 
         {/* ---------------------- Rounds list ---------------------- */}
         <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="scroll">
@@ -211,7 +210,7 @@ const MatchesTab: FC = () => {
               (() => {
                 const round = rounds[selectedRoundIndex]
                 return (
-                  <article className="flex flex-col pt-8 flex-1">
+                  <article className="flex flex-col flex-1 gap-2">
                     <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
                       Rodada {selectedRoundIndex + 1}
                     </h2>
@@ -247,6 +246,11 @@ const MatchesTab: FC = () => {
           </ul>
         </ScrollArea>
       </CardContent>
+      <CardFooter>
+        <Button className="w-full" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
+          Gerar
+        </Button>
+      </CardFooter>
     </Card>
   )
 }
