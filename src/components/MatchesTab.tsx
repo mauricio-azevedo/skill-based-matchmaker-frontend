@@ -117,8 +117,8 @@ const MatchesTab: FC = () => {
         })
       })
 
-      toast.success('Rodada gerada e estatísticas atualizadas!', {
-        description: 'Tudo pronto para a próxima rodada.',
+      toast.success(`Rodada #${newIndex + 1} gerada!`, {
+        // description: 'Agora é só partir pro PLAY!.',
         duration: 3000,
       })
     } catch (error) {
