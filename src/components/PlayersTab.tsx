@@ -52,50 +52,52 @@ const PlayersTab: FC = () => {
 
         <CardContent className="flex min-h-0 flex-col gap-6 p-6">
           {/* ----------------------------- Form -------------------------------- */}
-          <form onSubmit={handleSubmit} className="grid gap-4">
-            {/* ---------------------- Player name input ---------------------- */}
-            <div className="grid gap-2">
-              <Label htmlFor="player-name">Nome</Label>
-              <Input
-                id="player-name"
-                placeholder="Player name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="flex gap-4">
+            <div className="flex flex-col gap-4">
+              {/* ---------------------- Player name input ---------------------- */}
+              <div className="flex">
+                <Label htmlFor="player-name" className="w-18">
+                  Nome
+                </Label>
+                <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
+              </div>
 
-            {/* ------------- NEW: level picker with ToggleGroup -------------- */}
-            <div className="grid gap-2">
-              <Label htmlFor="player-level">Nível</Label>
-              {/*
+              {/* ------------- NEW: level picker with ToggleGroup -------------- */}
+              <div className="flex">
+                <Label htmlFor="player-level" className="w-18">
+                  Nível
+                </Label>
+                {/*
                 We use a **single** ToggleGroup (radio‑style) so only one level
                 can be selected at a time. The chosen value is stored as a
                 number in state.
               */}
-              <ToggleGroup
-                id="player-level"
-                type="single"
-                value={level.toString()}
-                onValueChange={(val: string) => {
-                  // Ignore empty string when the same item is clicked again
-                  if (val) setLevel(Number(val))
-                }}
-                className="flex flex-wrap gap-2 w-full"
-              >
-                {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
-                  <ToggleGroupItem
-                    key={lvl}
-                    value={lvl.toString()}
-                    aria-label={`Level ${lvl}`}
-                    className="w-8 justify-center"
-                  >
-                    {lvl}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+                <ToggleGroup
+                  size="default"
+                  id="player-level"
+                  type="single"
+                  value={level.toString()}
+                  onValueChange={(val: string) => {
+                    // Ignore empty string when the same item is clicked again
+                    if (val) setLevel(Number(val))
+                  }}
+                  className="flex flex-wrap gap-2 w-full"
+                >
+                  {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
+                    <ToggleGroupItem
+                      key={lvl}
+                      value={lvl.toString()}
+                      aria-label={`Level ${lvl}`}
+                      className="w-8 justify-center"
+                    >
+                      {lvl}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </div>
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="h-[88px] w-[88px]">
               Adicionar
             </Button>
           </form>
