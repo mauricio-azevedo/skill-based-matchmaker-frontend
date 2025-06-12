@@ -6,7 +6,7 @@
 // ============================================================================
 
 import { createContext, useContext, useEffect, useState, type FC, type ReactNode } from 'react'
-import type { Player } from '../types/players'
+import type { Player } from '@/types/players'
 
 // ----------------------------------------------------------------------------
 // Helper: retorna o menor matchCount entre um conjunto de players
