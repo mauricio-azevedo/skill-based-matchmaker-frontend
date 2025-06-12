@@ -89,10 +89,12 @@ interface ScoreModalProps {
   onClose: () => void
   initialScoreA: number | null
   initialScoreB: number | null
+  namesA: string[]
+  namesB: string[]
   onSave: (scoreA: number, scoreB: number) => void
 }
 
-const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initialScoreB, onSave }) => {
+const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initialScoreB, namesA, namesB, onSave }) => {
   const [scoreA, setScoreA] = useState<number | null>(initialScoreA)
   const [scoreB, setScoreB] = useState<number | null>(initialScoreB)
 
@@ -128,32 +130,40 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
     onSave(scoreA, scoreB)
   }
 
+  console.log(namesA)
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) onClose()
-      }}
-    >
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Inserir placar</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
+
+        {/* ---------- Nomes das duplas ---------- */}
+        <div className="flex flex-col gap-6">
           <div>
-            <p className="font-medium mb-1">Time A</p>
+            <p className="font-semibold mb-3">
+              {namesA.join(' & ')} {/* Pedro & João */}
+            </p>
             {renderScoreToggle(scoreA, setScoreA)}
           </div>
+
           <div>
-            <p className="font-medium mb-1">Time B</p>
+            <p className="font-semibold mb-3">
+              {namesB.join(' & ')} {/* Maria & Ana */}
+            </p>
             {renderScoreToggle(scoreB, setScoreB)}
           </div>
         </div>
+
+        {/* ---------- Botões ---------- */}
         <DialogFooter className="pt-4">
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSave}>Salvar</Button>
+          <div className="flex gap-2 justify-end">
+            <Button variant="secondary" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave}>Salvar</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -180,7 +190,16 @@ const MatchesTab: FC = () => {
     matchId: string | null
     initialA: number | null
     initialB: number | null
-  }>({ open: false, matchId: null, initialA: null, initialB: null })
+    namesA: string[]
+    namesB: string[]
+  }>({
+    open: false,
+    matchId: null,
+    initialA: null,
+    initialB: null,
+    namesA: [],
+    namesB: [],
+  })
 
   // ---------------------------------------------------------------------------
   // Effects
@@ -274,11 +293,15 @@ const MatchesTab: FC = () => {
     const round = rounds[selectedRoundIndex]
     const match = round.matches.find((m) => m.id === matchId)
 
+    if (!match) return
+
     setModalState({
       open: true,
       matchId,
-      initialA: match?.gamesA ?? null,
-      initialB: match?.gamesB ?? null,
+      initialA: match.gamesA ?? null,
+      initialB: match.gamesB ?? null,
+      namesA: match.teamA.map((p) => p.name),
+      namesB: match.teamB.map((p) => p.name),
     })
   }
 
@@ -298,9 +321,11 @@ const MatchesTab: FC = () => {
       {/* Modal primeiro para ficar fora do fluxo do Card */}
       <ScoreModal
         open={modalState.open}
-        onClose={() => setModalState((prev) => ({ ...prev, open: false }))}
+        onClose={() => setModalState((p) => ({ ...p, open: false }))}
         initialScoreA={modalState.initialA}
         initialScoreB={modalState.initialB}
+        namesA={modalState.namesA}
+        namesB={modalState.namesB}
         onSave={handleSaveScore}
       />
 
