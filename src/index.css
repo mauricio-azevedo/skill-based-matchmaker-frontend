@@ -118,3 +118,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+div[data-radix-scroll-area-content] * {
+  display: flex !important;
+}

@@ -127,12 +127,12 @@ const MatchesTab: FC = () => {
   /* ----------------------------- Render ---------------------------- */
   return (
     <section className="container mx-auto flex h-full max-w-lg flex-col gap-8 px-4 py-8">
-      <Card className="flex min-h-0 flex-col">
+      <Card className="flex min-h-0 flex-col flex-1">
         <CardHeader>
           <CardTitle>Matches</CardTitle>
         </CardHeader>
 
-        <CardContent className="flex min-h-0 flex-col gap-6 p-6">
+        <CardContent className="flex min-h-0 flex-col gap-6 p-6 flex-1">
           {/* ------------------------ Controls ----------------------- */}
           <div className="flex flex-wrap items-end gap-4">
             <div className="grid w-32 gap-2">
@@ -155,42 +155,40 @@ const MatchesTab: FC = () => {
           </div>
 
           {/* ---------------------- Rounds list ---------------------- */}
-          <ScrollArea className="min-h-0 flex-1 pr-1">
-            {rounds.length === 0 ? (
-              <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
-            ) : (
-              rounds.map((round, idx) => (
-                <article key={idx} className="space-y-4 pt-8 first:pt-0">
-                  <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
+          <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="auto">
+            <ul className="h-full w-full flex flex-col gap-2 p-2">
+              {rounds.length === 0 ? (
+                <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
+              ) : (
+                rounds.map((round, idx) => (
+                  <article key={idx} className="flex flex-col pt-8 first:pt-0 flex-1">
+                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
 
-                  <ol className="flex flex-col gap-6">
-                    {round.matches.map((m) => (
-                      <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm">
-                        {/* Times + placar */}
-                        <div className="flex items-center gap-4">
-                          {/* Team A */}
-                          <div className={m.winner === 'A' ? 'ring-2 ring-green-500 rounded-lg p-1' : ''}>
-                            <TeamView title="Equipe A" team={m.teamA} />
-                          </div>
+                    <ol className="flex flex-col gap-6 overflow-hidden flex-1">
+                      {round.matches.map((m) => (
+                        <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm overflow-hidden flex-1">
+                          {/* Times + placar */}
+                          <div className="flex flex-1 items-center gap-4">
+                            {/* Team A */}
+                            <TeamView title="Equipe A" players={m.teamA} isWinner={m.winner === 'A'} />
 
-                          {/* Placar */}
-                          <div className="flex flex-col items-center gap-1">
-                            <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
-                            <span className="font-bold">×</span>
-                            <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
-                          </div>
+                            {/* Placar */}
+                            <div className="flex flex-col items-center gap-1">
+                              <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
+                              <span className="font-bold">×</span>
+                              <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
+                            </div>
 
-                          {/* Team B */}
-                          <div className={m.winner === 'B' ? 'ring-2 ring-green-500 rounded-lg p-1' : ''}>
-                            <TeamView title="Equipe B" team={m.teamB} />
+                            {/* Team B */}
+                            <TeamView title="Equipe B" players={m.teamA} isWinner={m.winner === 'B'} />
                           </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </article>
-              ))
-            )}
+                        </li>
+                      ))}
+                    </ol>
+                  </article>
+                ))
+              )}
+            </ul>
           </ScrollArea>
         </CardContent>
       </Card>
@@ -203,21 +201,22 @@ const MatchesTab: FC = () => {
 // -----------------------------------------------------------------------------
 interface TeamViewProps {
   title: string
-  team: Player[]
+  players: Player[]
+  isWinner: boolean
 }
-const TeamView: FC<TeamViewProps> = ({ title, team }) => (
-  <div className="space-y-1">
-    <h3 className="mb-1 text-lg font-medium opacity-75">{title}</h3>
-    <ul className="space-y-1">
-      {team.map((p) => (
-        <li key={p.id} className="flex items-end gap-1 text-base">
-          {p.name}
-          <Badge variant="secondary" className="ml-1 text-xs">
+const TeamView: FC<TeamViewProps> = ({ title, players, isWinner }) => (
+  <div className={`flex flex-1 flex-col gap-2 ${isWinner ? 'ring-2 ring-green-500 rounded-lg p-1' : ''}`}>
+    <h3 className="text-lg font-medium opacity-75">{title}</h3>
+    <div className="flex flex-col max-w-full">
+      {players.map((p) => (
+        <div key={p.id} className="flex items-end gap-2 text-base">
+          <p>{p.name}</p>
+          <Badge variant="outline" className="text-xs">
             Lv {p.level}
           </Badge>
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   </div>
 )
 
