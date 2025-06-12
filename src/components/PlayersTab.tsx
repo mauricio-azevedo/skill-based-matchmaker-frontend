@@ -42,12 +42,12 @@ const PlayersTab: FC = () => {
         <CardContent className="flex flex-col gap-10 min-h-0">
           {/* Formulário de adição */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <div className="grid gap-2">
+            <div className="grid gap-3">
               <Label htmlFor="player-name">Nome</Label>
               <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-3">
               <Label htmlFor="player-level">Nível</Label>
               <ToggleGroup
                 id="player-level"

@@ -63,27 +63,25 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Editar Jogador</DialogTitle>
+          <DialogTitle>Editar {player.name}</DialogTitle>
           <DialogDescription>Altere nome, nível ou status; ou remova.</DialogDescription>
         </DialogHeader>
 
         {/* Form simples */}
-        <div className="flex flex-col gap-4">
-          {/* Nome */}
-          <div className="grid gap-1">
-            <Label htmlFor="edit-name">Nome</Label>
-            <Input id="edit-name" value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-3">
+            <Label htmlFor="player-name">Nome</Label>
+            <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
-          {/* Nível */}
-          <div className="grid gap-1">
+          <div className="grid gap-3">
             <Label htmlFor="edit-level">Nível</Label>
             <ToggleGroup
               id="edit-level"
               type="single"
               value={level.toString()}
               onValueChange={(val: string) => val && setLevel(Number(val))}
-              className="flex flex-wrap gap-2"
+              className="flex flex-wrap gap-2 w-full"
             >
               {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
                 <ToggleGroupItem
@@ -118,7 +116,9 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
             <DialogClose asChild>
-              <Button onClick={handleSave}>Salvar</Button>
+              <Button type="submit" onClick={handleSave}>
+                Salvar
+              </Button>
             </DialogClose>
           </div>
         </DialogFooter>
