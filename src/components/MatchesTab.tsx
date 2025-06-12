@@ -39,13 +39,6 @@ function useLocalStorage<T>(key: string, initialValue: T) {
 }
 
 // -----------------------------------------------------------------------------
-// Utility: grid template helper
-// -----------------------------------------------------------------------------
-const gridTemplate = (courts: number) => ({
-  gridTemplateColumns: `repeat(${courts}, minmax(0, 1fr))`,
-})
-
-// -----------------------------------------------------------------------------
 // Main component
 // -----------------------------------------------------------------------------
 const MatchesTab: FC = () => {
@@ -170,7 +163,7 @@ const MatchesTab: FC = () => {
                 <article key={idx} className="space-y-4 pt-8 first:pt-0">
                   <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
 
-                  <ol className="grid gap-6" style={gridTemplate(courts)}>
+                  <ol className="flex flex-col gap-6">
                     {round.matches.map((m) => (
                       <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm">
                         {/* Times + placar */}
