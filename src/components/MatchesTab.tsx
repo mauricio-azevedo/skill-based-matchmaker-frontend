@@ -115,7 +115,7 @@ const MatchesTab: FC = () => {
     <Input
       type="number"
       min={0}
-      className="w-16 text-center"
+      className="w-8 text-center"
       value={value ?? ''}
       onChange={(e) => {
         const v = e.target.value
