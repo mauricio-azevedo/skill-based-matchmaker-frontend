@@ -126,12 +126,12 @@ const MatchesTab: FC = () => {
 
   /* ----------------------------- Render ---------------------------- */
   return (
-    <Card className="flex min-h-0 flex-col flex-1">
+    <Card>
       <CardHeader>
         <CardTitle>Matches</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex min-h-0 flex-col gap-6 p-6 flex-1">
+      <CardContent>
         {/* ------------------------ Controls ----------------------- */}
         <div className="flex flex-wrap items-end gap-4">
           <div className="grid w-32 gap-2">
@@ -154,8 +154,8 @@ const MatchesTab: FC = () => {
         </div>
 
         {/* ---------------------- Rounds list ---------------------- */}
-        <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="auto">
-          <ul className="h-full w-full flex flex-col gap-2 p-2">
+        <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="scroll">
+          <ul className="h-full w-full flex flex-col gap-2">
             {rounds.length === 0 ? (
               <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
             ) : (
@@ -165,7 +165,7 @@ const MatchesTab: FC = () => {
 
                   <ol className="flex flex-col gap-6 overflow-hidden flex-1">
                     {round.matches.map((m) => (
-                      <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm overflow-hidden flex-1">
+                      <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm overflow-hidden flex-1">
                         {/* Times + placar */}
                         <div className="flex flex-1 items-center gap-4">
                           {/* Team A */}

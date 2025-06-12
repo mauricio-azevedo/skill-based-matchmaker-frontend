@@ -33,12 +33,11 @@ const PlayersTab: FC = () => {
   }
 
   return (
-    <Card className="w-full max-w-sm min-h-0">
-      {' '}
+    <Card>
       <CardHeader>
         <CardTitle>Jogadores</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-10 min-h-0">
+      <CardContent>
         {/* Formulário de adição */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="grid gap-3">
@@ -74,7 +73,7 @@ const PlayersTab: FC = () => {
         </form>
 
         {/* Lista de jogadores */}
-        <ScrollArea className="min-h-0 flex-1 pr-1">
+        <ScrollArea className="min-h-0 flex-1" type="scroll">
           <LayoutGroup>
             <motion.ul layout initial={false} className="flex flex-col gap-3">
               <AnimatePresence initial={false}>

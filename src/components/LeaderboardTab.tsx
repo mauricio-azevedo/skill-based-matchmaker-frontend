@@ -147,13 +147,13 @@ const LeaderboardTab: FC = () => {
 
   /* ------------------------------ Render ---------------------------------- */
   return (
-    <Card className="flex min-h-0 flex-col">
+    <Card>
       <CardHeader>
         <CardTitle>Leaderboard</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex min-h-0 flex-col p-6">
-        <ScrollArea className="min-h-0 flex-1 pr-1">
+      <CardContent>
+        <ScrollArea className="min-h-0 flex-1" type="scroll">
           {rows.length === 0 ? (
             <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
           ) : (

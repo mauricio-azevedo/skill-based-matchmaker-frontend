@@ -67,7 +67,7 @@ export default function App() {
         </TabsList>
 
         {/* Conteúdo */}
-        <main className="container mx-auto flex h-full max-w-lg flex-col gap-8 px-4 py-8 flex-grow overflow-hidden">
+        <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden mt-2 items-center">
           <TabsContent value="players" asChild>
             <PlayersTab />
           </TabsContent>
