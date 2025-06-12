@@ -147,81 +147,79 @@ const LeaderboardTab: FC = () => {
 
   /* ------------------------------ Render ---------------------------------- */
   return (
-    <section className="container mx-auto flex h-full max-w-lg flex-col gap-8 px-4 py-8">
-      <Card className="flex min-h-0 flex-col">
-        <CardHeader>
-          <CardTitle>Leaderboard</CardTitle>
-        </CardHeader>
+    <Card className="flex min-h-0 flex-col">
+      <CardHeader>
+        <CardTitle>Leaderboard</CardTitle>
+      </CardHeader>
 
-        <CardContent className="flex min-h-0 flex-col p-6">
-          <ScrollArea className="min-h-0 flex-1 pr-1">
-            {rows.length === 0 ? (
-              <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
-            ) : (
-              <TooltipProvider delayDuration={200}>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-8">#</TableHead>
-                      <TableHead>Jogador</TableHead>
-                      <TableHead className="text-right">P</TableHead>
-                      <TableHead className="text-right">SV</TableHead>
-                      <TableHead className="text-right">SG</TableHead>
-                    </TableRow>
-                  </TableHeader>
+      <CardContent className="flex min-h-0 flex-col p-6">
+        <ScrollArea className="min-h-0 flex-1 pr-1">
+          {rows.length === 0 ? (
+            <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
+          ) : (
+            <TooltipProvider delayDuration={200}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-8">#</TableHead>
+                    <TableHead>Jogador</TableHead>
+                    <TableHead className="text-right">P</TableHead>
+                    <TableHead className="text-right">SV</TableHead>
+                    <TableHead className="text-right">SG</TableHead>
+                  </TableRow>
+                </TableHeader>
 
-                  <TableBody>
-                    {rows.map((p, idx) => {
-                      const tipSG = formatMiniSgTooltip(p, rows) // saldo de games
-                      const tipSV = formatMiniSvTooltip(p, rows) // saldo de vitórias
+                <TableBody>
+                  {rows.map((p, idx) => {
+                    const tipSG = formatMiniSgTooltip(p, rows) // saldo de games
+                    const tipSV = formatMiniSvTooltip(p, rows) // saldo de vitórias
 
-                      return (
-                        <TableRow key={p.id} className={idx === 0 ? 'font-bold' : ''}>
-                          <TableCell>{idx + 1}</TableCell>
-                          <TableCell>{p.name}</TableCell>
-                          <TableCell className="text-right">{p.P}</TableCell>
-                          <TableCell className="text-right">{p.SV}</TableCell>
-                          <TableCell className="text-right">{p.SG}</TableCell>
+                    return (
+                      <TableRow key={p.id} className={idx === 0 ? 'font-bold' : ''}>
+                        <TableCell>{idx + 1}</TableCell>
+                        <TableCell>{p.name}</TableCell>
+                        <TableCell className="text-right">{p.P}</TableCell>
+                        <TableCell className="text-right">{p.SV}</TableCell>
+                        <TableCell className="text-right">{p.SG}</TableCell>
 
-                          {/* tie icons */}
-                          {showTooltips && (
-                            <TableCell className="text-center">
-                              <span className="flex items-center justify-center gap-2">
-                                {p.miniSV !== undefined && p.miniSV !== 0 && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Info className="h-4 w-4 opacity-70" />
-                                    </TooltipTrigger>
-                                    <TooltipContent side="left" className="max-w-xs text-xs">
-                                      {tipSV}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
+                        {/* tie icons */}
+                        {showTooltips && (
+                          <TableCell className="text-center">
+                            <span className="flex items-center justify-center gap-2">
+                              {p.miniSV !== undefined && p.miniSV !== 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-4 w-4 opacity-70" />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="left" className="max-w-xs text-xs">
+                                    {tipSV}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
 
-                                {p.miniSG !== undefined && p.miniSG !== 0 && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Info className="h-4 w-4 opacity-70" />
-                                    </TooltipTrigger>
-                                    <TooltipContent side="left" className="max-w-xs text-xs">
-                                      {tipSG}
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </span>
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </TooltipProvider>
-            )}
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </section>
+                              {p.miniSG !== undefined && p.miniSG !== 0 && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Info className="h-4 w-4 opacity-70" />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="left" className="max-w-xs text-xs">
+                                    {tipSG}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </span>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </TooltipProvider>
+          )}
+        </ScrollArea>
+      </CardContent>
+    </Card>
   )
 }
 

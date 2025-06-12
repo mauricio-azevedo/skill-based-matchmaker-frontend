@@ -126,73 +126,71 @@ const MatchesTab: FC = () => {
 
   /* ----------------------------- Render ---------------------------- */
   return (
-    <section className="container mx-auto flex h-full max-w-lg flex-col gap-8 px-4 py-8">
-      <Card className="flex min-h-0 flex-col flex-1">
-        <CardHeader>
-          <CardTitle>Matches</CardTitle>
-        </CardHeader>
+    <Card className="flex min-h-0 flex-col flex-1">
+      <CardHeader>
+        <CardTitle>Matches</CardTitle>
+      </CardHeader>
 
-        <CardContent className="flex min-h-0 flex-col gap-6 p-6 flex-1">
-          {/* ------------------------ Controls ----------------------- */}
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="grid w-32 gap-2">
-              <Label htmlFor="courts">Quadras</Label>
-              <Input
-                id="courts"
-                type="number"
-                min={1}
-                value={courts}
-                onChange={(e) => setCourts(Number(e.target.value))}
-              />
-            </div>
-
-            <Button onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
-              Gerar
-            </Button>
-            <Button variant="secondary" onClick={handleClear} disabled={rounds.length === 0}>
-              Limpar
-            </Button>
+      <CardContent className="flex min-h-0 flex-col gap-6 p-6 flex-1">
+        {/* ------------------------ Controls ----------------------- */}
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="grid w-32 gap-2">
+            <Label htmlFor="courts">Quadras</Label>
+            <Input
+              id="courts"
+              type="number"
+              min={1}
+              value={courts}
+              onChange={(e) => setCourts(Number(e.target.value))}
+            />
           </div>
 
-          {/* ---------------------- Rounds list ---------------------- */}
-          <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="auto">
-            <ul className="h-full w-full flex flex-col gap-2 p-2">
-              {rounds.length === 0 ? (
-                <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
-              ) : (
-                rounds.map((round, idx) => (
-                  <article key={idx} className="flex flex-col pt-8 first:pt-0 flex-1">
-                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
+          <Button onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
+            Gerar
+          </Button>
+          <Button variant="secondary" onClick={handleClear} disabled={rounds.length === 0}>
+            Limpar
+          </Button>
+        </div>
 
-                    <ol className="flex flex-col gap-6 overflow-hidden flex-1">
-                      {round.matches.map((m) => (
-                        <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm overflow-hidden flex-1">
-                          {/* Times + placar */}
-                          <div className="flex flex-1 items-center gap-4">
-                            {/* Team A */}
-                            <TeamView title="Equipe A" players={m.teamA} isWinner={m.winner === 'A'} />
+        {/* ---------------------- Rounds list ---------------------- */}
+        <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="auto">
+          <ul className="h-full w-full flex flex-col gap-2 p-2">
+            {rounds.length === 0 ? (
+              <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
+            ) : (
+              rounds.map((round, idx) => (
+                <article key={idx} className="flex flex-col pt-8 first:pt-0 flex-1">
+                  <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
 
-                            {/* Placar */}
-                            <div className="flex flex-col items-center gap-1">
-                              <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
-                              <span className="font-bold">×</span>
-                              <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
-                            </div>
+                  <ol className="flex flex-col gap-6 overflow-hidden flex-1">
+                    {round.matches.map((m) => (
+                      <li key={m.id} className="rounded-2xl border bg-muted p-4 shadow-sm overflow-hidden flex-1">
+                        {/* Times + placar */}
+                        <div className="flex flex-1 items-center gap-4">
+                          {/* Team A */}
+                          <TeamView title="Equipe A" players={m.teamA} isWinner={m.winner === 'A'} />
 
-                            {/* Team B */}
-                            <TeamView title="Equipe B" players={m.teamA} isWinner={m.winner === 'B'} />
+                          {/* Placar */}
+                          <div className="flex flex-col items-center gap-1">
+                            <ScoreInput value={m.gamesA} onChange={(v) => setGames(idx, m.id, 'A', v)} />
+                            <span className="font-bold">×</span>
+                            <ScoreInput value={m.gamesB} onChange={(v) => setGames(idx, m.id, 'B', v)} />
                           </div>
-                        </li>
-                      ))}
-                    </ol>
-                  </article>
-                ))
-              )}
-            </ul>
-          </ScrollArea>
-        </CardContent>
-      </Card>
-    </section>
+
+                          {/* Team B */}
+                          <TeamView title="Equipe B" players={m.teamA} isWinner={m.winner === 'B'} />
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </article>
+              ))
+            )}
+          </ul>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   )
 }
 
