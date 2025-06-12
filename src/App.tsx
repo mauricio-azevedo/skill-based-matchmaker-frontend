@@ -27,11 +27,11 @@ export default function App() {
   }, [theme])
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden gap-4">
       {/* ---------- Header ---------- */}
       <header className="flex items-center border-b px-4 py-2">
         <h1 className="text-xl font-semibold tracking-tight">Skill-Based Matchmaker</h1>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-4">
           {/* Switch do shadcn controla o tema */}
           {/* Ícone do sol — fica mais “aceso” no modo claro */}
           <Sun
@@ -58,16 +58,9 @@ export default function App() {
       </header>
 
       {/* ---------- Tabs ---------- */}
-      <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden">
-        {/* Barra de triggers */}
-        <TabsList className="self-center mt-4">
-          <TabsTrigger value="players">Players</TabsTrigger>
-          <TabsTrigger value="matches">Matches</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-        </TabsList>
-
+      <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden gap-4">
         {/* Conteúdo */}
-        <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden mt-2 items-center">
+        <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center">
           <TabsContent value="players" asChild>
             <PlayersTab />
           </TabsContent>
@@ -78,6 +71,13 @@ export default function App() {
             <LeaderboardTab />
           </TabsContent>
         </main>
+
+        {/* Barra de triggers */}
+        <TabsList className="self-center">
+          <TabsTrigger value="players">Players</TabsTrigger>
+          <TabsTrigger value="matches">Matches</TabsTrigger>
+          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+        </TabsList>
       </Tabs>
 
       {/* ---------- Footer ---------- */}

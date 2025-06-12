@@ -75,7 +75,7 @@ const PlayersTab: FC = () => {
         {/* Lista de jogadores */}
         <ScrollArea className="min-h-0 flex-1" type="scroll">
           <LayoutGroup>
-            <motion.ul layout initial={false} className="flex flex-col gap-3">
+            <motion.ul layout initial={false} className="flex flex-col gap-3 flex-1">
               <AnimatePresence initial={false}>
                 {players.map((p) => (
                   <motion.li
