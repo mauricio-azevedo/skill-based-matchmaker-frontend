@@ -223,20 +223,22 @@ const LeaderboardTab: FC = () => {
           </TooltipProvider>
         )}
         {/* legenda simples para leigos */}
-        <div className="flex flex-col text-xs text-muted-foreground">
-          <p>
-            <b>P</b> = Pontos (3 por vitória)
-          </p>
-          <p>
-            <b>V-D</b> = Vitórias‑Derrotas
-          </p>
-          <p>
-            <b>SV</b> = Saldo de Vitórias
-          </p>
-          <p>
-            <b>SG</b> = Saldo de Games
-          </p>
-        </div>
+        {rows.length !== 0 && (
+          <div className="flex flex-col text-xs text-muted-foreground">
+            <p>
+              <b>P</b> = Pontos (3 por vitória)
+            </p>
+            <p>
+              <b>V-D</b> = Vitórias‑Derrotas
+            </p>
+            <p>
+              <b>SV</b> = Saldo de Vitórias
+            </p>
+            <p>
+              <b>SG</b> = Saldo de Games
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
