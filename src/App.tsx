@@ -8,23 +8,38 @@ import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'
 import { Moon, Sun, Settings } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-
-// Se você tiver copiado o ThemeProvider do boilerplate do shadcn,
-// descomente estas duas linhas e envolva o <App /> no ThemeProvider no entry (main.tsx).
-// import { ThemeProvider } from "@/components/theme-provider"
-//
-// <ThemeProvider>
-//    <App />
-// </ThemeProvider>
+import { toast } from 'sonner'
+import { useRounds } from '@/context/RoundsContext'
+import { usePlayers } from '@/context/PlayersContext'
 
 export default function App() {
-  // controla o modo; se preferir, troque por useTheme() do next-themes
+  // -----------------------------------------------------------
+  // Tema (poderia ser trocado por useTheme() do next-themes)
+  // -----------------------------------------------------------
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
-  // aplica a classe "dark" na <html> root
+  // Aplica a classe "dark" na <html> root
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
+
+  // -----------------------------------------------------------
+  // Action: limpar partidas
+  // -----------------------------------------------------------
+  const { clear: clearRounds } = useRounds()
+  const { updatePlayers } = usePlayers()
+
+  const handleClearRounds = () => {
+    clearRounds()
+    updatePlayers((prev) =>
+      prev.map((player) => ({
+        ...player,
+        matchCount: 0,
+        partnerCounts: {},
+      })),
+    )
+    toast.success('Todas as partidas apagadas!', { duration: 3000 })
+  }
 
   return (
     <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
@@ -32,7 +47,6 @@ export default function App() {
       <header className="flex items-center border-b px-4 py-2">
         <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
         <div className="ml-auto flex items-center gap-4">
-          {/* Switch do shadcn controla o tema */}
           {/* Ícone do sol — fica mais “aceso” no modo claro */}
           <Sun
             className="h-4 w-4 transition-opacity"
@@ -66,7 +80,10 @@ export default function App() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+              <DropdownMenuItem
+                onSelect={handleClearRounds}
+                className="text-destructive focus:text-destructive cursor-pointer"
+              >
                 Limpar partidas
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">

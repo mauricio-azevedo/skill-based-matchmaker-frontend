@@ -216,7 +216,7 @@ const MatchesTab: FC = () => {
   }, [])
 
   useEffect(() => {
-    // ao adicionar/limpar, selecione sempre a última existente
+    // ao adicionar, selecione sempre a última existente
     if (rounds.length === 0) {
       setSelectedRoundIndex(0)
     } else if (selectedRoundIndex > rounds.length - 1) {
@@ -272,18 +272,6 @@ const MatchesTab: FC = () => {
     } catch (error) {
       toast.error((error as Error).message, { duration: 6000 })
     }
-  }
-
-  const handleClear = () => {
-    clear()
-    updatePlayers((prev) =>
-      prev.map((player) => ({
-        ...player,
-        matchCount: 0,
-        partnerCounts: {},
-      })),
-    )
-    toast.success('Todas as rodadas apagadas!', { duration: 3000 })
   }
 
   // ---------------------------------------------------------------------------
@@ -353,10 +341,6 @@ const MatchesTab: FC = () => {
 
             {rounds.length > 0 && (
               <div className="flex gap-2">
-                <Button variant="destructive" onClick={handleClear} disabled={rounds.length === 0}>
-                  Limpar
-                </Button>
-
                 <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione..." />
