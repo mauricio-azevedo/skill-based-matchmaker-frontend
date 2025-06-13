@@ -99,9 +99,6 @@ const PlayersTab: FC = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {/*<Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">*/}
-                        {/*  Ativo*/}
-                        {/*</Label>*/}
                         <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
                       </div>
                     </div>
