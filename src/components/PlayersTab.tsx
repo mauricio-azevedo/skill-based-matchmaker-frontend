@@ -79,17 +79,17 @@ const PlayersTab: FC = () => {
         </ScrollArea>
 
         {/* Formulário de adição */}
-        <form onSubmit={handleSubmit} className="flex gap-3 items-center">
+        <form onSubmit={handleSubmit} className="flex gap-2 items-center">
           <div className="flex flex-col gap-2">
-            <div className="flex gap-3 flex-1">
-              <Label htmlFor="player-name" className="w-[2.25rem]">
+            <div className="flex gap-2 flex-1">
+              <Label htmlFor="player-name" className="w-[2.5rem]">
                 Nome
               </Label>
               <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
-            <div className="flex gap-3 flex-1">
-              <Label htmlFor="player-level" className="w-[2.25rem]">
+            <div className="flex gap-2 flex-1">
+              <Label htmlFor="player-level" className="w-[2.5rem]">
                 Nível
               </Label>
               <ToggleGroup
