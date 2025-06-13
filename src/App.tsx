@@ -1,5 +1,4 @@
-// App.tsx — versão que usa shadcn/ui
-// Pré-requisitos: shadcn add tabs switch button (e theme-provider, que já vem no template)
+// src/App.tsx
 
 import { useEffect, useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -7,7 +6,8 @@ import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
 import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'
-import { Moon, Sun } from 'lucide-react'
+import { Moon, Sun, Settings } from 'lucide-react'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 
 // Se você tiver copiado o ThemeProvider do boilerplate do shadcn,
 // descomente estas duas linhas e envolva o <App /> no ThemeProvider no entry (main.tsx).
@@ -54,6 +54,26 @@ export default function App() {
             aria-hidden="true"
             style={{ opacity: theme === 'dark' ? 1 : 0.25 }}
           />
+
+          {/* Botão de configuração com menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                aria-label="Configurações"
+                className="rounded-md p-2 transition hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+                Limpar partidas
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+                Limpar tudo
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
