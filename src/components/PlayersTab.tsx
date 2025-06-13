@@ -24,6 +24,7 @@ const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
+  const [courts, setCourts] = useState(1) // número de quadras
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -36,9 +37,27 @@ const PlayersTab: FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Jogadores</CardTitle>
+        <CardTitle>Setup</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col justify-between">
+      <CardContent className="flex flex-col justify-between !gap-0">
+        {/* Número de quadras */}
+        <div className="flex items-center gap-2 mb-3">
+          <Label htmlFor="court-count" className="w-[8rem]">
+            Número de quadras
+          </Label>
+          <Input
+            id="court-count"
+            type="number"
+            min={1}
+            value={courts}
+            onChange={(e) => setCourts(Number(e.target.value))}
+            className="max-w-[6rem]"
+          />
+        </div>
+
+        {/* Título Jogadores */}
+        <h2 className="text-lg font-semibold mb-2">Jogadores</h2>
+
         {/* Lista de jogadores */}
         {players.length === 0 ? (
           <p className="italic text-muted-foreground">Adicione pelo menos 4 jogadores.</p>
@@ -83,7 +102,7 @@ const PlayersTab: FC = () => {
         )}
 
         {/* Formulário de adição */}
-        <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+        <form onSubmit={handleSubmit} className="flex gap-2 items-center mt-4">
           <div className="flex flex-col gap-2">
             <div className="flex gap-2 flex-1">
               <Label htmlFor="player-name" className="w-[2.5rem]">
