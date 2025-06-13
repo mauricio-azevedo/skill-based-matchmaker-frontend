@@ -78,7 +78,7 @@ const PlayersTab: FC = () => {
         </ScrollArea>
 
         {/* Formulário de adição */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
           <div className="flex gap-2">
             <div className="grid gap-3 flex-1">
               <Label htmlFor="player-name">Nome</Label>
