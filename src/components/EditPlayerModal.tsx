@@ -61,7 +61,7 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Editar jogador</DialogTitle>
           <DialogDescription>{player.name}</DialogDescription>
