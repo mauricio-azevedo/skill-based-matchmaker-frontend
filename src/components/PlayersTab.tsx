@@ -38,45 +38,49 @@ const PlayersTab: FC = () => {
       <CardHeader>
         <CardTitle>Jogadores</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col justify-between">
         {/* Lista de jogadores */}
-        <ScrollArea className="min-h-0 flex-1" type="scroll">
-          <LayoutGroup>
-            <motion.ul layout initial={false} className="flex flex-col gap-3 flex-1">
-              <AnimatePresence initial={false}>
-                {players.map((p) => (
-                  <motion.li
-                    key={p.id}
-                    layout="position"
-                    variants={itemVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={spring}
-                    className="flex items-center"
-                  >
-                    {/* cartão interno */}
-                    <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center">
-                          <p className="font-medium text-sm">{p.name}</p>
-                          <Badge variant="secondary" className="ml-2 text-xs">
-                            Nív. {p.level}
-                          </Badge>
+        {players.length === 0 ? (
+          <p className="italic text-muted-foreground">Adicione pelo menos 4 jogadores.</p>
+        ) : (
+          <ScrollArea className="min-h-0 flex-1" type="scroll">
+            <LayoutGroup>
+              <motion.ul layout initial={false} className="flex flex-col gap-3 flex-1">
+                <AnimatePresence initial={false}>
+                  {players.map((p) => (
+                    <motion.li
+                      key={p.id}
+                      layout="position"
+                      variants={itemVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={spring}
+                      className="flex items-center"
+                    >
+                      {/* cartão interno */}
+                      <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center">
+                            <p className="font-medium text-sm">{p.name}</p>
+                            <Badge variant="secondary" className="ml-2 text-xs">
+                              Nív. {p.level}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
-                      </div>
-                    </div>
-                    {/* trigger do modal de edição */}
-                    <EditPlayerModal player={p} />
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </motion.ul>
-          </LayoutGroup>
-        </ScrollArea>
+                      {/* trigger do modal de edição */}
+                      <EditPlayerModal player={p} />
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </motion.ul>
+            </LayoutGroup>
+          </ScrollArea>
+        )}
 
         {/* Formulário de adição */}
         <form onSubmit={handleSubmit} className="flex gap-2 items-center">
