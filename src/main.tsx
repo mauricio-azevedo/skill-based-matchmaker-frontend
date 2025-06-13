@@ -9,7 +9,7 @@ createRoot(document.getElementById('root')!).render(
   <PlayersProvider>
     <RoundsProvider>
       <App />
-      <Toaster />
+      <Toaster position="top-center" />
     </RoundsProvider>
   </PlayersProvider>,
 )
