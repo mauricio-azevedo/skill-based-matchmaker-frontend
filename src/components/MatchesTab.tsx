@@ -437,7 +437,7 @@ const MatchesTab: FC = () => {
               Embaralhar
             </Button>
             <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
-              Gerar
+              Nova rodada
             </Button>
           </div>
         </CardFooter>
