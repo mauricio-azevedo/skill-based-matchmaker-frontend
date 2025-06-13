@@ -109,7 +109,7 @@ const PlayersTab: FC = () => {
 
         {/* Formulário de adição */}
         <form onSubmit={handleSubmit} className="flex gap-2 items-center mt-4">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 flex-1">
             <div className="flex gap-2 flex-1">
               <Label htmlFor="player-name" className="w-[2.5rem]">
                 Nome
