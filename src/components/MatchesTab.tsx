@@ -66,13 +66,6 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
   })
 }
 
-/**
- * Helper to know if *any* match across all rounds already has a recorded score.
- */
-function hasRecordedResults(rounds: ReturnType<typeof useRounds>['rounds']) {
-  return rounds.some((r) => r.matches.some((m) => m.gamesA !== null || m.gamesB !== null))
-}
-
 // -----------------------------------------------------------------------------
 // Custom hook: useLocalStorage
 // -----------------------------------------------------------------------------
@@ -287,18 +280,6 @@ const MatchesTab: FC = () => {
     }
   }
 
-  /**
-   * Public handler attached to the Shuffle button.
-   * If *any* match already has a result, we ask for confirmation first.
-   */
-  const handleShuffle = () => {
-    if (hasRecordedResults(rounds)) {
-      setConfirmShuffleOpen(true)
-    } else {
-      doShuffle()
-    }
-  }
-
   // ---------------------------------------------------------------------------
   // Handlers – Scores
   // ---------------------------------------------------------------------------
@@ -471,7 +452,7 @@ const MatchesTab: FC = () => {
             <Button
               className="flex-1 max-w-fit"
               variant="ghost"
-              onClick={handleShuffle}
+              onClick={doShuffle}
               disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
             >
               <Shuffle size={14} aria-hidden="true" />
