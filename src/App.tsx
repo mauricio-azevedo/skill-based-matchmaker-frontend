@@ -24,7 +24,7 @@ export default function App() {
   }, [theme])
 
   // -----------------------------------------------------------
-  // Action: limpar partidas
+  // Actions: limpar partidas e limpar tudo
   // -----------------------------------------------------------
   const { clear: clearRounds } = useRounds()
   const { updatePlayers } = usePlayers()
@@ -39,6 +39,12 @@ export default function App() {
       })),
     )
     toast.success('Todas as partidas apagadas!', { duration: 3000 })
+  }
+
+  const handleClearAll = () => {
+    clearRounds()
+    updatePlayers(() => []) // remove todos os jogadores
+    toast.success('Todos os dados apagados!', { duration: 3000 })
   }
 
   return (
@@ -86,7 +92,10 @@ export default function App() {
               >
                 Limpar partidas
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive focus:text-destructive cursor-pointer">
+              <DropdownMenuItem
+                onSelect={handleClearAll}
+                className="text-destructive focus:text-destructive cursor-pointer"
+              >
                 Limpar tudo
               </DropdownMenuItem>
             </DropdownMenuContent>
