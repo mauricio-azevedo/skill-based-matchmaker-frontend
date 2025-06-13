@@ -24,6 +24,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
+import { buttonVariants } from '@/components/ui/button'
 
 export default function App() {
   // -----------------------------------------------------------
@@ -39,8 +40,12 @@ export default function App() {
   // -----------------------------------------------------------
   // Actions: limpar partidas e limpar tudo
   // -----------------------------------------------------------
-  const { clear: clearRounds } = useRounds()
-  const { updatePlayers } = usePlayers()
+  const { rounds, clear: clearRounds } = useRounds()
+  const { players, updatePlayers } = usePlayers()
+
+  const hasRounds = rounds.length > 0
+  const hasPlayers = players.length > 0
+  const noData = !hasRounds && !hasPlayers
 
   const handleClearRounds = () => {
     clearRounds()
@@ -101,7 +106,7 @@ export default function App() {
             <DropdownMenuContent align="end">
               {/* ---------- Confirmação para limpar partidas ---------- */}
               <AlertDialog>
-                <AlertDialogTrigger asChild>
+                <AlertDialogTrigger disabled={!hasRounds} asChild>
                   <DropdownMenuItem
                     // Evita que o Dropdown feche antes do diálogo abrir
                     onSelect={(e) => e.preventDefault()}
@@ -119,14 +124,19 @@ export default function App() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleClearRounds}>Confirmar</AlertDialogAction>
+                    <AlertDialogAction
+                      className={buttonVariants({ variant: 'destructive' })}
+                      onClick={handleClearRounds}
+                    >
+                      Confirmar
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
 
               {/* ---------- Confirmação para limpar tudo ---------- */}
               <AlertDialog>
-                <AlertDialogTrigger asChild>
+                <AlertDialogTrigger disabled={noData} asChild>
                   <DropdownMenuItem
                     onSelect={(e) => e.preventDefault()}
                     className="text-destructive focus:text-destructive cursor-pointer"
@@ -143,7 +153,9 @@ export default function App() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleClearAll}>Confirmar</AlertDialogAction>
+                    <AlertDialogAction className={buttonVariants({ variant: 'destructive' })} onClick={handleClearAll}>
+                      Confirmar
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
