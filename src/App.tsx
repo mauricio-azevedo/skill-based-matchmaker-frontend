@@ -27,7 +27,7 @@ export default function App() {
   }, [theme])
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden gap-4">
+    <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
       {/* ---------- Header ---------- */}
       <header className="flex items-center border-b px-4 py-2">
         <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
@@ -58,7 +58,7 @@ export default function App() {
       </header>
 
       {/* ---------- Tabs ---------- */}
-      <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden gap-4">
+      <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden gap-2">
         {/* Conteúdo */}
         <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center">
           <TabsContent value="players" asChild>
