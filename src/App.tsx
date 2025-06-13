@@ -30,7 +30,7 @@ export default function App() {
     <div className="flex flex-col h-screen overflow-hidden gap-4">
       {/* ---------- Header ---------- */}
       <header className="flex items-center border-b px-4 py-2">
-        <h1 className="text-xl font-semibold tracking-tight">Skill-Based Matchmaker</h1>
+        <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
         <div className="ml-auto flex items-center gap-4">
           {/* Switch do shadcn controla o tema */}
           {/* Ícone do sol — fica mais “aceso” no modo claro */}
