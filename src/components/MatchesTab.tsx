@@ -420,7 +420,7 @@ const MatchesTab: FC = () => {
               onClick={handleShuffle}
               disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
             >
-              <Shuffle size={14} className="mr-2" aria-hidden="true" />
+              <Shuffle size={14} aria-hidden="true" />
               <span>Embaralhar</span>
             </Button>
             <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
