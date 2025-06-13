@@ -454,7 +454,7 @@ interface TeamViewProps {
 }
 
 const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
-  <div className={cn('flex flex-1 items-center gap-4', team === 'B' && 'justify-end')}>
+  <div className={cn('flex flex-1 items-center gap-4 justify-end', team === 'A' && 'justify-end flex-row-reverse')}>
     {/* crown replaces the old green ring */}
     {isWinner && (
       <div>
