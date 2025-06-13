@@ -1,5 +1,5 @@
 // src/components/PlayersTab.tsx
-import { useState, type FC, type FormEvent } from 'react'
+import { useState, type FC, type FormEvent, useRef } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -24,7 +24,9 @@ const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
-  const [courts, setCourts] = useState(1) // número de quadras
+  const [courts, setCourts] = useState(1)
+
+  const nameInputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -32,6 +34,7 @@ const PlayersTab: FC = () => {
     if (!trimmed) return
     add(trimmed, level)
     setName('')
+    queueMicrotask(() => nameInputRef.current?.focus())
   }
 
   return (
@@ -106,7 +109,7 @@ const PlayersTab: FC = () => {
               <Label htmlFor="player-name" className="w-[2.5rem]">
                 Nome
               </Label>
-              <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
+              <Input ref={nameInputRef} id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
             <div className="flex gap-2 flex-1">
@@ -126,6 +129,13 @@ const PlayersTab: FC = () => {
                     value={lvl.toString()}
                     aria-label={`Level ${lvl}`}
                     className="w-8 justify-center"
+                    onMouseDown={(e) => e.preventDefault()} // ★ keeps current focus
+                    onClick={() => {
+                      setLevel(lvl)
+                      // iOS sometimes closes the keyboard before the click bubbles,
+                      // so force-refocus in the next tick:
+                      queueMicrotask(() => nameInputRef.current?.focus())
+                    }}
                   >
                     {lvl}
                   </ToggleGroupItem>
@@ -134,7 +144,12 @@ const PlayersTab: FC = () => {
             </div>
           </div>
 
-          <Button size="icon" className="rounded-full">
+          <Button
+            size="icon"
+            className="rounded-full"
+            onMouseDown={(e) => e.preventDefault()} // ★ don't steal focus
+            type="submit"
+          >
             <Plus className="h-4 w-4" />
           </Button>
         </form>
