@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
-import { Plus } from 'lucide-react'
+import { Plus, Minus } from 'lucide-react'
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.9, y: 12 },
@@ -46,14 +46,41 @@ const PlayersTab: FC = () => {
         {/* Número de quadras */}
         <div className="flex items-center gap-2 mb-3">
           <Label htmlFor="court-count">Número de quadras</Label>
-          <Input
-            id="court-count"
-            type="number"
-            min={1}
-            value={courts}
-            onChange={(e) => setCourts(Number(e.target.value))}
-            className="max-w-[6rem]"
-          />
+          <div className="flex items-center gap-1">
+            {/* Botão de diminuir */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onMouseDown={(e) => e.preventDefault()} // mantém o foco atual
+              onClick={() => setCourts((prev) => Math.max(1, prev - 1))}
+              aria-label="Diminuir número de quadras"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+
+            {/* Campo numérico (também permite digitação direta) */}
+            <Input
+              id="court-count"
+              type="number"
+              min={1}
+              value={courts}
+              onChange={(e) => setCourts(Math.max(1, Number(e.target.value)))}
+              className="w-12 text-center"
+            />
+
+            {/* Botão de aumentar */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onMouseDown={(e) => e.preventDefault()} // mantém o foco atual
+              onClick={() => setCourts((prev) => prev + 1)}
+              aria-label="Aumentar número de quadras"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Título Jogadores */}
