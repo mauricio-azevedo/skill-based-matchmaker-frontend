@@ -320,10 +320,7 @@ const MatchesTab: FC = () => {
           <DialogHeader>
             <DialogTitle>Embaralhar rodadas?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm">
-            Algumas partidas já possuem placares registrados. Embaralhar apagará esses resultados da última rodada.
-            Deseja continuar?
-          </p>
+          <p className="text-sm">Tem certeza que deseja embaralhar a rodada atual?</p>
           <DialogFooter className="pt-4">
             <Button variant="secondary" onClick={() => setConfirmShuffleOpen(false)}>
               Cancelar
@@ -452,7 +449,7 @@ const MatchesTab: FC = () => {
             <Button
               className="flex-1 max-w-fit"
               variant="ghost"
-              onClick={doShuffle}
+              onClick={() => setConfirmShuffleOpen(true)}
               disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
             >
               <Shuffle size={14} aria-hidden="true" />
