@@ -12,6 +12,19 @@ import { toast } from 'sonner'
 import { useRounds } from '@/context/RoundsContext'
 import { usePlayers } from '@/context/PlayersContext'
 
+// ✨ NEW: AlertDialog components for confirmation
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
+
 export default function App() {
   // -----------------------------------------------------------
   // Tema (poderia ser trocado por useTheme() do next-themes)
@@ -86,18 +99,54 @@ export default function App() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onSelect={handleClearRounds}
-                className="text-destructive focus:text-destructive cursor-pointer"
-              >
-                Limpar partidas
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={handleClearAll}
-                className="text-destructive focus:text-destructive cursor-pointer"
-              >
-                Limpar tudo
-              </DropdownMenuItem>
+              {/* ---------- Confirmação para limpar partidas ---------- */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    // Evita que o Dropdown feche antes do diálogo abrir
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-destructive focus:text-destructive cursor-pointer"
+                  >
+                    Limpar partidas
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Limpar todas as partidas?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação apagará todos os registros de partidas. Você tem certeza?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearRounds}>Confirmar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              {/* ---------- Confirmação para limpar tudo ---------- */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-destructive focus:text-destructive cursor-pointer"
+                  >
+                    Limpar tudo
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Limpar todos os dados?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearAll}>Confirmar</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
