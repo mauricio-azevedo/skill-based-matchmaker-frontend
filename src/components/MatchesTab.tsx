@@ -108,9 +108,10 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
   const renderScoreToggle = (value: number | null, onChange: (v: number) => void) => (
     <ToggleGroup
       type="single"
-      value={value !== null ? String(value) : undefined}
-      onValueChange={(val: string) => {
-        if (val === '') return
+      /* antes: undefined => “uncontrolled”  */
+      value={value !== null ? String(value) : ''} // <= string vazia zera o estado
+      onValueChange={(val) => {
+        if (!val) return // val === '' quando o user desmarca
         onChange(Number(val))
       }}
       className="grid grid-cols-7 gap-1 w-full"
@@ -319,6 +320,7 @@ const MatchesTab: FC = () => {
     <>
       {/* Modal primeiro para ficar fora do fluxo do Card */}
       <ScoreModal
+        key={modalState.matchId} // força unmount/mount ao trocar de partida
         open={modalState.open}
         onClose={() => setModalState((p) => ({ ...p, open: false }))}
         initialScoreA={modalState.initialA}
