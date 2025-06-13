@@ -79,9 +79,6 @@ export default function App() {
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
       </Tabs>
-
-      {/* ---------- Footer ---------- */}
-      <footer className="border-t p-4 text-center text-xs opacity-60">© 2025 Skill-Based Matchmaker</footer>
     </div>
   )
 }
