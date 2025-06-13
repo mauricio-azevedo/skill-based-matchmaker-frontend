@@ -27,7 +27,7 @@ export default function App() {
   }, [theme])
 
   return (
-    <div className="flex flex-col max-h-dvh overflow-hidden gap-4">
+    <div className="flex flex-col h-dvh overflow-hidden gap-4">
       {/* ---------- Header ---------- */}
       <header className="flex items-center border-b px-4 py-2">
         <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
