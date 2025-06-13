@@ -43,9 +43,7 @@ const PlayersTab: FC = () => {
         <div className="flex flex-col">
           {/* Número de quadras */}
           <div className="flex items-center gap-2 mb-3">
-            <Label htmlFor="court-count" className="w-[8rem]">
-              Número de quadras
-            </Label>
+            <Label htmlFor="court-count">Número de quadras</Label>
             <Input
               id="court-count"
               type="number"
