@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "moduleResolution": "node",
+//    "moduleResolution": "node",
     "module": "esnext",
     // lookup packages like Node does
     "resolveJsonModule": true,
@@ -15,8 +15,11 @@
     "paths": {                   // ← novo
       "@/*": ["src/*"]
     },
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react"
+//    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "moduleResolution": "bundler", // evita o erro do @tailwindcss/vite
+    "verbatimModuleSyntax": true,  // mantenha, mas conserte os imports (passo 2)
+    "allowSyntheticDefaultImports": true, // destrava o import de 'path'
   },
   "include": [
     "src/**/*",
