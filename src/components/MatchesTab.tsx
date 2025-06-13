@@ -372,20 +372,18 @@ const MatchesTab: FC = () => {
             </div>
 
             {rounds.length > 0 && (
-              <div className="flex gap-2">
-                <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {rounds.map((_, idx) => (
-                      <SelectItem key={idx} value={String(idx)}>
-                        Rodada {idx + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {rounds.map((_, idx) => (
+                    <SelectItem key={idx} value={String(idx)}>
+                      Rodada {idx + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
 
