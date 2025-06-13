@@ -91,12 +91,12 @@ const PlayersTab: FC = () => {
                     {/* cartão interno */}
                     <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
                       <div className="flex items-center gap-4">
-                        <span className="font-medium leading-none">
-                          {p.name}
-                          <Badge variant="secondary" className="ml-2">
-                            Lv {p.level}
+                        <div className="flex items-center">
+                          <p className="font-medium text-sm">{p.name}</p>
+                          <Badge variant="secondary" className="ml-2 text-xs">
+                            Nív. {p.level}
                           </Badge>
-                        </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {/*<Label htmlFor={`active-${p.id}`} className="text-sm opacity-70">*/}

@@ -380,34 +380,35 @@ const MatchesTab: FC = () => {
                 (() => {
                   const round = rounds[selectedRoundIndex]
                   return (
-                    <article className="flex flex-col flex-1 gap-2">
+                    <article className="flex flex-col flex-1 gap-6">
                       <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
                         Rodada {selectedRoundIndex + 1}
                       </h2>
-                      <ol className="flex flex-col gap-6 overflow-hidden flex-1">
+                      <ol className="flex flex-col gap-10 flex-1">
                         {round.matches.map((m) => {
                           const hasScore = m.gamesA !== null && m.gamesB !== null
                           return (
-                            <li
-                              key={m.id}
-                              className="rounded-2xl border bg-muted px-3 py-4 shadow-sm overflow-hidden flex-1"
-                            >
+                            <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
                               {/* Times + placar */}
                               <div className="flex flex-1 items-center gap-4">
                                 <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                                <div
-                                  className="flex flex-col items-center gap-1"
-                                  onClick={() => openScoreModalFor(m.id)}
-                                >
+                                <div className="flex flex-col items-center gap-1">
                                   {!hasScore && (
-                                    <Button size="sm" variant="ghost">
-                                      Inserir placar
+                                    <Button
+                                      size="sm"
+                                      variant="secondary"
+                                      className="absolute -top-1/4 border"
+                                      onClick={() => openScoreModalFor(m.id)}
+                                    >
+                                      <p className="text-xs">Inserir placar</p>
                                     </Button>
                                   )}
-                                  {hasScore && (
+                                  {hasScore ? (
                                     <span className="text-sm font-medium">
                                       {m.gamesA} × {m.gamesB}
                                     </span>
+                                  ) : (
+                                    <span className="text-sm font-medium">×</span>
                                   )}
                                 </div>
                                 <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
@@ -467,10 +468,10 @@ const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
       </div>
     )}
 
-    <div className="flex flex-col max-w-full">
+    <div className="flex flex-col max-w-full gap-1">
       {players.map((p) => (
         <div key={p.id} className={cn('flex items-end gap-2 text-base', team === 'B' && 'justify-end')}>
-          <p>{p.name}</p>
+          <p className="text-sm font-medium">{p.name}</p>
         </div>
       ))}
     </div>

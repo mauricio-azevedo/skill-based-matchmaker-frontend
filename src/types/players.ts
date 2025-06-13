@@ -34,6 +34,10 @@ export interface PlayerLBRow extends Player {
   P: number
   SV: number
   SG: number
+  /** vitórias totais */
+  W: number
+  /** derrotas totais */
+  L: number
   /** saldo de vitórias interno dentro do bloco empatado (undefined se não houver empate) */
   miniSV?: number
   /** saldo de games interno dentro do bloco empatado (undefined se não houver empate) */

@@ -10,7 +10,6 @@ import type { PlayerLBRow } from '@/types/players'
 // shadcn/ui
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 /* -------------------------------------------------------------------------- */
@@ -88,7 +87,7 @@ const LeaderboardTab: FC = () => {
     const P = W * 3
     const SV = W - L
     const SG = GP - GC
-    return { ...p, P, SV, SG }
+    return { ...p, P, SV, SG, W, L }
   })
 
   /* --------------------------- Sort helpers -------------------------------- */
@@ -153,71 +152,91 @@ const LeaderboardTab: FC = () => {
       </CardHeader>
 
       <CardContent>
-        <ScrollArea className="min-h-0 flex-1" type="scroll">
-          {rows.length === 0 ? (
-            <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
-          ) : (
-            <TooltipProvider delayDuration={200}>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-8">#</TableHead>
-                    <TableHead>Jogador</TableHead>
-                    <TableHead className="text-right">P</TableHead>
-                    <TableHead className="text-right">SV</TableHead>
-                    <TableHead className="text-right">SG</TableHead>
-                  </TableRow>
-                </TableHeader>
+        {rows.length === 0 ? (
+          <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
+        ) : (
+          <TooltipProvider delayDuration={200}>
+            <Table>
+              <TableHeader>
+                <TableRow
+                  className="sticky top-0 z-20 bg-card/90 backdrop-blur
+                     supports-[backdrop-filter]:bg-card/60"
+                >
+                  <TableHead className="w-8">#</TableHead>
+                  <TableHead>Jogador</TableHead>
+                  <TableHead className="text-right">P</TableHead>
+                  <TableHead className="text-right">V-D</TableHead>
+                  <TableHead className="text-right">SV</TableHead>
+                  <TableHead className="text-right">SG</TableHead>
+                </TableRow>
+              </TableHeader>
 
-                <TableBody>
-                  {rows.map((p, idx) => {
-                    const tipSG = formatMiniSgTooltip(p, rows) // saldo de games
-                    const tipSV = formatMiniSvTooltip(p, rows) // saldo de vitórias
+              <TableBody>
+                {rows.map((p, idx) => {
+                  const tipSG = formatMiniSgTooltip(p, rows) // saldo de games
+                  const tipSV = formatMiniSvTooltip(p, rows) // saldo de vitórias
 
-                    return (
-                      <TableRow key={p.id} className={idx === 0 ? 'font-bold' : ''}>
-                        <TableCell>{idx + 1}</TableCell>
-                        <TableCell>{p.name}</TableCell>
-                        <TableCell className="text-right">{p.P}</TableCell>
-                        <TableCell className="text-right">{p.SV}</TableCell>
-                        <TableCell className="text-right">{p.SG}</TableCell>
+                  return (
+                    <TableRow key={p.id} className={idx === 0 ? 'font-bold' : ''}>
+                      <TableCell>{idx + 1}</TableCell>
+                      <TableCell>{p.name}</TableCell>
+                      <TableCell className="text-right">{p.P}</TableCell>
+                      <TableCell className="text-right">
+                        {p.W}-{p.L}
+                      </TableCell>
+                      <TableCell className="text-right">{p.SV}</TableCell>
+                      <TableCell className="text-right">{p.SG}</TableCell>
 
-                        {/* tie icons */}
-                        {showTooltips && (
-                          <TableCell className="text-center">
-                            <span className="flex items-center justify-center gap-2">
-                              {p.miniSV !== undefined && p.miniSV !== 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Info className="h-4 w-4 opacity-70" />
-                                  </TooltipTrigger>
-                                  <TooltipContent side="left" className="max-w-xs text-xs">
-                                    {tipSV}
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
+                      {/* tie icons */}
+                      {showTooltips && (
+                        <TableCell className="text-center">
+                          <span className="flex items-center justify-center gap-2">
+                            {p.miniSV !== undefined && p.miniSV !== 0 && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 opacity-70" />
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs text-xs">
+                                  {tipSV}
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
 
-                              {p.miniSG !== undefined && p.miniSG !== 0 && (
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Info className="h-4 w-4 opacity-70" />
-                                  </TooltipTrigger>
-                                  <TooltipContent side="left" className="max-w-xs text-xs">
-                                    {tipSG}
-                                  </TooltipContent>
-                                </Tooltip>
-                              )}
-                            </span>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TooltipProvider>
-          )}
-        </ScrollArea>
+                            {p.miniSG !== undefined && p.miniSG !== 0 && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 opacity-70" />
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs text-xs">
+                                  {tipSG}
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </span>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          </TooltipProvider>
+        )}
+        {/* legenda simples para leigos */}
+        <div className="flex flex-col text-xs text-muted-foreground">
+          <p>
+            <b>P</b> = Pontos (3 por vitória)
+          </p>
+          <p>
+            <b>V-D</b> = Vitórias‑Derrotas
+          </p>
+          <p>
+            <b>SV</b> = Saldo de Vitórias
+          </p>
+          <p>
+            <b>SG</b> = Saldo de Games
+          </p>
+        </div>
       </CardContent>
     </Card>
   )
