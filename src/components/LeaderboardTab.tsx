@@ -151,7 +151,7 @@ const LeaderboardTab: FC = () => {
         <CardTitle>Leaderboard</CardTitle>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="justify-between">
         {rows.length === 0 ? (
           <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
         ) : (
