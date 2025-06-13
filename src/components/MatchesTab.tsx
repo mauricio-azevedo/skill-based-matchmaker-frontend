@@ -66,6 +66,13 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
   })
 }
 
+/**
+ * Helper to know if *any* match across all rounds already has a recorded score.
+ */
+function hasRecordedResults(rounds: ReturnType<typeof useRounds>['rounds']) {
+  return rounds.some((r) => r.matches.some((m) => m.gamesA !== null || m.gamesB !== null))
+}
+
 // -----------------------------------------------------------------------------
 // Custom hook: useLocalStorage
 // -----------------------------------------------------------------------------
@@ -201,6 +208,9 @@ const MatchesTab: FC = () => {
     namesB: [],
   })
 
+  // New: confirmation dialog state ------------------------------------------------
+  const [confirmShuffleOpen, setConfirmShuffleOpen] = useState(false)
+
   // ---------------------------------------------------------------------------
   // Effects
   // ---------------------------------------------------------------------------
@@ -244,7 +254,10 @@ const MatchesTab: FC = () => {
     }
   }
 
-  const handleShuffle = () => {
+  /**
+   * *Actual* shuffle logic extracted so we can call it after confirmation.
+   */
+  const doShuffle = () => {
     if (players.length < PLAYERS_PER_MATCH) return
 
     if (rounds.length === 0) {
@@ -271,6 +284,18 @@ const MatchesTab: FC = () => {
       toast.success('Rodada embaralhada!', { duration: 3000 })
     } catch (error) {
       toast.error((error as Error).message, { duration: 6000 })
+    }
+  }
+
+  /**
+   * Public handler attached to the Shuffle button.
+   * If *any* match already has a result, we ask for confirmation first.
+   */
+  const handleShuffle = () => {
+    if (hasRecordedResults(rounds)) {
+      setConfirmShuffleOpen(true)
+    } else {
+      doShuffle()
     }
   }
 
@@ -306,7 +331,36 @@ const MatchesTab: FC = () => {
   // ---------------------------------------------------------------------------
   return (
     <>
-      {/* Modal primeiro para ficar fora do fluxo do Card */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Confirmation dialog for shuffling with existing results            */}
+      {/* ------------------------------------------------------------------ */}
+      <Dialog open={confirmShuffleOpen} onOpenChange={setConfirmShuffleOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Embaralhar rodadas?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm">
+            Algumas partidas já possuem placares registrados. Embaralhar apagará esses resultados da última rodada.
+            Deseja continuar?
+          </p>
+          <DialogFooter className="pt-4">
+            <Button variant="secondary" onClick={() => setConfirmShuffleOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setConfirmShuffleOpen(false)
+                doShuffle()
+              }}
+            >
+              Continuar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para inserir placar */}
       <ScoreModal
         key={modalState.matchId} // força unmount/mount ao trocar de partida
         open={modalState.open}
