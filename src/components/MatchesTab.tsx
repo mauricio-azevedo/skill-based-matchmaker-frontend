@@ -134,7 +134,7 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Inserir placar</DialogTitle>
+          <DialogTitle>Inserir resultado</DialogTitle>
         </DialogHeader>
 
         {/* ---------- Nomes das duplas ---------- */}
