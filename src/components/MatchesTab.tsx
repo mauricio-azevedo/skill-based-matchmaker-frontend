@@ -268,7 +268,7 @@ const MatchesTab: FC = () => {
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
       setSelectedRoundIndex(remainingRounds.length)
-      toast.success('Rodada embaralhada com sucesso!', { duration: 3000 })
+      toast.success('Rodada embaralhada!', { duration: 3000 })
     } catch (error) {
       toast.error((error as Error).message, { duration: 6000 })
     }
