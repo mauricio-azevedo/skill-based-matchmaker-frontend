@@ -387,8 +387,8 @@ const MatchesTab: FC = () => {
                                         variant="secondary"
                                         onClick={() => openScoreModalFor(m.id)}
                                       >
-                                        <p className="text-xs leading-[normal]">Resultado</p>
                                         <Edit size={8} />
+                                        <span className="text-xs">Resultado</span>
                                       </Button>
                                     ) : (
                                       <Button className="border" size="sm" variant="secondary">
