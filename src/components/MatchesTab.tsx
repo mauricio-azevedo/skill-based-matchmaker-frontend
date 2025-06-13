@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
-import { Crown } from 'lucide-react'
+import { Crown, Edit, X } from 'lucide-react'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -393,23 +393,25 @@ const MatchesTab: FC = () => {
                               <div className="flex flex-1 items-center gap-4">
                                 <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
                                 <div className="flex flex-col items-center gap-1">
-                                  {!hasScore && (
-                                    <Button
-                                      size="sm"
-                                      variant="secondary"
-                                      className="absolute -top-1/4 border"
-                                      onClick={() => openScoreModalFor(m.id)}
-                                    >
-                                      <p className="text-xs">Inserir placar</p>
-                                    </Button>
-                                  )}
-                                  {hasScore ? (
-                                    <span className="text-sm font-medium">
-                                      {m.gamesA} × {m.gamesB}
-                                    </span>
-                                  ) : (
-                                    <span className="text-sm font-medium">×</span>
-                                  )}
+                                  <div className="absolute -top-1/4 items-center flex">
+                                    {!hasScore ? (
+                                      <Button
+                                        className="border"
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => openScoreModalFor(m.id)}
+                                      >
+                                        <p className="text-xs leading-[normal]">Resultado</p>
+                                        <Edit size={8} />
+                                      </Button>
+                                    ) : (
+                                      <Button className="border" size="sm" variant="secondary">
+                                        {m.gamesA} × {m.gamesB}
+                                      </Button>
+                                    )}
+                                  </div>
+
+                                  <X size={14} />
                                 </div>
                                 <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
                               </div>
