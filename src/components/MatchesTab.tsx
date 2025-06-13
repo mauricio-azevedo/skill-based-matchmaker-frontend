@@ -356,21 +356,9 @@ const MatchesTab: FC = () => {
           <CardTitle>Partidas</CardTitle>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="!gap-2">
           {/* ------------------------ Controls ----------------------- */}
-          <div className="flex flex-wrap items-end gap-4 justify-between">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="courts">Quadras</Label>
-              <Input
-                className="w-16"
-                id="courts"
-                type="number"
-                min={1}
-                value={courts}
-                onChange={(e) => setCourts(Number(e.target.value))}
-              />
-            </div>
-
+          <div className="flex flex-wrap items-end justify-end">
             {rounds.length > 0 && (
               <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
                 <SelectTrigger>
