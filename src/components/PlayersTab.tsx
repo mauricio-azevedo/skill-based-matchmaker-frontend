@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
+import { Plus } from 'lucide-react'
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.9, y: 12 },
@@ -78,21 +79,25 @@ const PlayersTab: FC = () => {
         </ScrollArea>
 
         {/* Formulário de adição */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <div className="grid gap-3 flex-1">
-              <Label htmlFor="player-name">Nome</Label>
+        <form onSubmit={handleSubmit} className="flex gap-3 items-center">
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-3 flex-1">
+              <Label htmlFor="player-name" className="w-[2.25rem]">
+                Nome
+              </Label>
               <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
 
-            <div className="grid gap-3 flex-1">
-              <Label htmlFor="player-level">Nível</Label>
+            <div className="flex gap-3 flex-1">
+              <Label htmlFor="player-level" className="w-[2.25rem]">
+                Nível
+              </Label>
               <ToggleGroup
                 id="player-level"
                 type="single"
                 value={level.toString()}
                 onValueChange={(val: string) => val && setLevel(Number(val))}
-                className="flex flex-wrap gap-2 w-full"
+                className="flex flex-wrap gap-2 flex-1"
               >
                 {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
                   <ToggleGroupItem
@@ -108,8 +113,8 @@ const PlayersTab: FC = () => {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Adicionar
+          <Button size="icon" className="rounded-full">
+            <Plus className="h-4 w-4" />
           </Button>
         </form>
       </CardContent>
