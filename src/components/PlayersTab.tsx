@@ -38,40 +38,6 @@ const PlayersTab: FC = () => {
         <CardTitle>Jogadores</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Formulário de adição */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="grid gap-3">
-            <Label htmlFor="player-name">Nome</Label>
-            <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-
-          <div className="grid gap-3">
-            <Label htmlFor="player-level">Nível</Label>
-            <ToggleGroup
-              id="player-level"
-              type="single"
-              value={level.toString()}
-              onValueChange={(val: string) => val && setLevel(Number(val))}
-              className="flex flex-wrap gap-2 w-full"
-            >
-              {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
-                <ToggleGroupItem
-                  key={lvl}
-                  value={lvl.toString()}
-                  aria-label={`Level ${lvl}`}
-                  className="w-8 justify-center"
-                >
-                  {lvl}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          <Button type="submit" className="w-full">
-            Adicionar
-          </Button>
-        </form>
-
         {/* Lista de jogadores */}
         <ScrollArea className="min-h-0 flex-1" type="scroll">
           <LayoutGroup>
@@ -110,6 +76,40 @@ const PlayersTab: FC = () => {
             </motion.ul>
           </LayoutGroup>
         </ScrollArea>
+
+        {/* Formulário de adição */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="grid gap-3">
+            <Label htmlFor="player-name">Nome</Label>
+            <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+
+          <div className="grid gap-3">
+            <Label htmlFor="player-level">Nível</Label>
+            <ToggleGroup
+              id="player-level"
+              type="single"
+              value={level.toString()}
+              onValueChange={(val: string) => val && setLevel(Number(val))}
+              className="flex flex-wrap gap-2 w-full"
+            >
+              {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
+                <ToggleGroupItem
+                  key={lvl}
+                  value={lvl.toString()}
+                  aria-label={`Level ${lvl}`}
+                  className="w-8 justify-center"
+                >
+                  {lvl}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <Button type="submit" className="w-full">
+            Adicionar
+          </Button>
+        </form>
       </CardContent>
     </Card>
   )
