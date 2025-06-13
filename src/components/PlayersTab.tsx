@@ -53,7 +53,7 @@ const PlayersTab: FC = () => {
                     animate="animate"
                     exit="exit"
                     transition={spring}
-                    className="flex items-center gap-2"
+                    className="flex items-center"
                   >
                     {/* cartão interno */}
                     <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
