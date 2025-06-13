@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
-import { Crown, Edit, X } from 'lucide-react'
+import { Crown, Edit, Shuffle, X } from 'lucide-react'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -420,7 +420,8 @@ const MatchesTab: FC = () => {
               onClick={handleShuffle}
               disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
             >
-              Embaralhar
+              <Shuffle size={14} className="mr-2" aria-hidden="true" />
+              <span>Embaralhar</span>
             </Button>
             <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
               Nova rodada
