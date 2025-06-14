@@ -12,6 +12,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
 import { Plus, Minus } from 'lucide-react'
+import { useCourts } from '@/context/CourtsContext'
 
 const itemVariants = {
   initial: { opacity: 0, scale: 0.9, y: 12 },
@@ -22,9 +23,10 @@ const spring = { type: 'spring', stiffness: 500, damping: 38, mass: 0.9 }
 
 const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
+  const { courts, setCourts } = useCourts()
+
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
-  const [courts, setCourts] = useState(1)
 
   const nameInputRef = useRef<HTMLInputElement>(null)
 
