@@ -155,7 +155,7 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
         </div>
 
         {/* ---------- Botões ---------- */}
-        <DialogFooter className="pt-4">
+        <DialogFooter>
           <div className="flex gap-2 justify-end">
             <Button variant="secondary" onClick={onClose}>
               Cancelar
