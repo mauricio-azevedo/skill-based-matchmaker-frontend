@@ -66,7 +66,9 @@ const PlayersTab: FC = () => {
               min={1}
               value={courts}
               onChange={(e) => setCourts(Math.max(1, Number(e.target.value)))}
-              className="w-12 text-center"
+              readOnly
+              tabIndex={-1}
+              className="w-12 text-center cursor-default select-none pointer-events-none"
             />
 
             {/* Botão de aumentar */}
