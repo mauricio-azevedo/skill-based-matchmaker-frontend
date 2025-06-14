@@ -396,21 +396,23 @@ const MatchesTab: FC = () => {
                                 <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
                                 <div className="flex flex-col items-center gap-1">
                                   <div className="absolute -top-1/4 items-center flex">
-                                    {!hasScore ? (
-                                      <Button
-                                        className="border"
-                                        size="sm"
-                                        variant="secondary"
-                                        onClick={() => openScoreModalFor(m.id)}
-                                      >
-                                        <Edit size={8} />
-                                        <span className="text-xs">Resultado</span>
-                                      </Button>
-                                    ) : (
-                                      <Button className="border" size="sm" variant="secondary">
-                                        {m.gamesA} × {m.gamesB}
-                                      </Button>
-                                    )}
+                                    <Button
+                                      className="border"
+                                      size="sm"
+                                      variant="secondary"
+                                      onClick={() => openScoreModalFor(m.id)}
+                                    >
+                                      {!hasScore ? (
+                                        <>
+                                          <Edit size={8} />
+                                          <span className="text-xs">Resultado</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          {m.gamesA} × {m.gamesB}
+                                        </>
+                                      )}
+                                    </Button>
                                   </div>
 
                                   <X size={14} />
