@@ -38,6 +38,10 @@ const PlayersTab: FC = () => {
     queueMicrotask(() => nameInputRef.current?.focus())
   }
 
+  const activeCount = players.filter((p) => p.active).length
+  const total = players.length
+  const plural = activeCount === 1 ? 'ativo' : 'ativos'
+
   return (
     <Card>
       <CardHeader>
@@ -89,9 +93,17 @@ const PlayersTab: FC = () => {
         {/* Título Jogadores e contador */}
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold">Jogadores</h2>
-          <div className="flex items-center gap-1 text-muted-foreground">
+          <div className="flex items-center gap-1">
             <Users className="h-4 w-4" aria-hidden="true" />
-            <span className="text-sm">{players.length}</span>
+            <span className="text-sm">
+              {activeCount === total ? (
+                `${total}`
+              ) : (
+                <>
+                  {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
+                </>
+              )}
+            </span>{' '}
           </div>
         </div>
 
