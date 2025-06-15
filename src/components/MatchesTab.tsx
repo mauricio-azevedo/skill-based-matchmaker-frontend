@@ -453,7 +453,7 @@ const MatchesTab: FC = () => {
           {/* Seleção de rodadas (desabilitada por enquanto) */}
 
           {/* ---------------------- Rounds list ---------------------- */}
-          <div className="h-full w-full flex flex-col gap-2 overflow-y-auto scroll-pt-16 snap-y snap-mandatory shadow-[inset_0_-12px_10px_-12px_rgba(0,0,0,0.35)]">
+          <div className="h-full w-full flex flex-col gap-2 overflow-y-auto snap-y snap-mandatory shadow-[inset_0_-12px_10px_-12px_rgba(0,0,0,0.35)]">
             {rounds.length === 0 && (
               <p
                 key="placeholder" // chave p/ AnimatePresence poder animar
