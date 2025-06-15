@@ -449,12 +449,12 @@ const MatchesTab: FC = () => {
 
           {/* ---------------------- Rounds list ---------------------- */}
           <div className="h-full w-full flex flex-col gap-2 overflow-y-auto snap-y snap-mandatory shadow-[inset_0_-12px_10px_-12px_rgba(0,0,0,0.35)]">
-            {rounds.length === 0 ? (
-              <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
-            ) : (
-              <LayoutGroup>
-                <AnimatePresence initial={false}>
-                  {rounds.map((round, idx) => (
+            <LayoutGroup>
+              <AnimatePresence mode="popLayout" initial={false}>
+                {rounds.length === 0 ? (
+                  <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
+                ) : (
+                  rounds.map((round, idx) => (
                     <motion.div
                       key={round.id}
                       layout="position" // ✔ transições suaves no layout
@@ -537,10 +537,10 @@ const MatchesTab: FC = () => {
                         })}
                       </ol>
                     </motion.div>
-                  ))}
-                </AnimatePresence>
-              </LayoutGroup>
-            )}
+                  ))
+                )}
+              </AnimatePresence>
+            </LayoutGroup>
           </div>
         </CardContent>
         <CardFooter>
