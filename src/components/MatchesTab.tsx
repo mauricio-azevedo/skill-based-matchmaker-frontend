@@ -9,11 +9,10 @@ import type { Player } from '@/types/players'
 import { toast } from 'sonner'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
-import { Crown, Edit, MoreVertical, Shuffle, X } from 'lucide-react'
+import { Crown, Edit, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
@@ -123,16 +122,12 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
         {/* ---------- Nomes das duplas ---------- */}
         <div className="flex flex-col gap-6">
           <div>
-            <p className="font-semibold mb-3">
-              {namesA.join(' & ')} {/* Pedro & João */}
-            </p>
+            <p className="font-semibold mb-3">{namesA.join(' & ')}</p>
             {renderScoreToggle(scoreA, setScoreA)}
           </div>
 
           <div>
-            <p className="font-semibold mb-3">
-              {namesB.join(' & ')} {/* Maria & Ana */}
-            </p>
+            <p className="font-semibold mb-3">{namesB.join(' & ')}</p>
             {renderScoreToggle(scoreB, setScoreB)}
           </div>
         </div>
@@ -182,8 +177,14 @@ const MatchesTab: FC = () => {
     namesB: [],
   })
 
-  // New: confirmation dialog state ------------------------------------------------
+  // Confirmation dialog state – shuffle
   const [confirmShuffle, setConfirmShuffle] = useState<{
+    open: boolean
+    roundIndex: number | null
+  }>({ open: false, roundIndex: null })
+
+  // NEW: Confirmation dialog state – delete
+  const [confirmDelete, setConfirmDelete] = useState<{
     open: boolean
     roundIndex: number | null
   }>({ open: false, roundIndex: null })
@@ -218,7 +219,7 @@ const MatchesTab: FC = () => {
   }, [rounds, selectedRoundIndex])
 
   // ---------------------------------------------------------------------------
-  // Handlers – Generation / Shuffle / Clear
+  // Handlers – Generation / Shuffle / Delete / Clear
   // ---------------------------------------------------------------------------
   const handleGenerate = () => {
     if (warnIfInsufficient()) return
@@ -269,6 +270,39 @@ const MatchesTab: FC = () => {
 
     setSelectedRoundIndex(targetIdx)
     toast.success('Rodada embaralhada!', { duration: 3000 })
+  }
+
+  /**
+   * *Actual* delete logic extracted so we can call it after confirmation.
+   */
+  const doDelete = (targetIdx: number) => {
+    const roundToRemove = rounds[targetIdx]
+    if (!roundToRemove) return
+
+    // snapshot das rodadas atuais
+    const prevRounds = [...rounds]
+
+    // zere tudo
+    clear()
+    updatePlayers((prev) => prev.map((p) => ({ ...p, matchCount: 0, partnerCounts: {} })))
+
+    // repopule: ignore o índice removido
+    prevRounds.forEach((r, idx) => {
+      if (idx === targetIdx) return // skip removed round
+      addRound(r)
+      updatePlayers((prev) => applyRoundStats(prev, r, 1))
+    })
+
+    // ajustar seleção
+    let newSelected = selectedRoundIndex
+    if (selectedRoundIndex === targetIdx) {
+      newSelected = Math.max(0, selectedRoundIndex - 1)
+    } else if (selectedRoundIndex > targetIdx) {
+      newSelected = selectedRoundIndex - 1
+    }
+    setSelectedRoundIndex(newSelected)
+
+    toast.success('Rodada excluída!', { duration: 3000 })
   }
 
   // ---------------------------------------------------------------------------
@@ -345,10 +379,47 @@ const MatchesTab: FC = () => {
               onClick={() => {
                 if (confirmShuffle.roundIndex === null) return
                 setConfirmShuffle({ open: false, roundIndex: null })
-                doShuffle(confirmShuffle.roundIndex) // ⟵ novo
+                doShuffle(confirmShuffle.roundIndex)
               }}
             >
               Sim, embaralhar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Confirmation dialog for DELETE round                               */}
+      {/* ------------------------------------------------------------------ */}
+      <Dialog open={confirmDelete.open} onOpenChange={(isOpen) => setConfirmDelete((p) => ({ ...p, open: isOpen }))}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {hasScoresInRound(confirmDelete.roundIndex)
+                ? 'Excluir rodada e descartar resultados?'
+                : 'Excluir esta rodada?'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm">
+            {hasScoresInRound(confirmDelete.roundIndex)
+              ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
+              : 'Esta ação é irreversível.'}
+          </p>
+
+          <DialogFooter className="pt-4">
+            <Button variant="secondary" onClick={() => setConfirmDelete({ open: false, roundIndex: null })}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirmDelete.roundIndex === null) return
+                setConfirmDelete({ open: false, roundIndex: null })
+                doDelete(confirmDelete.roundIndex)
+              }}
+            >
+              Sim, excluir
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -374,22 +445,7 @@ const MatchesTab: FC = () => {
 
         <CardContent className="!gap-2">
           {/* ------------------------ Controls ----------------------- */}
-          {/*<div className="flex flex-wrap items-end justify-end">*/}
-          {/*  {rounds.length > 0 && (*/}
-          {/*    <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>*/}
-          {/*      <SelectTrigger>*/}
-          {/*        <SelectValue placeholder="Selecione..." />*/}
-          {/*      </SelectTrigger>*/}
-          {/*      <SelectContent>*/}
-          {/*        {rounds.map((_, idx) => (*/}
-          {/*          <SelectItem key={idx} value={String(idx)}>*/}
-          {/*            Rodada {idx + 1}*/}
-          {/*          </SelectItem>*/}
-          {/*        ))}*/}
-          {/*      </SelectContent>*/}
-          {/*    </Select>*/}
-          {/*  )}*/}
-          {/*</div>*/}
+          {/* Seleção de rodadas (desabilitada por enquanto) */}
 
           {/* ---------------------- Rounds list ---------------------- */}
           <div className="h-full w-full flex flex-col gap-2 overflow-y-auto snap-y snap-mandatory">
@@ -397,7 +453,7 @@ const MatchesTab: FC = () => {
               <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
             ) : (
               rounds.map((round, idx) => (
-                <div key={idx} className="flex flex-col flex-1 gap-6 snap-start pb-12">
+                <div key={idx} className="flex flex-col gap-6 snap-start pb-12">
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
 
@@ -416,8 +472,15 @@ const MatchesTab: FC = () => {
                             setConfirmShuffle({ open: true, roundIndex: idx })
                           }}
                         >
-                          <Shuffle size={14} aria-hidden="true" />
-                          Embaralhar
+                          <Shuffle size={14} aria-hidden="true" /> Embaralhar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => {
+                            setConfirmDelete({ open: true, roundIndex: idx })
+                          }}
+                        >
+                          <Trash size={14} aria-hidden="true" /> Apagar
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
