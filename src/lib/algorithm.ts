@@ -123,6 +123,7 @@ export function generateSchedule(players: Player[], courts: number): Round {
   const best = selectTopMatches(allMatches, courts)
 
   return {
+    id: crypto.randomUUID(),
     matches: best.map(({ teamA, teamB }) => ({
       id: crypto.randomUUID(),
       teamA,

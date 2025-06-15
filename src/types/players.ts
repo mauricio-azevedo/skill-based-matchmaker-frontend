@@ -27,6 +27,7 @@ export interface Match {
 
 /** Conjunto de partidas que podem acontecer simultaneamente. */
 export interface Round {
+  id: string
   matches: Match[] // ≤ courts partidas, sem jogadores repetidos
 }
 

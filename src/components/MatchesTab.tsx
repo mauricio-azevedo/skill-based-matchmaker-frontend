@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { Crown, Edit, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -146,12 +147,19 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
   )
 }
 
+const roundVariants = {
+  initial: { opacity: 0, scale: 0.9, y: 12 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.8, y: 12 },
+}
+const spring = { type: 'spring', stiffness: 500, damping: 38, mass: 0.9 }
+
 // -----------------------------------------------------------------------------
 // Main component
 // -----------------------------------------------------------------------------
 const MatchesTab: FC = () => {
   const { players, updatePlayers } = usePlayers()
-  const { rounds, addRound, setGames, clear } = useRounds()
+  const { rounds, addRound, setGames, replaceRound, removeRound } = useRounds()
   const { courts } = useCourts()
 
   const activePlayers = players.filter((p) => p.active)
@@ -255,69 +263,44 @@ const MatchesTab: FC = () => {
   /**
    * *Actual* shuffle logic extracted so we can call it after confirmation.
    */
-  const doShuffle = (targetIdx: number) => {
-    const targetInternal = uiToInternal(targetIdx)
+  const doShuffle = (uiIdx: number) => {
+    // ① rodada correta, olhando o array que a UI usa (já invertido)
+    const oldRound = rounds[uiIdx]
+    if (!oldRound) return
 
-    if (rounds.length === 0) {
-      handleGenerate()
-      return
-    }
+    // ② índice correspondente no array ascendente, usado pelo context
+    const ascIdx = uiToInternal(uiIdx)
 
-    // snapshot das rodadas atuais
-    const prevRoundsAsc = [...rounds].reverse()
+    // ③ gera novo schedule e preserva o id para manter a key estável
+    const fresh = generateSchedule(activePlayers, courts)
+    const newRound = { ...fresh, id: oldRound.id }
 
-    // zere tudo
-    clear()
-    updatePlayers((prev) => prev.map((p) => ({ ...p, matchCount: 0, partnerCounts: {} })))
+    // ④ atualiza estatísticas
+    updatePlayers((prev) => applyRoundStats(prev, oldRound, -1))
+    updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
 
-    // repopule: quando chegar no índice-alvo, gere de novo
-    prevRoundsAsc.forEach((r, idx) => {
-      if (idx === targetInternal) {
-        const newRound = generateSchedule(activePlayers, courts)
-        addRound(newRound)
-        updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-      } else {
-        addRound(r)
-        updatePlayers((prev) => applyRoundStats(prev, r, 1))
-      }
-    })
+    // ⑤ troca no contexto (RoundsProvider)
+    replaceRound(ascIdx, newRound)
 
-    setSelectedRoundIndex(targetIdx)
     toast.success('Rodada embaralhada!', { duration: 3000 })
   }
 
   /**
    * *Actual* delete logic extracted so we can call it after confirmation.
    */
-  const doDelete = (targetIdx: number) => {
-    const targetInternal = uiToInternal(targetIdx)
-
+  const doDelete = (targetIdxUI: number) => {
+    const targetInternal = uiToInternal(targetIdxUI)
     const roundToRemove = rounds[targetInternal]
     if (!roundToRemove) return
 
-    // snapshot das rodadas atuais
-    const prevRoundsAsc = [...rounds].reverse()
+    // 1. devolve os stats dessa rodada
+    updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
 
-    // zere tudo
-    clear()
-    updatePlayers((prev) => prev.map((p) => ({ ...p, matchCount: 0, partnerCounts: {} })))
+    // 2. remove a rodada numa tacada só
+    removeRound(targetInternal) // crie no seu contexto ou use setRounds
 
-    // repopule: ignore o índice removido
-    prevRoundsAsc.forEach((r, idx) => {
-      if (idx === targetInternal) return // skip removed round
-      addRound(r)
-      updatePlayers((prev) => applyRoundStats(prev, r, 1))
-    })
-
-    // ajustar seleção
-    let newSelected = selectedRoundIndex
-    if (selectedRoundIndex === targetIdx) {
-      newSelected = Math.max(0, selectedRoundIndex - 1)
-    } else if (selectedRoundIndex > targetIdx) {
-      newSelected = selectedRoundIndex - 1
-    }
-    setSelectedRoundIndex(newSelected)
-
+    // 3. ajusta seleção
+    setSelectedRoundIndex((i) => Math.max(0, i > targetIdxUI ? i - 1 : i))
     toast.success('Rodada excluída!', { duration: 3000 })
   }
 
@@ -469,82 +452,94 @@ const MatchesTab: FC = () => {
             {rounds.length === 0 ? (
               <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
             ) : (
-              rounds.map((round, idx) => (
-                <div
-                  key={rounds.length - idx}
-                  ref={idx === selectedRoundIndex ? selectedRoundRef : undefined}
-                  className="flex flex-col gap-6 snap-start pb-12"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {rounds.length - idx}</h2>
+              <LayoutGroup>
+                <AnimatePresence initial={false}>
+                  {rounds.map((round, idx) => (
+                    <motion.div
+                      key={round.id}
+                      layout="position" // ✔ transições suaves no layout
+                      variants={roundVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={spring}
+                      ref={idx === selectedRoundIndex ? selectedRoundRef : undefined}
+                      className="flex flex-col gap-6 snap-start pb-12"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
+                          Rodada {rounds.length - idx}
+                        </h2>
 
-                    {/* botão “mais opções” */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="shrink-0">
-                          <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                        {/* botão “mais opções” */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="shrink-0">
+                              <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
+                            </Button>
+                          </DropdownMenuTrigger>
 
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => {
-                            if (warnIfInsufficient()) return
-                            setConfirmShuffle({ open: true, roundIndex: idx })
-                          }}
-                        >
-                          <Shuffle size={14} aria-hidden="true" /> Embaralhar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={() => {
-                            setConfirmDelete({ open: true, roundIndex: idx })
-                          }}
-                        >
-                          <Trash size={14} aria-hidden="true" /> Apagar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <ol className="flex flex-col gap-10 flex-1">
-                    {round.matches.map((m) => {
-                      const hasScore = m.gamesA !== null && m.gamesB !== null
-                      return (
-                        <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
-                          {/* Times + placar */}
-                          <div className="flex flex-1 items-center gap-4">
-                            <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                            <div className="flex flex-col items-center gap-1">
-                              <div className="absolute -top-1/4 items-center flex">
-                                <Button
-                                  className="border"
-                                  size="sm"
-                                  variant="secondary"
-                                  onClick={() => openScoreModalFor(m.id, idx)}
-                                >
-                                  {!hasScore ? (
-                                    <>
-                                      <Edit size={8} />
-                                      <span className="text-xs">Resultado</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      {m.gamesA} × {m.gamesB}
-                                    </>
-                                  )}
-                                </Button>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                if (warnIfInsufficient()) return
+                                setConfirmShuffle({ open: true, roundIndex: idx })
+                              }}
+                            >
+                              <Shuffle size={14} aria-hidden="true" /> Embaralhar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => {
+                                setConfirmDelete({ open: true, roundIndex: idx })
+                              }}
+                            >
+                              <Trash size={14} aria-hidden="true" /> Apagar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <ol className="flex flex-col gap-10 flex-1">
+                        {round.matches.map((m) => {
+                          const hasScore = m.gamesA !== null && m.gamesB !== null
+                          return (
+                            <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
+                              {/* Times + placar */}
+                              <div className="flex flex-1 items-center gap-4">
+                                <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
+                                <div className="flex flex-col items-center gap-1">
+                                  <div className="absolute -top-1/4 items-center flex">
+                                    <Button
+                                      className="border"
+                                      size="sm"
+                                      variant="secondary"
+                                      onClick={() => openScoreModalFor(m.id, idx)}
+                                    >
+                                      {!hasScore ? (
+                                        <>
+                                          <Edit size={8} />
+                                          <span className="text-xs">Resultado</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          {m.gamesA} × {m.gamesB}
+                                        </>
+                                      )}
+                                    </Button>
+                                  </div>
+
+                                  <X size={14} />
+                                </div>
+                                <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
                               </div>
-
-                              <X size={14} />
-                            </div>
-                            <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ol>
-                </div>
-              ))
+                            </li>
+                          )
+                        })}
+                      </ol>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </LayoutGroup>
             )}
           </div>
         </CardContent>
