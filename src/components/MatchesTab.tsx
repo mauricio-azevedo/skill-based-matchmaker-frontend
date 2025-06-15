@@ -385,7 +385,7 @@ const MatchesTab: FC = () => {
                 <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
               ) : (
                 rounds.map((round, idx) => (
-                  <article key={idx} className="flex flex-col flex-1 gap-6">
+                  <article key={idx} className="flex flex-col flex-1 gap-6 snap-start">
                     <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
                       Rodada {selectedRoundIndex + 1}
                     </h2>
