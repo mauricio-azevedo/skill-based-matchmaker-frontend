@@ -15,7 +15,6 @@ import { cn } from '@/lib/utils'
 import { Crown, Edit, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -146,13 +145,6 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
     </Dialog>
   )
 }
-
-const roundVariants = {
-  initial: { opacity: 0, scale: 0.9, y: 12 },
-  animate: { opacity: 1, scale: 1, y: 0 },
-  exit: { opacity: 0, scale: 0.8, y: 12 },
-}
-const spring = { type: 'spring', stiffness: 500, damping: 38, mass: 0.9 }
 
 // -----------------------------------------------------------------------------
 // Main component
@@ -346,10 +338,6 @@ const MatchesTab: FC = () => {
     return false
   }
 
-  const handleScroll = () => {
-    selectedRoundRef.current?.scrollIntoView({ block: 'start', inline: 'nearest' })
-  }
-
   // ---------------------------------------------------------------------------
   // JSX
   // ---------------------------------------------------------------------------
@@ -466,94 +454,82 @@ const MatchesTab: FC = () => {
                 Nenhuma rodada gerada ainda.
               </p>
             )}
+            {rounds.map((round, idx) => (
+              <div
+                key={round.id}
+                ref={idx === selectedRoundIndex ? selectedRoundRef : undefined}
+                className="flex flex-col gap-6 snap-start pb-12"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {rounds.length - idx}</h2>
 
-            <LayoutGroup>
-              <AnimatePresence>
-                {rounds.map((round, idx) => (
-                  <motion.div
-                    key={round.id}
-                    layout="position" // ✔ transições suaves no layout
-                    variants={roundVariants}
-                    onAnimationComplete={handleScroll}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={spring}
-                    ref={idx === selectedRoundIndex ? selectedRoundRef : undefined}
-                    className="flex flex-col gap-6 snap-start pb-12"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {rounds.length - idx}</h2>
+                  {/* botão “mais opções” */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="shrink-0">
+                        <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
+                      </Button>
+                    </DropdownMenuTrigger>
 
-                      {/* botão “mais opções” */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="shrink-0">
-                            <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
-                          </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              if (warnIfInsufficient()) return
-                              setConfirmShuffle({ open: true, roundIndex: idx })
-                            }}
-                          >
-                            <Shuffle size={14} aria-hidden="true" /> Embaralhar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => {
-                              setConfirmDelete({ open: true, roundIndex: idx })
-                            }}
-                          >
-                            <Trash size={14} aria-hidden="true" /> Apagar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <ol className="flex flex-col gap-10 flex-1">
-                      {round.matches.map((m) => {
-                        const hasScore = m.gamesA !== null && m.gamesB !== null
-                        return (
-                          <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
-                            {/* Times + placar */}
-                            <div className="flex flex-1 items-center gap-4">
-                              <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                              <div className="flex flex-col items-center gap-1">
-                                <div className="absolute -top-1/4 items-center flex">
-                                  <Button
-                                    className="border"
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => openScoreModalFor(m.id, idx)}
-                                  >
-                                    {!hasScore ? (
-                                      <>
-                                        <Edit size={8} />
-                                        <span className="text-xs">Resultado</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        {m.gamesA} × {m.gamesB}
-                                      </>
-                                    )}
-                                  </Button>
-                                </div>
-
-                                <X size={14} />
-                              </div>
-                              <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (warnIfInsufficient()) return
+                          setConfirmShuffle({ open: true, roundIndex: idx })
+                        }}
+                      >
+                        <Shuffle size={14} aria-hidden="true" /> Embaralhar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => {
+                          setConfirmDelete({ open: true, roundIndex: idx })
+                        }}
+                      >
+                        <Trash size={14} aria-hidden="true" /> Apagar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <ol className="flex flex-col gap-10 flex-1">
+                  {round.matches.map((m) => {
+                    const hasScore = m.gamesA !== null && m.gamesB !== null
+                    return (
+                      <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
+                        {/* Times + placar */}
+                        <div className="flex flex-1 items-center gap-4">
+                          <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="absolute -top-1/4 items-center flex">
+                              <Button
+                                className="border"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => openScoreModalFor(m.id, idx)}
+                              >
+                                {!hasScore ? (
+                                  <>
+                                    <Edit size={8} />
+                                    <span className="text-xs">Resultado</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    {m.gamesA} × {m.gamesB}
+                                  </>
+                                )}
+                              </Button>
                             </div>
-                          </li>
-                        )
-                      })}
-                    </ol>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </LayoutGroup>
+
+                            <X size={14} />
+                          </div>
+                          <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ol>
+              </div>
+            ))}
           </div>
         </CardContent>
         <CardFooter>
