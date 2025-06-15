@@ -187,6 +187,9 @@ const MatchesTab: FC = () => {
   // New: confirmation dialog state ------------------------------------------------
   const [confirmShuffleOpen, setConfirmShuffleOpen] = useState(false)
 
+  const hasEnoughForCourts = (plist: Player[], courts: number) =>
+    plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
+
   // ---------------------------------------------------------------------------
   // Effects
   // ---------------------------------------------------------------------------
@@ -214,6 +217,8 @@ const MatchesTab: FC = () => {
   // Handlers – Generation / Shuffle / Clear
   // ---------------------------------------------------------------------------
   const handleGenerate = () => {
+    if (warnIfInsufficient()) return
+
     try {
       const newRound = generateSchedule(activePlayers, courts)
       const newIndex = rounds.length
@@ -234,8 +239,6 @@ const MatchesTab: FC = () => {
    * *Actual* shuffle logic extracted so we can call it after confirmation.
    */
   const doShuffle = () => {
-    if (players.length < PLAYERS_PER_MATCH) return
-
     if (rounds.length === 0) {
       handleGenerate()
       return
@@ -288,6 +291,19 @@ const MatchesTab: FC = () => {
     setGames(selectedRoundIndex, modalState.matchId, 'B', scoreB)
     setModalState((prev) => ({ ...prev, open: false }))
     toast.success('Placar salvo!', { duration: 2500 })
+  }
+
+  const warnIfInsufficient = (): boolean => {
+    if (!hasEnoughForCourts(players, courts)) {
+      toast.error(
+        `Precisamos de pelo menos ${courts * PLAYERS_PER_MATCH} jogadores ativos para preencher ${courts} ${
+          courts === 1 ? 'quadra' : 'quadras'
+        }.`,
+      )
+      return true
+    }
+
+    return false
   }
 
   // ---------------------------------------------------------------------------
@@ -424,7 +440,10 @@ const MatchesTab: FC = () => {
             <Button
               className="flex-1 max-w-fit"
               variant="ghost"
-              onClick={() => setConfirmShuffleOpen(true)}
+              onClick={() => {
+                if (warnIfInsufficient()) return
+                setConfirmShuffleOpen(true)
+              }}
               disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
             >
               <Shuffle size={14} aria-hidden="true" />
