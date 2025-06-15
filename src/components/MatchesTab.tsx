@@ -301,7 +301,7 @@ const MatchesTab: FC = () => {
       <Dialog open={confirmShuffleOpen} onOpenChange={setConfirmShuffleOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle> {hasScores ? 'Descartar resultados e embaralhar?' : 'Embaralhar esta rodada?'}</DialogTitle>
+            <DialogTitle>{hasScores ? 'Descartar resultados e embaralhar?' : 'Embaralhar esta rodada?'}</DialogTitle>
           </DialogHeader>
           <p className="text-sm">
             {hasScores
