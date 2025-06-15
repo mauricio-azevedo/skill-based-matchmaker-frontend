@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
@@ -31,6 +31,8 @@ export default function App() {
   // Tema (poderia ser trocado por useTheme() do next-themes)
   // -----------------------------------------------------------
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
+
+  const settingsBtnRef = useRef<HTMLButtonElement>(null)
 
   // Aplica a classe "dark" na <html> root
   useEffect(() => {
@@ -99,13 +101,21 @@ export default function App() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
+                ref={settingsBtnRef}
                 aria-label="Configurações"
                 className="rounded-md p-2 transition hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2"
               >
                 <Settings className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              onCloseAutoFocus={(e) => {
+                e.preventDefault() // impede que o Radix volte o foco
+                settingsBtnRef.current?.blur() // blur de fato
+              }}
+            >
+              {' '}
               {/* ---------- Confirmação para limpar partidas ---------- */}
               <AlertDialog>
                 <AlertDialogTrigger disabled={!hasRounds} asChild>
@@ -135,7 +145,6 @@ export default function App() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-
               {/* ---------- Confirmação para limpar tudo ---------- */}
               <AlertDialog>
                 <AlertDialogTrigger disabled={noData} asChild>
