@@ -34,6 +34,8 @@ export default function App() {
 
   const settingsBtnRef = useRef<HTMLButtonElement>(null)
 
+  const [warning, setWarning] = useState<null | 'rounds' | 'all'>(null)
+
   // Aplica a classe "dark" na <html> root
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -108,21 +110,14 @@ export default function App() {
                 <Settings className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              onCloseAutoFocus={(e) => {
-                e.preventDefault() // impede que o Radix volte o foco
-                settingsBtnRef.current?.blur() // blur de fato
-              }}
-            >
-              {' '}
+            <DropdownMenuContent align="end">
               {/* ---------- Confirmação para limpar partidas ---------- */}
               <AlertDialog>
                 <AlertDialogTrigger disabled={!hasRounds} asChild>
                   <DropdownMenuItem
-                    // Evita que o Dropdown feche antes do diálogo abrir
-                    onSelect={(e) => e.preventDefault()}
-                    className="text-destructive focus:text-destructive cursor-pointer"
+                    disabled={!hasRounds}
+                    onSelect={() => setWarning('rounds')}
+                    className="text-destructive cursor-pointer"
                   >
                     Limpar partidas
                   </DropdownMenuItem>
@@ -149,8 +144,9 @@ export default function App() {
               <AlertDialog>
                 <AlertDialogTrigger disabled={noData} asChild>
                   <DropdownMenuItem
-                    onSelect={(e) => e.preventDefault()}
-                    className="text-destructive focus:text-destructive cursor-pointer"
+                    disabled={noData}
+                    onSelect={() => setWarning('all')}
+                    className="text-destructive cursor-pointer"
                   >
                     Limpar tudo
                   </DropdownMenuItem>
@@ -172,6 +168,55 @@ export default function App() {
               </AlertDialog>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Alertas */}
+          {/* Limpar partidas */}
+          <AlertDialog open={warning === 'rounds'} onOpenChange={() => setWarning(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Limpar todas as partidas?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação apagará todos os registros de partidas. Você tem certeza?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  className={buttonVariants({ variant: 'destructive' })}
+                  onClick={() => {
+                    handleClearRounds()
+                    setWarning(null)
+                  }}
+                >
+                  Confirmar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Limpar tudo */}
+          <AlertDialog open={warning === 'all'} onOpenChange={() => setWarning(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Limpar todos os dados?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  className={buttonVariants({ variant: 'destructive' })}
+                  onClick={() => {
+                    handleClearAll()
+                    setWarning(null)
+                  }}
+                >
+                  Confirmar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </header>
 
