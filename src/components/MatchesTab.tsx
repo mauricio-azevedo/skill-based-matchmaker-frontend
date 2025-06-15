@@ -1,4 +1,4 @@
-import { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -212,11 +212,12 @@ const MatchesTab: FC = () => {
   // ---------------------------------------------------------------------------
   // Effects
   // ---------------------------------------------------------------------------
-  useLayoutEffect(() => {
-    selectedRoundRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest', // keeps snap-scroll happy
-    })
+  useEffect(() => {
+    if (!selectedRoundRef.current) return
+    const id = requestAnimationFrame(() =>
+      selectedRoundRef.current!.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
+    )
+    return () => cancelAnimationFrame(id)
   }, [selectedRoundIndex, rounds.length])
 
   useEffect(() => {
@@ -354,76 +355,80 @@ const MatchesTab: FC = () => {
       {/* Confirmation dialog for shuffling with existing results            */}
       {/* ------------------------------------------------------------------ */}
 
-      <Dialog open={confirmShuffle.open} onOpenChange={(isOpen) => setConfirmShuffle((p) => ({ ...p, open: isOpen }))}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
+      {confirmShuffle.open && (
+        <Dialog
+          open={confirmShuffle.open}
+          onOpenChange={(isOpen) => setConfirmShuffle((p) => ({ ...p, open: isOpen }))}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {hasScoresInRound(confirmShuffle.roundIndex)
+                  ? 'Descartar resultados e embaralhar?'
+                  : 'Embaralhar esta rodada?'}
+              </DialogTitle>
+            </DialogHeader>
+
+            <p className="text-sm">
               {hasScoresInRound(confirmShuffle.roundIndex)
-                ? 'Descartar resultados e embaralhar?'
-                : 'Embaralhar esta rodada?'}
-            </DialogTitle>
-          </DialogHeader>
+                ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
+                : 'Confirme que os jogos ainda não começaram.'}
+            </p>
 
-          <p className="text-sm">
-            {hasScoresInRound(confirmShuffle.roundIndex)
-              ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
-              : 'Confirme que os jogos ainda não começaram.'}
-          </p>
+            <DialogFooter className="pt-4">
+              <Button variant="secondary" onClick={() => setConfirmShuffle({ open: false, roundIndex: null })}>
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (confirmShuffle.roundIndex === null) return
+                  setConfirmShuffle({ open: false, roundIndex: null })
+                  doShuffle(confirmShuffle.roundIndex)
+                }}
+              >
+                Sim, embaralhar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
-          <DialogFooter className="pt-4">
-            <Button variant="secondary" onClick={() => setConfirmShuffle({ open: false, roundIndex: null })}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (confirmShuffle.roundIndex === null) return
-                setConfirmShuffle({ open: false, roundIndex: null })
-                doShuffle(confirmShuffle.roundIndex)
-              }}
-            >
-              Sim, embaralhar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {confirmDelete.open && (
+        <Dialog open={confirmDelete.open} onOpenChange={(isOpen) => setConfirmDelete((p) => ({ ...p, open: isOpen }))}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {hasScoresInRound(confirmDelete.roundIndex)
+                  ? 'Excluir rodada e descartar resultados?'
+                  : 'Excluir esta rodada?'}
+              </DialogTitle>
+            </DialogHeader>
 
-      {/* ------------------------------------------------------------------ */}
-      {/* Confirmation dialog for DELETE round                               */}
-      {/* ------------------------------------------------------------------ */}
-      <Dialog open={confirmDelete.open} onOpenChange={(isOpen) => setConfirmDelete((p) => ({ ...p, open: isOpen }))}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
+            <p className="text-sm">
               {hasScoresInRound(confirmDelete.roundIndex)
-                ? 'Excluir rodada e descartar resultados?'
-                : 'Excluir esta rodada?'}
-            </DialogTitle>
-          </DialogHeader>
+                ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
+                : 'Esta ação é irreversível.'}
+            </p>
 
-          <p className="text-sm">
-            {hasScoresInRound(confirmDelete.roundIndex)
-              ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
-              : 'Esta ação é irreversível.'}
-          </p>
-
-          <DialogFooter className="pt-4">
-            <Button variant="secondary" onClick={() => setConfirmDelete({ open: false, roundIndex: null })}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (confirmDelete.roundIndex === null) return
-                setConfirmDelete({ open: false, roundIndex: null })
-                doDelete(confirmDelete.roundIndex)
-              }}
-            >
-              Sim, excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="pt-4">
+              <Button variant="secondary" onClick={() => setConfirmDelete({ open: false, roundIndex: null })}>
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (confirmDelete.roundIndex === null) return
+                  setConfirmDelete({ open: false, roundIndex: null })
+                  doDelete(confirmDelete.roundIndex)
+                }}
+              >
+                Sim, excluir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Modal para inserir placar */}
       <ScoreModal
