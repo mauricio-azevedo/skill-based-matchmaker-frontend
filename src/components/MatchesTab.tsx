@@ -166,6 +166,7 @@ const MatchesTab: FC = () => {
   const [modalState, setModalState] = useState<{
     open: boolean
     matchId: string | null
+    roundIdxUI: number | null
     initialA: number | null
     initialB: number | null
     namesA: string[]
@@ -173,6 +174,7 @@ const MatchesTab: FC = () => {
   }>({
     open: false,
     matchId: null,
+    roundIdxUI: null,
     initialA: null,
     initialB: null,
     namesA: [],
@@ -322,15 +324,14 @@ const MatchesTab: FC = () => {
   // ---------------------------------------------------------------------------
   // Handlers – Scores
   // ---------------------------------------------------------------------------
-  const openScoreModalFor = (matchId: string) => {
-    const matches = rounds.flatMap((r) => r.matches)
-    const match = matches.find((m) => m.id === matchId)
-
+  const openScoreModalFor = (matchId: string, roundIdxUI: number) => {
+    const match = rounds.flatMap((r) => r.matches).find((m) => m.id === matchId)
     if (!match) return
 
     setModalState({
       open: true,
       matchId,
+      roundIdxUI,
       initialA: match.gamesA ?? null,
       initialB: match.gamesB ?? null,
       namesA: match.teamA.map((p) => p.name),
@@ -339,8 +340,9 @@ const MatchesTab: FC = () => {
   }
 
   const handleSaveScore = (scoreA: number, scoreB: number) => {
-    if (!modalState.matchId) return
-    const idxInternal = uiToInternal(selectedRoundIndex)
+    if (!modalState.matchId || modalState.roundIdxUI === null) return
+
+    const idxInternal = uiToInternal(modalState.roundIdxUI)
     setGames(idxInternal, modalState.matchId, 'A', scoreA)
     setGames(idxInternal, modalState.matchId, 'B', scoreB)
     setModalState((prev) => ({ ...prev, open: false }))
@@ -518,7 +520,7 @@ const MatchesTab: FC = () => {
                                   className="border"
                                   size="sm"
                                   variant="secondary"
-                                  onClick={() => openScoreModalFor(m.id)}
+                                  onClick={() => openScoreModalFor(m.id, idx)}
                                 >
                                   {!hasScore ? (
                                     <>
