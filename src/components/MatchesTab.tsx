@@ -467,7 +467,7 @@ const MatchesTab: FC = () => {
           {/* ---------------------- Rounds list ---------------------- */}
           <div
             ref={scrollContainerRef}
-            className="h-full w-full flex flex-col-reverse gap-2 overflow-y-auto snap-y snap-mandatory shadow-[inset_0_-12px_10px_-12px_rgba(0,0,0,0.35)]"
+            className="h-full w-full flex flex-col-reverse justify-end gap-2 overflow-y-auto snap-y snap-mandatory shadow-[inset_0_-12px_10px_-12px_rgba(0,0,0,0.35)]"
           >
             {rounds.length === 0 ? (
               <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
