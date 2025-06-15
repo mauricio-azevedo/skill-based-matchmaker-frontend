@@ -148,9 +148,9 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
 }
 
 const roundVariants = {
-  initial: { opacity: 0, scale: 0.9 },
-  animate: { opacity: 1, scale: 1 },
-  exit: { opacity: 0, scale: 0.8 },
+  initial: { opacity: 0, scale: 0.9, y: 12 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.8, y: 12 },
 }
 const spring = { type: 'spring', stiffness: 500, damping: 38, mass: 0.9 }
 
@@ -346,6 +346,10 @@ const MatchesTab: FC = () => {
     return false
   }
 
+  const handleScroll = () => {
+    selectedRoundRef.current?.scrollIntoView({ block: 'start', inline: 'nearest' })
+  }
+
   // ---------------------------------------------------------------------------
   // JSX
   // ---------------------------------------------------------------------------
@@ -470,6 +474,7 @@ const MatchesTab: FC = () => {
                     key={round.id}
                     layout="position" // ✔ transições suaves no layout
                     variants={roundVariants}
+                    onAnimationComplete={handleScroll}
                     initial="initial"
                     animate="animate"
                     exit="exit"
