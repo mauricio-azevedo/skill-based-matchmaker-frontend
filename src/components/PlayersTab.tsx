@@ -112,7 +112,7 @@ const PlayersTab: FC = () => {
                       animate="animate"
                       exit="exit"
                       transition={spring}
-                      className="flex items-center"
+                      className="flex items-center gap-1"
                     >
                       {/* cartão interno */}
                       <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
@@ -128,6 +128,7 @@ const PlayersTab: FC = () => {
                           <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
                         </div>
                       </div>
+
                       {/* trigger do modal de edição */}
                       <EditPlayerModal player={p} />
                     </motion.li>
