@@ -379,58 +379,55 @@ const MatchesTab: FC = () => {
           </div>
 
           {/* ---------------------- Rounds list ---------------------- */}
-          <ScrollArea className="min-h-0 relative flex-1 overflow-hidden" type="scroll">
+          <ScrollArea className="min-h-0 relative flex-1 h-full overflow-y-auto snap-y snap-mandatory" type="scroll">
             <ul className="h-full w-full flex flex-col gap-2">
               {rounds.length === 0 ? (
                 <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
               ) : (
-                (() => {
-                  const round = rounds[selectedRoundIndex]
-                  return (
-                    <article className="flex flex-col flex-1 gap-6">
-                      <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
-                        Rodada {selectedRoundIndex + 1}
-                      </h2>
-                      <ol className="flex flex-col gap-10 flex-1">
-                        {round.matches.map((m) => {
-                          const hasScore = m.gamesA !== null && m.gamesB !== null
-                          return (
-                            <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
-                              {/* Times + placar */}
-                              <div className="flex flex-1 items-center gap-4">
-                                <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                                <div className="flex flex-col items-center gap-1">
-                                  <div className="absolute -top-1/4 items-center flex">
-                                    <Button
-                                      className="border"
-                                      size="sm"
-                                      variant="secondary"
-                                      onClick={() => openScoreModalFor(m.id)}
-                                    >
-                                      {!hasScore ? (
-                                        <>
-                                          <Edit size={8} />
-                                          <span className="text-xs">Resultado</span>
-                                        </>
-                                      ) : (
-                                        <>
-                                          {m.gamesA} × {m.gamesB}
-                                        </>
-                                      )}
-                                    </Button>
-                                  </div>
-
-                                  <X size={14} />
+                rounds.map((round, idx) => (
+                  <article key={idx} className="flex flex-col flex-1 gap-6">
+                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">
+                      Rodada {selectedRoundIndex + 1}
+                    </h2>
+                    <ol className="flex flex-col gap-10 flex-1">
+                      {round.matches.map((m) => {
+                        const hasScore = m.gamesA !== null && m.gamesB !== null
+                        return (
+                          <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
+                            {/* Times + placar */}
+                            <div className="flex flex-1 items-center gap-4">
+                              <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
+                              <div className="flex flex-col items-center gap-1">
+                                <div className="absolute -top-1/4 items-center flex">
+                                  <Button
+                                    className="border"
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => openScoreModalFor(m.id)}
+                                  >
+                                    {!hasScore ? (
+                                      <>
+                                        <Edit size={8} />
+                                        <span className="text-xs">Resultado</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        {m.gamesA} × {m.gamesB}
+                                      </>
+                                    )}
+                                  </Button>
                                 </div>
-                                <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+
+                                <X size={14} />
                               </div>
-                            </li>
-                          )
-                        })}
-                      </ol>
-                    </article>
-                  )
-                })()
+                              <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+                            </div>
+                          </li>
+                        )
+                      })}
+                    </ol>
+                  </article>
+                ))
               )}
             </ul>
           </ScrollArea>
