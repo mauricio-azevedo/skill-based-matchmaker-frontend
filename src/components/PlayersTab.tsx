@@ -1,4 +1,3 @@
-// src/components/PlayersTab.tsx
 import { useState, type FC, type FormEvent, useRef } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
@@ -11,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
-import { Plus, Minus } from 'lucide-react'
+import { Plus, Minus, Users } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 
 const itemVariants = {
@@ -87,8 +86,14 @@ const PlayersTab: FC = () => {
           </div>
         </div>
 
-        {/* Título Jogadores */}
-        <h2 className="text-lg font-semibold mb-2">Jogadores</h2>
+        {/* Título Jogadores e contador */}
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold">Jogadores</h2>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Users className="h-4 w-4" aria-hidden="true" />
+            <span className="text-sm">{players.length}</span>
+          </div>
+        </div>
 
         {/* Lista de jogadores */}
         {players.length === 0 ? (
