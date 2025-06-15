@@ -380,7 +380,7 @@ const MatchesTab: FC = () => {
 
           {/* ---------------------- Rounds list ---------------------- */}
           <ScrollArea className="min-h-0 relative flex-1 h-full overflow-y-auto snap-y snap-mandatory" type="scroll">
-            <ul className="h-full w-full flex flex-col gap-2">
+            <ul className="h-full w-full flex flex-col gap-2 overflow-y-auto snap-y snap-mandatory">
               {rounds.length === 0 ? (
                 <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
               ) : (
