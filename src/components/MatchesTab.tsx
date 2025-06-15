@@ -452,7 +452,7 @@ const MatchesTab: FC = () => {
             {rounds.length === 0 && (
               <p
                 key="placeholder" // chave p/ AnimatePresence poder animar
-                className="italic text-muted-foreground px-3 py-6 self-center"
+                className="italic text-muted-foreground"
               >
                 Nenhuma rodada gerada ainda.
               </p>
