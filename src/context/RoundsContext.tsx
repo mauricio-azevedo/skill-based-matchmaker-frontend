@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 import type { Round } from '@/types/players'
 
@@ -6,7 +6,7 @@ import type { Round } from '@/types/players'
 export const STORAGE_KEY_ROUNDS = 'match_rounds'
 
 type Ctx = {
-  rounds: Round[]
+  rounds: Round[] // agora sempre chega invertido
   addRound: (round: Round) => void
   setGames: (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) => void
   clear: () => void
@@ -48,7 +48,15 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const clear = () => setRounds([])
 
-  return <RoundsContext.Provider value={{ rounds, addRound, setGames, clear }}>{children}</RoundsContext.Provider>
+  /** Mantém o estado ordenado pelo tempo de criação,
+   mas entrega para o consumer do Context sempre na ordem inversa */
+  const reversedRounds = useMemo(() => [...rounds].reverse(), [rounds])
+
+  return (
+    <RoundsContext.Provider value={{ rounds: reversedRounds, addRound, setGames, clear }}>
+      {children}
+    </RoundsContext.Provider>
+  )
 }
 
 export const useRounds = () => {
