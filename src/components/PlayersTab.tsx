@@ -60,6 +60,7 @@ const PlayersTab: FC = () => {
               onMouseDown={(e) => e.preventDefault()} // mantém o foco atual
               onClick={() => setCourts((prev) => Math.max(1, prev - 1))}
               aria-label="Diminuir número de quadras"
+              className="h-8 text-xs"
             >
               <Minus className="h-4 w-4" />
             </Button>
@@ -73,7 +74,7 @@ const PlayersTab: FC = () => {
               onChange={(e) => setCourts(Math.max(1, Number(e.target.value)))}
               readOnly
               tabIndex={-1}
-              className="w-12 text-center cursor-default select-none pointer-events-none"
+              className="w-12 text-center cursor-default select-none pointer-events-none text-xs h-8"
             />
 
             {/* Botão de aumentar */}
@@ -84,6 +85,7 @@ const PlayersTab: FC = () => {
               onMouseDown={(e) => e.preventDefault()} // mantém o foco atual
               onClick={() => setCourts((prev) => prev + 1)}
               aria-label="Aumentar número de quadras"
+              className="h-8 text-xs"
             >
               <Plus className="h-4 w-4" />
             </Button>
