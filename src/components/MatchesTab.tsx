@@ -360,22 +360,22 @@ const MatchesTab: FC = () => {
 
         <CardContent className="!gap-2">
           {/* ------------------------ Controls ----------------------- */}
-          <div className="flex flex-wrap items-end justify-end">
-            {rounds.length > 0 && (
-              <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {rounds.map((_, idx) => (
-                    <SelectItem key={idx} value={String(idx)}>
-                      Rodada {idx + 1}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
+          {/*<div className="flex flex-wrap items-end justify-end">*/}
+          {/*  {rounds.length > 0 && (*/}
+          {/*    <Select value={String(selectedRoundIndex)} onValueChange={(v) => setSelectedRoundIndex(Number(v))}>*/}
+          {/*      <SelectTrigger>*/}
+          {/*        <SelectValue placeholder="Selecione..." />*/}
+          {/*      </SelectTrigger>*/}
+          {/*      <SelectContent>*/}
+          {/*        {rounds.map((_, idx) => (*/}
+          {/*          <SelectItem key={idx} value={String(idx)}>*/}
+          {/*            Rodada {idx + 1}*/}
+          {/*          </SelectItem>*/}
+          {/*        ))}*/}
+          {/*      </SelectContent>*/}
+          {/*    </Select>*/}
+          {/*  )}*/}
+          {/*</div>*/}
 
           {/* ---------------------- Rounds list ---------------------- */}
           <div className="h-full w-full flex flex-col gap-2 overflow-y-auto snap-y snap-mandatory">
