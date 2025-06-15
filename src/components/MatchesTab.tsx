@@ -215,7 +215,7 @@ const MatchesTab: FC = () => {
   useEffect(() => {
     if (!selectedRoundRef.current) return
     const id = requestAnimationFrame(() =>
-      selectedRoundRef.current!.scrollIntoView({ behavior: 'smooth', block: 'nearest' }),
+      selectedRoundRef.current!.scrollIntoView({ behavior: 'smooth', block: 'start' }),
     )
     return () => cancelAnimationFrame(id)
   }, [selectedRoundIndex, rounds.length])
