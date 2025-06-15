@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
@@ -11,11 +11,8 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { toast } from 'sonner'
 import { useRounds } from '@/context/RoundsContext'
 import { usePlayers } from '@/context/PlayersContext'
-
-// ✨ NEW: AlertDialog components for confirmation
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -32,8 +29,7 @@ export default function App() {
   // -----------------------------------------------------------
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
-  const settingsBtnRef = useRef<HTMLButtonElement>(null)
-
+  // Estado do diálogo: null | 'rounds' | 'all'
   const [warning, setWarning] = useState<null | 'rounds' | 'all'>(null)
 
   // Aplica a classe "dark" na <html> root
@@ -65,7 +61,7 @@ export default function App() {
 
   const handleClearAll = () => {
     clearRounds()
-    updatePlayers(() => []) // remove todos os jogadores
+    updatePlayers(() => [])
     toast.success('Todos os dados apagados!', { duration: 3000 })
   }
 
@@ -75,150 +71,93 @@ export default function App() {
       <header className="flex items-center border-b px-4 py-2">
         <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
         <div className="ml-auto flex items-center gap-4">
+          {/* Tema */}
           <div className="flex items-center gap-2">
-            {/* Ícone do sol — fica mais “aceso” no modo claro */}
-            <Sun
-              className="h-4 w-4 transition-opacity"
-              aria-hidden="true"
-              style={{ opacity: theme === 'light' ? 1 : 0.35 }}
-            />
-
-            {/* Switch do shadcn controla o tema */}
+            <Sun className="h-4 w-4 transition-opacity" style={{ opacity: theme === 'light' ? 1 : 0.35 }} />
             <Switch
               id="theme-toggle"
               checked={theme === 'dark'}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-              aria-label="Toggle dark mode"
+              aria-label="Alternar tema"
             />
-
-            {/* Ícone da lua — fica mais “acesa” no modo escuro */}
-            <Moon
-              className="h-4 w-4 transition-opacity"
-              aria-hidden="true"
-              style={{ opacity: theme === 'dark' ? 1 : 0.25 }}
-            />
+            <Moon className="h-4 w-4 transition-opacity" style={{ opacity: theme === 'dark' ? 1 : 0.25 }} />
           </div>
 
-          {/* Botão de configuração com menu */}
+          {/* Menu de configurações */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button
-                ref={settingsBtnRef}
-                aria-label="Configurações"
-                className="rounded-md p-2 transition hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2"
-              >
+              <button className="rounded-md p-2 transition hover:bg-muted" aria-label="Configurações">
                 <Settings className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {/* ---------- Confirmação para limpar partidas ---------- */}
-              <AlertDialog>
-                <AlertDialogTrigger disabled={!hasRounds} asChild>
-                  <DropdownMenuItem
-                    disabled={!hasRounds}
-                    onSelect={() => setWarning('rounds')}
-                    className="text-destructive cursor-pointer"
-                  >
-                    Limpar partidas
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Limpar todas as partidas?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta ação apagará todos os registros de partidas. Você tem certeza?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction
-                      className={buttonVariants({ variant: 'destructive' })}
-                      onClick={handleClearRounds}
-                    >
-                      Confirmar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-              {/* ---------- Confirmação para limpar tudo ---------- */}
-              <AlertDialog>
-                <AlertDialogTrigger disabled={noData} asChild>
-                  <DropdownMenuItem
-                    disabled={noData}
-                    onSelect={() => setWarning('all')}
-                    className="text-destructive cursor-pointer"
-                  >
-                    Limpar tudo
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Limpar todos os dados?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction className={buttonVariants({ variant: 'destructive' })} onClick={handleClearAll}>
-                      Confirmar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DropdownMenuItem
+                disabled={!hasRounds}
+                className="text-destructive cursor-pointer"
+                onSelect={() => setWarning('rounds')}
+              >
+                Limpar partidas
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={noData}
+                className="text-destructive cursor-pointer"
+                onSelect={() => setWarning('all')}
+              >
+                Limpar tudo
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {/* Alertas */}
-          {/* Limpar partidas */}
-          <AlertDialog open={warning === 'rounds'} onOpenChange={() => setWarning(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Limpar todas as partidas?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta ação apagará todos os registros de partidas. Você tem certeza?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  className={buttonVariants({ variant: 'destructive' })}
-                  onClick={() => {
-                    handleClearRounds()
-                    setWarning(null)
-                  }}
-                >
-                  Confirmar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          {/* Limpar tudo */}
-          <AlertDialog open={warning === 'all'} onOpenChange={() => setWarning(null)}>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Limpar todos os dados?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  className={buttonVariants({ variant: 'destructive' })}
-                  onClick={() => {
-                    handleClearAll()
-                    setWarning(null)
-                  }}
-                >
-                  Confirmar
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </header>
+
+      {/* ---------- AlertDialogs (fora do menu, padrão Radix) ---------- */}
+      {/* Limpar partidas */}
+      <AlertDialog open={warning === 'rounds'} onOpenChange={() => setWarning(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar todas as partidas?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação apagará todos os registros de partidas. Você tem certeza?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              onClick={() => {
+                handleClearRounds()
+                setWarning(null)
+              }}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Limpar tudo */}
+      <AlertDialog open={warning === 'all'} onOpenChange={() => setWarning(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar todos os dados?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: 'destructive' })}
+              onClick={() => {
+                handleClearAll()
+                setWarning(null)
+              }}
+            >
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* ---------- Tabs ---------- */}
       <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden gap-2">
