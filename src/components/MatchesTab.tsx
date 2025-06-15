@@ -165,6 +165,8 @@ const MatchesTab: FC = () => {
 
   const [selectedRoundIndex, setSelectedRoundIndex] = useState<number>(rounds.length > 0 ? rounds.length - 1 : 0)
 
+  const hasScores = rounds[selectedRoundIndex]?.matches.some((m) => m.gamesA !== null || m.gamesB !== null)
+
   // Modal state consolidated for robustness
   const [modalState, setModalState] = useState<{
     open: boolean
@@ -299,9 +301,13 @@ const MatchesTab: FC = () => {
       <Dialog open={confirmShuffleOpen} onOpenChange={setConfirmShuffleOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Embaralhar rodadas?</DialogTitle>
+            <DialogTitle> {hasScores ? 'Descartar resultados e embaralhar?' : 'Embaralhar esta rodada?'}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm">Tem certeza que deseja embaralhar a rodada atual?</p>
+          <p className="text-sm">
+            {hasScores
+              ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
+              : 'Confirme que os jogos ainda não começaram.'}
+          </p>
           <DialogFooter className="pt-4">
             <Button variant="secondary" onClick={() => setConfirmShuffleOpen(false)}>
               Cancelar
@@ -313,7 +319,7 @@ const MatchesTab: FC = () => {
                 doShuffle()
               }}
             >
-              Continuar
+              Sim, embaralhar
             </Button>
           </DialogFooter>
         </DialogContent>
