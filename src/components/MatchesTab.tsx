@@ -13,8 +13,9 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
-import { Crown, Edit, Shuffle, X } from 'lucide-react'
+import { Crown, Edit, MoreVertical, Shuffle, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -164,8 +165,6 @@ const MatchesTab: FC = () => {
 
   const [selectedRoundIndex, setSelectedRoundIndex] = useState<number>(rounds.length > 0 ? rounds.length - 1 : 0)
 
-  const hasScores = rounds[selectedRoundIndex]?.matches.some((m) => m.gamesA !== null || m.gamesB !== null)
-
   // Modal state consolidated for robustness
   const [modalState, setModalState] = useState<{
     open: boolean
@@ -184,7 +183,13 @@ const MatchesTab: FC = () => {
   })
 
   // New: confirmation dialog state ------------------------------------------------
-  const [confirmShuffleOpen, setConfirmShuffleOpen] = useState(false)
+  const [confirmShuffle, setConfirmShuffle] = useState<{
+    open: boolean
+    roundIndex: number | null
+  }>({ open: false, roundIndex: null })
+
+  const hasScoresInRound = (idx: number | null) =>
+    idx !== null && rounds[idx]?.matches.some((m) => m.gamesA !== null || m.gamesB !== null)
 
   const hasEnoughForCourts = (plist: Player[], courts: number) =>
     plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
@@ -237,40 +242,41 @@ const MatchesTab: FC = () => {
   /**
    * *Actual* shuffle logic extracted so we can call it after confirmation.
    */
-  const doShuffle = () => {
+  const doShuffle = (targetIdx: number) => {
     if (rounds.length === 0) {
       handleGenerate()
       return
     }
 
+    // snapshot das rodadas atuais
     const prevRounds = [...rounds]
-    const remainingRounds = prevRounds.slice(0, -1)
 
+    // zere tudo
     clear()
     updatePlayers((prev) => prev.map((p) => ({ ...p, matchCount: 0, partnerCounts: {} })))
 
-    remainingRounds.forEach((r) => {
-      addRound(r)
-      updatePlayers((prev) => applyRoundStats(prev, r, 1))
+    // repopule: quando chegar no índice-alvo, gere de novo
+    prevRounds.forEach((r, idx) => {
+      if (idx === targetIdx) {
+        const newRound = generateSchedule(activePlayers, courts)
+        addRound(newRound)
+        updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
+      } else {
+        addRound(r)
+        updatePlayers((prev) => applyRoundStats(prev, r, 1))
+      }
     })
 
-    try {
-      const newRound = generateSchedule(activePlayers, courts)
-      addRound(newRound)
-      updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-      setSelectedRoundIndex(remainingRounds.length)
-      toast.success('Rodada embaralhada!', { duration: 3000 })
-    } catch (error) {
-      toast.error((error as Error).message, { duration: 6000 })
-    }
+    setSelectedRoundIndex(targetIdx)
+    toast.success('Rodada embaralhada!', { duration: 3000 })
   }
 
   // ---------------------------------------------------------------------------
   // Handlers – Scores
   // ---------------------------------------------------------------------------
   const openScoreModalFor = (matchId: string) => {
-    const round = rounds[selectedRoundIndex]
-    const match = round.matches.find((m) => m.id === matchId)
+    const matches = rounds.flatMap((r) => r.matches)
+    const match = matches.find((m) => m.id === matchId)
 
     if (!match) return
 
@@ -313,25 +319,33 @@ const MatchesTab: FC = () => {
       {/* ------------------------------------------------------------------ */}
       {/* Confirmation dialog for shuffling with existing results            */}
       {/* ------------------------------------------------------------------ */}
-      <Dialog open={confirmShuffleOpen} onOpenChange={setConfirmShuffleOpen}>
+
+      <Dialog open={confirmShuffle.open} onOpenChange={(isOpen) => setConfirmShuffle((p) => ({ ...p, open: isOpen }))}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{hasScores ? 'Descartar resultados e embaralhar?' : 'Embaralhar esta rodada?'}</DialogTitle>
+            <DialogTitle>
+              {hasScoresInRound(confirmShuffle.roundIndex)
+                ? 'Descartar resultados e embaralhar?'
+                : 'Embaralhar esta rodada?'}
+            </DialogTitle>
           </DialogHeader>
+
           <p className="text-sm">
-            {hasScores
+            {hasScoresInRound(confirmShuffle.roundIndex)
               ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
               : 'Confirme que os jogos ainda não começaram.'}
           </p>
+
           <DialogFooter className="pt-4">
-            <Button variant="secondary" onClick={() => setConfirmShuffleOpen(false)}>
+            <Button variant="secondary" onClick={() => setConfirmShuffle({ open: false, roundIndex: null })}>
               Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={() => {
-                setConfirmShuffleOpen(false)
-                doShuffle()
+                if (confirmShuffle.roundIndex === null) return
+                setConfirmShuffle({ open: false, roundIndex: null })
+                doShuffle(confirmShuffle.roundIndex) // ⟵ novo
               }}
             >
               Sim, embaralhar
@@ -384,7 +398,30 @@ const MatchesTab: FC = () => {
             ) : (
               rounds.map((round, idx) => (
                 <div key={idx} className="flex flex-col flex-1 gap-6 snap-start pb-12">
-                  <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
+
+                    {/* botão “mais opções” */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="shrink-0">
+                          <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            if (warnIfInsufficient()) return
+                            setConfirmShuffle({ open: true, roundIndex: idx })
+                          }}
+                        >
+                          <Shuffle size={14} aria-hidden="true" />
+                          Embaralhar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   <ol className="flex flex-col gap-10 flex-1">
                     {round.matches.map((m) => {
                       const hasScore = m.gamesA !== null && m.gamesB !== null
@@ -428,23 +465,9 @@ const MatchesTab: FC = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <div className="flex w-full gap-2">
-            <Button
-              className="flex-1 max-w-fit"
-              variant="ghost"
-              onClick={() => {
-                if (warnIfInsufficient()) return
-                setConfirmShuffleOpen(true)
-              }}
-              disabled={rounds.length === 0 || players.length < PLAYERS_PER_MATCH}
-            >
-              <Shuffle size={14} aria-hidden="true" />
-              <span>Embaralhar</span>
-            </Button>
-            <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
-              Nova rodada
-            </Button>
-          </div>
+          <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
+            Nova rodada
+          </Button>
         </CardFooter>
       </Card>
     </>
