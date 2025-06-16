@@ -1,6 +1,6 @@
 // src/lib/algorithm.ts
 
-import type { Player, Round } from '../types/players'
+import type { Player, UnsavedRound } from '../types/players'
 
 // mínimo de jogadores necessários para uma rodada
 const MIN_PLAYERS = 4 as const
@@ -109,7 +109,7 @@ function selectTopMatches(matches: InternalMatch[], courts: number): InternalMat
 /**
  * Gera um Round com partidas balanceadas.
  */
-export function generateSchedule(players: Player[], courts: number): Round {
+export function generateSchedule(players: Player[], courts: number): UnsavedRound {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }

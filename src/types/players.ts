@@ -26,10 +26,14 @@ export interface Match {
 }
 
 /** Conjunto de partidas que podem acontecer simultaneamente. */
-export interface Round {
+export interface UnsavedRound {
   id: string
+  matches: Match[]
+  // no roundNumber here
+}
+
+export interface Round extends UnsavedRound {
   roundNumber: number
-  matches: Match[] // ≤ courts partidas, sem jogadores repetidos
 }
 
 export interface PlayerLBRow extends Player {

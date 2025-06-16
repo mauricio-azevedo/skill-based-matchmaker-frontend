@@ -1,12 +1,12 @@
 // @/context/RoundsContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import type { Round } from '@/types/players'
+import type { Round, UnsavedRound } from '@/types/players'
 
 export const STORAGE_KEY_ROUNDS = 'match_rounds'
 
 type Ctx = {
   rounds: Round[]
-  addRound: (r: Omit<Round, 'roundNumber'>) => void
+  addRound: (r: UnsavedRound) => void
   removeRound: (idx: number) => void
   replaceRound: (idx: number, r: Round) => void
   setGames: (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) => void

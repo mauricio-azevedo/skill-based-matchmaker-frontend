@@ -3,7 +3,7 @@ import { type FC, useEffect, useState } from 'react'
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
 import { generateSchedule } from '@/lib/algorithm'
-import type { Player } from '@/types/players'
+import type { Player, UnsavedRound } from '@/types/players'
 
 // shadcn/ui
 import { toast } from 'sonner'
@@ -201,7 +201,7 @@ const MatchesTab: FC = () => {
   const handleGenerate = () => {
     if (warnIfInsufficient()) return
     try {
-      const newRound = generateSchedule(activePlayers, courts)
+      const newRound: UnsavedRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
       setSelectedRoundIndex(rounds.length)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
@@ -214,8 +214,8 @@ const MatchesTab: FC = () => {
   const doShuffle = (idx: number) => {
     const oldRound = rounds[idx]
     if (!oldRound) return
-    const fresh = generateSchedule(activePlayers, courts)
-    const newRound = { ...fresh, id: oldRound.id }
+    const fresh: UnsavedRound = generateSchedule(activePlayers, courts)
+    const newRound = { ...fresh, id: oldRound.id, roundNumber: oldRound.roundNumber }
     updatePlayers((prev) => applyRoundStats(prev, oldRound, -1))
     updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
     replaceRound(idx, newRound)
