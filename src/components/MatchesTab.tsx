@@ -73,8 +73,6 @@ const MatchesTab: FC = () => {
 
   const activePlayers = players.filter((p) => p.active)
 
-  const [selectedRoundIndex, setSelectedRoundIndex] = useState<number>(0)
-
   const [modalState, setModalState] = useState<{
     open: boolean
     matchId: string | null
@@ -108,20 +106,11 @@ const MatchesTab: FC = () => {
   const hasEnoughForCourts = (plist: Player[], courts: number) =>
     plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
 
-  useEffect(() => {
-    if (rounds.length === 0) {
-      setSelectedRoundIndex(0)
-    } else if (selectedRoundIndex >= rounds.length) {
-      setSelectedRoundIndex(rounds.length - 1)
-    }
-  }, [rounds, selectedRoundIndex])
-
   const handleGenerate = () => {
     if (warnIfInsufficient()) return
     try {
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
-      setSelectedRoundIndex(rounds.length)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
       toast.success(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
     } catch (error) {
@@ -145,7 +134,6 @@ const MatchesTab: FC = () => {
     if (!roundToRemove) return
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
-    setSelectedRoundIndex((i) => Math.max(0, i > idx ? i - 1 : i))
     toast.success('Rodada excluída!', { duration: 3000 })
   }
 
