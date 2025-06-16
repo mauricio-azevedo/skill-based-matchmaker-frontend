@@ -28,13 +28,25 @@ const PlayersTab: FC = () => {
   const [level, setLevel] = useState(1)
 
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLFormElement>(null)
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const trimmed = name.trim()
     if (!trimmed) return
     add(trimmed, level)
-    toast.success(`${trimmed} adicionado!`, { position: 'bottom-center', duration: 1000 })
+    const rect = formRef.current!.getBoundingClientRect()
+    console.log(rect.left + rect.width / 2)
+    toast.success(`${trimmed} adicionado!`, {
+      duration: 1000,
+      style: {
+        position: 'absolute',
+        top: `${rect.top}px`,
+        left: `0`,
+        transform: 'translate(0, -140%)',
+        zIndex: 9999,
+      },
+    })
     setName('')
     queueMicrotask(() => nameInputRef.current?.focus())
   }
@@ -151,7 +163,7 @@ const PlayersTab: FC = () => {
         )}
 
         {/* Formulário de adição */}
-        <form onSubmit={handleSubmit} className="flex gap-2 items-center mt-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="flex gap-2 items-center pt-4">
           <div className="flex flex-col gap-2 flex-1">
             <div className="flex gap-2 flex-1">
               <Label htmlFor="player-name" className="w-[2.5rem]">
