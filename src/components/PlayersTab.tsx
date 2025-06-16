@@ -104,7 +104,7 @@ const PlayersTab: FC = () => {
                   {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
                 </>
               )}
-            </span>{' '}
+            </span>
           </div>
         </div>
 
