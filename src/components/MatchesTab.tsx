@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -74,6 +74,10 @@ const MatchesTab: FC = () => {
 
   const activePlayers = players.filter((p) => p.active)
 
+  // Ref for scroll container
+  const listRef = useRef<HTMLUListElement>(null)
+  const [disableSnap, setDisableSnap] = useState(false)
+
   const [modalState, setModalState] = useState<{
     open: boolean
     matchId: string | null
@@ -107,14 +111,10 @@ const MatchesTab: FC = () => {
   const hasEnoughForCourts = (plist: Player[], courts: number) =>
     plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
 
-  const [disableSnap, setDisableSnap] = useState(false)
-
-  const handleGenerate = () => {
+  // Extracted generation logic
+  const generateNewRound = () => {
     if (warnIfInsufficient()) return
-
-    // turn snap off immediately before adding
     setDisableSnap(true)
-
     try {
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
@@ -125,7 +125,24 @@ const MatchesTab: FC = () => {
     }
   }
 
-  // once rounds have updated, re-enable snap after a short delay
+  // Handle generate click: scroll to top if needed
+  const handleGenerate = () => {
+    if (listRef.current && listRef.current.scrollTop > 0) {
+      // Scroll smoothly to top
+      listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+      // Wait until scroll reaches top, then generate
+      const onScroll = () => {
+        if (listRef.current!.scrollTop === 0) {
+          listRef.current!.removeEventListener('scroll', onScroll)
+        }
+      }
+      listRef.current.addEventListener('scroll', onScroll)
+    } else {
+      generateNewRound()
+    }
+  }
+
+  // Re-enable snap after rounds update
   useEffect(() => {
     if (!disableSnap) return
     const timer = setTimeout(() => setDisableSnap(false), 1000)
@@ -212,7 +229,10 @@ const MatchesTab: FC = () => {
           </AnimatePresence>
 
           {/* Rounds List */}
-          <ul className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}>
+          <ul
+            ref={listRef}
+            className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}
+          >
             <AnimatePresence initial={false}>
               {rounds.map((round, idx) => (
                 <motion.li
