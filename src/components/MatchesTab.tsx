@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -71,6 +71,10 @@ const MatchesTab: FC = () => {
   const { rounds, addRound, setGames, replaceRound, removeRound } = useRounds()
   const { courts } = useCourts()
 
+  // Refs for scroll container and previous length
+  const roundsContainerRef = useRef<HTMLDivElement>(null)
+  const prevRoundsLengthRef = useRef(rounds.length)
+
   const activePlayers = players.filter((p) => p.active)
 
   const [modalState, setModalState] = useState<{
@@ -105,6 +109,14 @@ const MatchesTab: FC = () => {
 
   const hasEnoughForCourts = (plist: Player[], courts: number) =>
     plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
+
+  // Scroll to top only when rounds length increases
+  useEffect(() => {
+    if (roundsContainerRef.current && rounds.length > prevRoundsLengthRef.current) {
+      roundsContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+    prevRoundsLengthRef.current = rounds.length
+  }, [rounds.length])
 
   const handleGenerate = () => {
     if (warnIfInsufficient()) return
@@ -194,7 +206,7 @@ const MatchesTab: FC = () => {
           </AnimatePresence>
 
           {/* Rounds List */}
-          <div className="overflow-y-auto h-full snap-y snap-mandatory">
+          <div ref={roundsContainerRef} className="overflow-y-auto h-full snap-y snap-mandatory">
             <AnimatePresence initial={false}>
               {rounds.map((round, idx) => (
                 <motion.div
