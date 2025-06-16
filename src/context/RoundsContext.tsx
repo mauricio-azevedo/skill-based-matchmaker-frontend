@@ -1,5 +1,4 @@
-// @/context/RoundsContext.tsx
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { Round, UnsavedRound } from '@/types/players'
 
 export const STORAGE_KEY_ROUNDS = 'match_rounds'
@@ -31,32 +30,33 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem(STORAGE_KEY_ROUNDS, JSON.stringify(rounds))
   }, [rounds])
 
-  const addRound = (r: UnsavedRound) => {
+  // add a new round with next sequential number (prev[0] is the newest)
+  const addRound = useCallback((r: UnsavedRound) => {
     setRounds((prev) => {
-      const maxNum = prev.reduce((max, rt) => Math.max(max, rt.roundNumber), 0)
-      const nextNumber = maxNum + 1
+      const nextNumber = prev.length > 0 ? prev[0].roundNumber + 1 : 1
       const newRound: Round = { ...r, roundNumber: nextNumber }
       return [newRound, ...prev]
     })
-  }
+  }, [])
 
-  const removeRound = (idx: number) => {
+  const removeRound = useCallback((idx: number) => {
     setRounds((prev) => {
       // Remove the specified round
       const filtered = prev.filter((_, i) => i !== idx)
       // Re-number all remaining rounds sequentially:
-      // newest (index 0) gets highest number = filtered.length,
-      // down to 1
       return filtered.map((round, index) => ({
         ...round,
         roundNumber: filtered.length - index,
       }))
     })
-  }
+  }, [])
 
-  const replaceRound = (idx: number, r: Round) => setRounds((prev) => prev.map((old, i) => (i === idx ? r : old)))
+  const replaceRound = useCallback(
+    (idx: number, r: Round) => setRounds((prev) => prev.map((old, i) => (i === idx ? r : old))),
+    [],
+  )
 
-  const setGames = (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) =>
+  const setGames = useCallback((roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) => {
     setRounds((prev) => {
       const copy = structuredClone(prev)
       const match = copy[roundIdx]?.matches.find((m) => m.id === matchId)
@@ -67,8 +67,9 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
       return copy
     })
+  }, [])
 
-  const clear = () => setRounds([])
+  const clear = useCallback(() => setRounds([]), [])
 
   return (
     <RoundsContext.Provider value={{ rounds, addRound, removeRound, replaceRound, setGames, clear }}>
