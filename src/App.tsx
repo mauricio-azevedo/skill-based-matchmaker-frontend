@@ -65,11 +65,17 @@ export default function App() {
     singleToastSuccess('Todos os dados apagados!', { duration: 3000 })
   }
 
+  const handleTitleDoubleClick = () => {
+    singleToastSuccess('🏖️ Você encontrou o easter egg!', { duration: 3000 })
+  }
+
   return (
     <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
       {/* ---------- Header ---------- */}
       <header className="flex items-center border-b px-4 py-2">
-        <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
+        <h1 className="text-xl font-semibold tracking-tight" onDoubleClick={handleTitleDoubleClick}>
+          BeachRank
+        </h1>
         <div className="ml-auto flex items-center gap-4">
           {/* Tema */}
           <div className="flex items-center gap-2">
