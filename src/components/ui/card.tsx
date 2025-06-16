@@ -9,7 +9,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
       className={cn(
         'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
         className,
-        'flex min-h-0 flex-col max-w-md w-full h-full gap-4',
+        'flex min-h-0 flex-col max-w-md w-full h-full gap-4 py-4',
       )}
       {...props}
     />
