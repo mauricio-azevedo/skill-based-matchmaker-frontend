@@ -10,19 +10,10 @@ import { Moon, Sun, Settings } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { useRounds } from '@/context/RoundsContext'
 import { usePlayers } from '@/context/PlayersContext'
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
-} from '@/components/ui/alert-dialog'
-import { buttonVariants } from '@/components/ui/button'
 import { singleToastSuccess } from '@/utils/singleToast'
 import { seedPlayers } from '@/data/seedPlayers'
+import { shuffle } from '@/utils/shuffle'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 export default function App() {
   // -----------------------------------------------------------
@@ -31,7 +22,7 @@ export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   // Estado do diálogo: null | 'rounds' | 'all'
-  const [warning, setWarning] = useState<null | 'rounds' | 'all'>(null)
+  const [warning, setWarning] = useState<null | 'rounds' | 'all' | 'seed'>(null)
 
   // Aplica a classe "dark" na <html> root
   useEffect(() => {
@@ -66,7 +57,8 @@ export default function App() {
     singleToastSuccess('Todos os dados apagados!', { duration: 3000 })
   }
 
-  const handleTitleDoubleClick = () => {
+  const handleLoadSeed = () => {
+    shuffle(seedPlayers)
     clearRounds()
     updatePlayers(() => seedPlayers)
   }
@@ -75,9 +67,7 @@ export default function App() {
     <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
       {/* ---------- Header ---------- */}
       <header className="flex items-center border-b px-4 py-2">
-        <h1 className="text-xl font-semibold tracking-tight" onDoubleClick={handleTitleDoubleClick}>
-          BeachRank
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
         <div className="ml-auto flex items-center gap-4">
           {/* Tema */}
           <div className="flex items-center gap-2">
@@ -99,18 +89,15 @@ export default function App() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => setWarning('seed')}>Carregar seed</DropdownMenuItem>
               <DropdownMenuItem
                 disabled={!hasRounds}
-                className="text-destructive cursor-pointer"
+                className="text-destructive"
                 onSelect={() => setWarning('rounds')}
               >
                 Limpar partidas
               </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={noData}
-                className="text-destructive cursor-pointer"
-                onSelect={() => setWarning('all')}
-              >
+              <DropdownMenuItem disabled={noData} className="text-destructive " onSelect={() => setWarning('all')}>
                 Limpar tudo
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -118,54 +105,43 @@ export default function App() {
         </div>
       </header>
 
-      {/* ---------- AlertDialogs (fora do menu, padrão Radix) ---------- */}
-      {/* Limpar partidas */}
-      <AlertDialog open={warning === 'rounds'} onOpenChange={() => setWarning(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Limpar todas as partidas?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta ação apagará todos os registros de partidas. Você tem certeza?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: 'destructive' })}
-              onClick={() => {
-                handleClearRounds()
-                setWarning(null)
-              }}
-            >
-              Confirmar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={warning === 'seed'}
+        onOpenChange={() => setWarning(null)}
+        title="Carregar seed?"
+        description="Esta ação apagará todos os registros atuais de jogadres e partidas. Você tem certeza?"
+        confirmText="Sim, carregar seed"
+        onConfirm={() => {
+          handleLoadSeed()
+          setWarning(null)
+        }}
+      />
 
-      {/* Limpar tudo */}
-      <AlertDialog open={warning === 'all'} onOpenChange={() => setWarning(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Limpar todos os dados?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              className={buttonVariants({ variant: 'destructive' })}
-              onClick={() => {
-                handleClearAll()
-                setWarning(null)
-              }}
-            >
-              Confirmar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={warning === 'rounds'}
+        onOpenChange={() => setWarning(null)}
+        title="Limpar todas as partidas?"
+        description="Esta ação apagará todos os registros de partidas. Você tem certeza?"
+        confirmVariant="destructive"
+        confirmText="Sim, limpar partidas"
+        onConfirm={() => {
+          handleClearRounds()
+          setWarning(null)
+        }}
+      />
+
+      <ConfirmDialog
+        open={warning === 'all'}
+        onOpenChange={() => setWarning(null)}
+        title="Limpar todos os dados?"
+        description="Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?"
+        confirmVariant="destructive"
+        confirmText="Sim, limpar tudo"
+        onConfirm={() => {
+          handleClearAll()
+          setWarning(null)
+        }}
+      />
 
       {/* ---------- Tabs ---------- */}
       <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden gap-2">

@@ -1,6 +1,7 @@
 // src/lib/algorithm.ts
 
 import type { Player, UnsavedRound } from '../types/players'
+import { shuffle } from '@/utils/shuffle'
 
 // mínimo de jogadores necessários para uma rodada
 const MIN_PLAYERS = 4 as const
@@ -10,16 +11,6 @@ const WEIGHT = {
   SKILL_IMBALANCE: 2, // α: peso para diferença de habilidade total do time
   MATCH_COUNT: 1, // β: peso para quantidade de partidas já jogadas
   PARTNER_COUNT: 1, // γ: peso para frequência de parceria passada
-}
-
-/**
- * Embaralha um array in-place (Fisher–Yates).
- */
-function shuffle<T>(array: T[]): void {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
-  }
 }
 
 /**
