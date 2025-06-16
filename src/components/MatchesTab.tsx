@@ -140,7 +140,7 @@ const MatchesTab: FC = () => {
     updatePlayers((prev) => applyRoundStats(prev, oldRound, -1))
     updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
     replaceRound(idx, newRound)
-    toast.success('Rodada embaralhada!', { duration: 3000 })
+    toast.success(`Rodada ${oldRound.roundNumber} embaralhada!`, { duration: 3000 })
   }
 
   const doDelete = (idx: number) => {
