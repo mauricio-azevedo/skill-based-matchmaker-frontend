@@ -128,19 +128,9 @@ const MatchesTab: FC = () => {
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
     if (listRef.current && listRef.current.scrollTop > 0) {
-      // Scroll smoothly to top
       listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
-      // Wait until scroll reaches top, then generate
-      const onScroll = () => {
-        if (listRef.current!.scrollTop === 0) {
-          listRef.current!.removeEventListener('scroll', onScroll)
-          generateNewRound()
-        }
-      }
-      listRef.current.addEventListener('scroll', onScroll)
-    } else {
-      generateNewRound()
     }
+    generateNewRound()
   }
 
   // Re-enable snap after rounds update
