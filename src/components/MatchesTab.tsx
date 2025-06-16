@@ -267,90 +267,6 @@ const MatchesTab: FC = () => {
 
   return (
     <>
-      {confirmShuffle.open && (
-        <Dialog
-          open={confirmShuffle.open}
-          onOpenChange={(isOpen) => setConfirmShuffle((p) => ({ ...p, open: isOpen }))}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {hasScoresInRound(confirmShuffle.roundIndex)
-                  ? 'Descartar resultados e embaralhar?'
-                  : 'Embaralhar esta rodada?'}
-              </DialogTitle>
-            </DialogHeader>
-            <p className="text-sm">
-              {hasScoresInRound(confirmShuffle.roundIndex)
-                ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
-                : 'Confirme que os jogos ainda não começaram.'}
-            </p>
-            <DialogFooter className="pt-4">
-              <Button variant="secondary" onClick={() => setConfirmShuffle({ open: false, roundIndex: null })}>
-                Cancelar
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (confirmShuffle.roundIndex === null) return
-                  const idx = confirmShuffle.roundIndex
-                  setConfirmShuffle({ open: false, roundIndex: null })
-                  doShuffle(idx)
-                }}
-              >
-                Sim, embaralhar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {confirmDelete.open && (
-        <Dialog open={confirmDelete.open} onOpenChange={(isOpen) => setConfirmDelete((p) => ({ ...p, open: isOpen }))}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {hasScoresInRound(confirmDelete.roundIndex)
-                  ? 'Excluir rodada e descartar resultados?'
-                  : 'Excluir esta rodada?'}
-              </DialogTitle>
-            </DialogHeader>
-            <p className="text-sm">
-              {hasScoresInRound(confirmDelete.roundIndex)
-                ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
-                : 'Esta ação é irreversível.'}
-            </p>
-            <DialogFooter className="pt-4">
-              <Button variant="secondary" onClick={() => setConfirmDelete({ open: false, roundIndex: null })}>
-                Cancelar
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (confirmDelete.roundIndex === null) return
-                  const idx = confirmDelete.roundIndex
-                  setConfirmDelete({ open: false, roundIndex: null })
-                  doDelete(idx)
-                }}
-              >
-                Sim, excluir
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      <ScoreModal
-        key={modalState.matchId || ''}
-        open={modalState.open}
-        onClose={() => setModalState((p) => ({ ...p, open: false }))}
-        initialScoreA={modalState.initialA}
-        initialScoreB={modalState.initialB}
-        namesA={modalState.namesA}
-        namesB={modalState.namesB}
-        onSave={handleSaveScore}
-      />
-
       <Card>
         <CardHeader>
           <CardTitle>Partidas</CardTitle>
@@ -461,6 +377,90 @@ const MatchesTab: FC = () => {
           </Button>
         </CardFooter>
       </Card>
+
+      {confirmShuffle.open && (
+        <Dialog
+          open={confirmShuffle.open}
+          onOpenChange={(isOpen) => setConfirmShuffle((p) => ({ ...p, open: isOpen }))}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {hasScoresInRound(confirmShuffle.roundIndex)
+                  ? 'Descartar resultados e embaralhar?'
+                  : 'Embaralhar esta rodada?'}
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm">
+              {hasScoresInRound(confirmShuffle.roundIndex)
+                ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
+                : 'Confirme que os jogos ainda não começaram.'}
+            </p>
+            <DialogFooter className="pt-4">
+              <Button variant="secondary" onClick={() => setConfirmShuffle({ open: false, roundIndex: null })}>
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (confirmShuffle.roundIndex === null) return
+                  const idx = confirmShuffle.roundIndex
+                  setConfirmShuffle({ open: false, roundIndex: null })
+                  doShuffle(idx)
+                }}
+              >
+                Sim, embaralhar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {confirmDelete.open && (
+        <Dialog open={confirmDelete.open} onOpenChange={(isOpen) => setConfirmDelete((p) => ({ ...p, open: isOpen }))}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {hasScoresInRound(confirmDelete.roundIndex)
+                  ? 'Excluir rodada e descartar resultados?'
+                  : 'Excluir esta rodada?'}
+              </DialogTitle>
+            </DialogHeader>
+            <p className="text-sm">
+              {hasScoresInRound(confirmDelete.roundIndex)
+                ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
+                : 'Esta ação é irreversível.'}
+            </p>
+            <DialogFooter className="pt-4">
+              <Button variant="secondary" onClick={() => setConfirmDelete({ open: false, roundIndex: null })}>
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (confirmDelete.roundIndex === null) return
+                  const idx = confirmDelete.roundIndex
+                  setConfirmDelete({ open: false, roundIndex: null })
+                  doDelete(idx)
+                }}
+              >
+                Sim, excluir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <ScoreModal
+        key={modalState.matchId || ''}
+        open={modalState.open}
+        onClose={() => setModalState((p) => ({ ...p, open: false }))}
+        initialScoreA={modalState.initialA}
+        initialScoreB={modalState.initialB}
+        namesA={modalState.namesA}
+        namesB={modalState.namesB}
+        onSave={handleSaveScore}
+      />
     </>
   )
 }
