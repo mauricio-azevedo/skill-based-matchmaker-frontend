@@ -64,87 +64,6 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
 }
 
 // -----------------------------------------------------------------------------
-// ScoreModal sub-component (handles its own local state for robustness)
-// -----------------------------------------------------------------------------
-interface ScoreModalProps {
-  open: boolean
-  onClose: () => void
-  initialScoreA: number | null
-  initialScoreB: number | null
-  namesA: string[]
-  namesB: string[]
-  onSave: (scoreA: number, scoreB: number) => void
-}
-
-const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initialScoreB, namesA, namesB, onSave }) => {
-  const [scoreA, setScoreA] = useState<number | null>(initialScoreA)
-  const [scoreB, setScoreB] = useState<number | null>(initialScoreB)
-
-  useEffect(() => {
-    setScoreA(initialScoreA)
-    setScoreB(initialScoreB)
-  }, [initialScoreA, initialScoreB])
-
-  const renderScoreToggle = (value: number | null, onChange: (v: number) => void) => (
-    <ToggleGroup
-      type="single"
-      value={value !== null ? String(value) : ''}
-      onValueChange={(val) => {
-        if (!val) return
-        onChange(Number(val))
-      }}
-      className="grid grid-cols-7 gap-1 w-full"
-    >
-      {SCORE_OPTIONS.map((opt) => (
-        <ToggleGroupItem key={opt} value={String(opt)} className="px-2 py-1">
-          {opt}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  )
-
-  const handleSave = () => {
-    if (scoreA === null || scoreB === null) {
-      toast.error('Selecione o placar de ambos os times.')
-      return
-    }
-    onSave(scoreA, scoreB)
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Inserir resultado</DialogTitle>
-        </DialogHeader>
-
-        {/* ---------- Nomes das duplas ---------- */}
-        <div className="flex flex-col gap-6">
-          <div>
-            <p className="font-semibold mb-3">{namesA.join(' & ')}</p>
-            {renderScoreToggle(scoreA, setScoreA)}
-          </div>
-          <div>
-            <p className="font-semibold mb-3">{namesB.join(' & ')}</p>
-            {renderScoreToggle(scoreB, setScoreB)}
-          </div>
-        </div>
-
-        {/* ---------- Botões ---------- */}
-        <DialogFooter>
-          <div className="flex gap-2 justify-end">
-            <Button variant="secondary" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-// -----------------------------------------------------------------------------
 // Main component
 // -----------------------------------------------------------------------------
 const MatchesTab: FC = () => {
@@ -490,5 +409,86 @@ const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
     </div>
   </div>
 )
+
+// -----------------------------------------------------------------------------
+// ScoreModal sub-component (handles its own local state for robustness)
+// -----------------------------------------------------------------------------
+interface ScoreModalProps {
+  open: boolean
+  onClose: () => void
+  initialScoreA: number | null
+  initialScoreB: number | null
+  namesA: string[]
+  namesB: string[]
+  onSave: (scoreA: number, scoreB: number) => void
+}
+
+const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initialScoreB, namesA, namesB, onSave }) => {
+  const [scoreA, setScoreA] = useState<number | null>(initialScoreA)
+  const [scoreB, setScoreB] = useState<number | null>(initialScoreB)
+
+  useEffect(() => {
+    setScoreA(initialScoreA)
+    setScoreB(initialScoreB)
+  }, [initialScoreA, initialScoreB])
+
+  const renderScoreToggle = (value: number | null, onChange: (v: number) => void) => (
+    <ToggleGroup
+      type="single"
+      value={value !== null ? String(value) : ''}
+      onValueChange={(val) => {
+        if (!val) return
+        onChange(Number(val))
+      }}
+      className="grid grid-cols-7 gap-1 w-full"
+    >
+      {SCORE_OPTIONS.map((opt) => (
+        <ToggleGroupItem key={opt} value={String(opt)} className="px-2 py-1">
+          {opt}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  )
+
+  const handleSave = () => {
+    if (scoreA === null || scoreB === null) {
+      toast.error('Selecione o placar de ambos os times.')
+      return
+    }
+    onSave(scoreA, scoreB)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Inserir resultado</DialogTitle>
+        </DialogHeader>
+
+        {/* ---------- Nomes das duplas ---------- */}
+        <div className="flex flex-col gap-6">
+          <div>
+            <p className="font-semibold mb-3">{namesA.join(' & ')}</p>
+            {renderScoreToggle(scoreA, setScoreA)}
+          </div>
+          <div>
+            <p className="font-semibold mb-3">{namesB.join(' & ')}</p>
+            {renderScoreToggle(scoreB, setScoreB)}
+          </div>
+        </div>
+
+        {/* ---------- Botões ---------- */}
+        <DialogFooter>
+          <div className="flex gap-2 justify-end">
+            <Button variant="secondary" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSave}>Salvar</Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
 export default MatchesTab
