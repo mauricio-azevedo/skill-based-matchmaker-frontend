@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils'
 import { Crown, Edit, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { AnimatePresence, motion, spring } from 'framer-motion'
-import { itemVariants } from '@/components/PlayersTab'
+import { AnimatePresence, motion } from 'framer-motion'
+import { itemVariants, spring } from '@/consts/animation'
 
 // -----------------------------------------------------------------------------
 // Constants
