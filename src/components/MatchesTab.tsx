@@ -23,6 +23,7 @@ import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/s
 // -----------------------------------------------------------------------------
 const PLAYERS_PER_MATCH = 4 as const
 const SCORE_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const
+const DISABLE_SNAP_TIMEOUT = 500 as const
 
 // -----------------------------------------------------------------------------
 // Utility helpers
@@ -136,7 +137,7 @@ const MatchesTab: FC = () => {
   // Re-enable snap after rounds update
   useEffect(() => {
     if (!disableSnap) return
-    const timer = setTimeout(() => setDisableSnap(false), 800)
+    const timer = setTimeout(() => setDisableSnap(false), DISABLE_SNAP_TIMEOUT)
     return () => clearTimeout(timer)
   }, [rounds, disableSnap])
 
@@ -224,7 +225,7 @@ const MatchesTab: FC = () => {
             ref={listRef}
             className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}
           >
-            <AnimatePresence initial={false}>
+            <AnimatePresence initial={false} mode="popLayout">
               {rounds.map((round, idx) => (
                 <motion.li
                   key={round.id}
@@ -234,8 +235,6 @@ const MatchesTab: FC = () => {
                   animate="animate"
                   exit="exit"
                   className="flex flex-col gap-6 pb-12 snap-start"
-                  onAnimationStart={() => console.time('addAnimation')}
-                  onAnimationComplete={() => console.timeEnd('addAnimation')}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {round.roundNumber}</h2>

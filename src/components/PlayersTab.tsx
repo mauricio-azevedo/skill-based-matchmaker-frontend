@@ -109,7 +109,7 @@ const PlayersTab: FC = () => {
           <p className="italic text-muted-foreground flex-1">Adicione pelo menos 4 jogadores.</p>
         ) : (
           <ul className="flex flex-col gap-3 flex-1 overflow-y-auto">
-            <AnimatePresence initial={false}>
+            <AnimatePresence initial={false} mode="popLayout">
               {players.map((p) => (
                 <motion.li
                   key={p.id}
