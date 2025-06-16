@@ -159,7 +159,7 @@ const MatchesTab: FC = () => {
   const [modalState, setModalState] = useState<{
     open: boolean
     matchId: string | null
-    roundIdxUI: number | null
+    roundIdx: number | null
     initialA: number | null
     initialB: number | null
     namesA: string[]
@@ -167,7 +167,7 @@ const MatchesTab: FC = () => {
   }>({
     open: false,
     matchId: null,
-    roundIdxUI: null,
+    roundIdx: null,
     initialA: null,
     initialB: null,
     namesA: [],
@@ -183,10 +183,9 @@ const MatchesTab: FC = () => {
     roundIndex: null,
   })
 
-  const uiToInternal = (uiIdx: number) => rounds.length - 1 - uiIdx
-
   const hasScoresInRound = (idx: number | null) =>
     idx !== null && rounds[idx]?.matches.some((m) => m.gamesA !== null || m.gamesB !== null)
+
   const hasEnoughForCourts = (plist: Player[], courts: number) =>
     plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
 
@@ -196,14 +195,14 @@ const MatchesTab: FC = () => {
     } else if (selectedRoundIndex >= rounds.length) {
       setSelectedRoundIndex(rounds.length - 1)
     }
-  }, [rounds])
+  }, [rounds, selectedRoundIndex])
 
   const handleGenerate = () => {
     if (warnIfInsufficient()) return
     try {
       const newRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
-      setSelectedRoundIndex(0)
+      setSelectedRoundIndex(rounds.length)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
       toast.success(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
     } catch (error) {
@@ -211,35 +210,33 @@ const MatchesTab: FC = () => {
     }
   }
 
-  const doShuffle = (uiIdx: number) => {
-    const oldRound = rounds[uiIdx]
+  const doShuffle = (idx: number) => {
+    const oldRound = rounds[idx]
     if (!oldRound) return
-    const ascIdx = uiToInternal(uiIdx)
     const fresh = generateSchedule(activePlayers, courts)
     const newRound = { ...fresh, id: oldRound.id }
     updatePlayers((prev) => applyRoundStats(prev, oldRound, -1))
     updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-    replaceRound(ascIdx, newRound)
+    replaceRound(idx, newRound)
     toast.success('Rodada embaralhada!', { duration: 3000 })
   }
 
-  const doDelete = (targetIdxUI: number) => {
-    const targetInternal = uiToInternal(targetIdxUI)
-    const roundToRemove = rounds[targetInternal]
+  const doDelete = (idx: number) => {
+    const roundToRemove = rounds[idx]
     if (!roundToRemove) return
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
-    removeRound(targetInternal)
-    setSelectedRoundIndex((i) => Math.max(0, i > targetIdxUI ? i - 1 : i))
+    removeRound(idx)
+    setSelectedRoundIndex((i) => Math.max(0, i > idx ? i - 1 : i))
     toast.success('Rodada excluída!', { duration: 3000 })
   }
 
-  const openScoreModalFor = (matchId: string, roundIdxUI: number) => {
-    const match = rounds.flatMap((r) => r.matches).find((m) => m.id === matchId)
+  const openScoreModalFor = (matchId: string, idx: number) => {
+    const match = rounds[idx]?.matches.find((m) => m.id === matchId)
     if (!match) return
     setModalState({
       open: true,
       matchId,
-      roundIdxUI,
+      roundIdx: idx,
       initialA: match.gamesA ?? null,
       initialB: match.gamesB ?? null,
       namesA: match.teamA.map((p) => p.name),
@@ -248,10 +245,9 @@ const MatchesTab: FC = () => {
   }
 
   const handleSaveScore = (scoreA: number, scoreB: number) => {
-    if (!modalState.matchId || modalState.roundIdxUI === null) return
-    const idxInternal = uiToInternal(modalState.roundIdxUI)
-    setGames(idxInternal, modalState.matchId, 'A', scoreA)
-    setGames(idxInternal, modalState.matchId, 'B', scoreB)
+    if (modalState.roundIdx === null || !modalState.matchId) return
+    setGames(modalState.roundIdx, modalState.matchId, 'A', scoreA)
+    setGames(modalState.roundIdx, modalState.matchId, 'B', scoreB)
     setModalState((prev) => ({ ...prev, open: false }))
     toast.success('Placar salvo!', { duration: 2500 })
   }
@@ -296,8 +292,9 @@ const MatchesTab: FC = () => {
                 variant="destructive"
                 onClick={() => {
                   if (confirmShuffle.roundIndex === null) return
+                  const idx = confirmShuffle.roundIndex
                   setConfirmShuffle({ open: false, roundIndex: null })
-                  doShuffle(confirmShuffle.roundIndex)
+                  doShuffle(idx)
                 }}
               >
                 Sim, embaralhar
@@ -330,8 +327,9 @@ const MatchesTab: FC = () => {
                 variant="destructive"
                 onClick={() => {
                   if (confirmDelete.roundIndex === null) return
+                  const idx = confirmDelete.roundIndex
                   setConfirmDelete({ open: false, roundIndex: null })
-                  doDelete(confirmDelete.roundIndex)
+                  doDelete(idx)
                 }}
               >
                 Sim, excluir
@@ -342,7 +340,7 @@ const MatchesTab: FC = () => {
       )}
 
       <ScoreModal
-        key={modalState.matchId}
+        key={modalState.matchId || ''}
         open={modalState.open}
         onClose={() => setModalState((p) => ({ ...p, open: false }))}
         initialScoreA={modalState.initialA}
@@ -363,7 +361,7 @@ const MatchesTab: FC = () => {
               {rounds.map((round, idx) => (
                 <div key={round.id} className="flex flex-col gap-6 pb-12">
                   <div className="flex items-center justify-between gap-2">
-                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {rounds.length - idx}</h2>
+                    <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {idx + 1}</h2>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="shrink-0">

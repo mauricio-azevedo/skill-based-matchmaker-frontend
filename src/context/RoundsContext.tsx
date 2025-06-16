@@ -1,15 +1,14 @@
-// context/RoundsContext.tsx
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import * as React from 'react'
 import type { Round } from '@/types/players'
 
 export const STORAGE_KEY_ROUNDS = 'match_rounds'
 
 type Ctx = {
-  rounds: Round[] // já vem invertido
+  rounds: Round[]
   addRound: (r: Round) => void
-  removeRound: (idx: number) => void //  🔹 novo
-  replaceRound: (idx: number, r: Round) => void //  🔹 novo
+  removeRound: (idx: number) => void
+  replaceRound: (idx: number, r: Round) => void
   setGames: (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) => void
   clear: () => void
 }
@@ -32,11 +31,8 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [roundsAsc])
 
   const addRound = (r: Round) => setRoundsAsc((prev) => [...prev, r])
-
   const removeRound = (idx: number) => setRoundsAsc((prev) => prev.filter((_, i) => i !== idx))
-
   const replaceRound = (idx: number, r: Round) => setRoundsAsc((prev) => prev.map((old, i) => (i === idx ? r : old)))
-
   const setGames = (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) =>
     setRoundsAsc((prev) => {
       const copy = structuredClone(prev)
@@ -48,11 +44,10 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
       return copy
     })
-
   const clear = () => setRoundsAsc([])
 
-  // entrega invertido ao consumer
-  const rounds = useMemo(() => [...roundsAsc].reverse(), [roundsAsc])
+  // now passing roundsAsc directly without reversing
+  const rounds = roundsAsc
 
   return (
     <RoundsContext.Provider value={{ rounds, addRound, removeRound, replaceRound, setGames, clear }}>
