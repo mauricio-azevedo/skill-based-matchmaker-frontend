@@ -225,7 +225,7 @@ const MatchesTab: FC = () => {
             ref={listRef}
             className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}
           >
-            <AnimatePresence initial={false} mode="popLayout">
+            <AnimatePresence initial={false}>
               {rounds.map((round, idx) => (
                 <motion.li
                   key={round.id}
