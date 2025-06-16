@@ -23,7 +23,7 @@ import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/s
 // -----------------------------------------------------------------------------
 const PLAYERS_PER_MATCH = 4 as const
 const SCORE_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const
-const DISABLE_SNAP_TIMEOUT = 500 as const
+const DISABLE_SNAP_TIMEOUT = 600 as const
 
 // -----------------------------------------------------------------------------
 // Utility helpers
