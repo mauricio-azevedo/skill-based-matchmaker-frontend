@@ -355,8 +355,23 @@ const MatchesTab: FC = () => {
         <CardHeader>
           <CardTitle>Partidas</CardTitle>
         </CardHeader>
-        <CardContent className="!gap-2">
-          {rounds.length === 0 && <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>}
+        <CardContent className="!gap-2 relative">
+          {/* Empty State */}
+          <AnimatePresence initial={false}>
+            {rounds.length === 0 && (
+              <motion.div
+                key="no-rounds"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 flex top-0 left-4 pointer-events-none"
+              >
+                <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Rounds List */}
           <ScrollArea className="h-full shadow-[inset_0_-12px_10px_-12px_rgba(0,0,0,0.35)]">
             <div className="flex flex-col flex-1">
               <AnimatePresence initial={false}>
