@@ -8,10 +8,10 @@ const MIN_PLAYERS = 4 as const
 
 // constantes de peso para o cálculo de score
 const WEIGHT = {
-  SKILL_IMBALANCE: 4, // α: peso para diferença de habilidade total entre os times
-  MATCH_COUNT_TOTAL: 6, // β: peso para o total de partidas jogadas pelos jogadores
-  MATCH_COUNT_IMBALANCE: 8, // δ: peso para o desequilíbrio no número de partidas entre os jogadores
-  PARTNER_COUNT: 2, // γ: peso para frequência de parcerias passadas
+  SKILL_IMBALANCE: 4, // α: evita times com diferença grande de habilidade
+  MATCH_COUNT_TOTAL: 6, // β: prioriza partidas com jogadores que, em média, jogaram menos até agora
+  MATCH_COUNT_IMBALANCE: 8, // δ: evita partidas com desequilíbrio (ex: alguém com 4 jogos e outro com 0)
+  PARTNER_COUNT: 2, // γ: evita repetir duplas que já jogaram juntas antes
 }
 
 /**
@@ -46,10 +46,10 @@ function calculateMatchScore(a1: Player, a2: Player, b1: Player, b2: Player): nu
   // diferença de skill total dos times
   const teamImbalance = Math.abs(a1.level + a2.level - (b1.level + b2.level))
 
-  // quantas partidas já jogou cada um
+  // média de partidas que cada um já jogou
   const playedSum = a1.matchCount + a2.matchCount + b1.matchCount + b2.matchCount
 
-  // diferença entre a quantidade de partidas que cada um já
+  // diferença entre a quantidade de partidas que cada um já jogou
   const matchCountImbalance =
     Math.max(a1.matchCount, a2.matchCount, b1.matchCount, b2.matchCount) -
       Math.min(a1.matchCount, a2.matchCount, b1.matchCount, b2.matchCount) || 1
