@@ -31,7 +31,7 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem(STORAGE_KEY_ROUNDS, JSON.stringify(rounds))
   }, [rounds])
 
-  const addRound = (r: Omit<Round, 'roundNumber'>) => {
+  const addRound = (r: UnsavedRound) => {
     setRounds((prev) => {
       const maxNum = prev.reduce((max, rt) => Math.max(max, rt.roundNumber), 0)
       const nextNumber = maxNum + 1
