@@ -1,12 +1,12 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import * as React from 'react'
+// @/context/RoundsContext.tsx
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import type { Round } from '@/types/players'
 
 export const STORAGE_KEY_ROUNDS = 'match_rounds'
 
 type Ctx = {
   rounds: Round[]
-  addRound: (r: Round) => void
+  addRound: (r: Omit<Round, 'roundNumber'>) => void
   removeRound: (idx: number) => void
   replaceRound: (idx: number, r: Round) => void
   setGames: (roundIdx: number, matchId: string, team: 'A' | 'B', games: number | null) => void
@@ -20,23 +20,26 @@ const calcWinner = (gA: number | null, gB: number | null) => (gA !== null && gB 
 export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [rounds, setRounds] = useState<Round[]>(() => {
     try {
-      // We stored in newest-first order already, so just load and parse.
       return JSON.parse(localStorage.getItem(STORAGE_KEY_ROUNDS) || '[]') as Round[]
     } catch {
       return []
     }
   })
 
-  // whenever state changes, persist it (still in newest-first order)
+  // persist on change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_ROUNDS, JSON.stringify(rounds))
   }, [rounds])
 
-  // === only change: prepend instead of append ===
-  const addRound = (r: Round) => {
-    setRounds((prev) => [r, ...prev])
+  const addRound = (r: Omit<Round, 'roundNumber'>) => {
+    setRounds((prev) => {
+      // compute next roundNumber by looking at existing max
+      const maxNum = prev.reduce((max, rt) => Math.max(max, rt.roundNumber), 0)
+      const nextNumber = maxNum + 1
+      const newRound: Round = { ...r, roundNumber: nextNumber }
+      return [newRound, ...prev]
+    })
   }
-  // =============================================
 
   const removeRound = (idx: number) => setRounds((prev) => prev.filter((_, i) => i !== idx))
 
