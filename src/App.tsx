@@ -35,12 +35,12 @@ export default function App() {
   const { rounds, clear: clearRounds } = useRounds()
   const { players, updatePlayers } = usePlayers()
 
-  // Verifica se os jogadores atuais correspondem exatamente ao seed (ignorando ordem)
+  // Verifica se os jogadores atuais correspondem exatamente ao seed (id, nome e nível), ignorando ordem
   const isSeedLoaded = useMemo(() => {
     if (players.length !== seedPlayers.length) return false
-    const seedIds = new Set(seedPlayers.map((p) => p.id))
-    return players.every((p) => seedIds.has(p.id))
-  }, [players])
+    const seedSet = new Set(seedPlayers.map(({ id, name, level }) => `${id}-${name}-${level}`))
+    return players.every(({ id, name, level }) => seedSet.has(`${id}-${name}-${level}`))
+  }, [players, seedPlayers])
 
   const hasRounds = rounds.length > 0
   const hasPlayers = players.length > 0
