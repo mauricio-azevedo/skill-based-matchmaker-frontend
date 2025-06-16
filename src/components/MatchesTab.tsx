@@ -17,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AnimatePresence, motion } from 'framer-motion'
 import { itemVariants } from '@/consts/animation'
 import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/singleToast'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -161,7 +162,6 @@ const MatchesTab: FC = () => {
 
     // turn snap off immediately before removing
     setDisableSnap(true)
-
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
     singleToastSuccess(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
@@ -313,79 +313,49 @@ const MatchesTab: FC = () => {
           </Button>
         </CardFooter>
       </Card>
-
-      {confirmShuffle.open && (
-        <Dialog
-          open={confirmShuffle.open}
-          onOpenChange={(isOpen) => setConfirmShuffle((p) => ({ ...p, open: isOpen }))}
-        >
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {hasScoresInRound(confirmShuffle.roundIndex)
-                  ? 'Descartar resultados e embaralhar?'
-                  : 'Embaralhar esta rodada?'}
-              </DialogTitle>
-            </DialogHeader>
-            <p className="text-sm">
-              {hasScoresInRound(confirmShuffle.roundIndex)
-                ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
-                : 'Confirme que os jogos ainda não começaram.'}
-            </p>
-            <DialogFooter>
-              <Button variant="secondary" onClick={() => setConfirmShuffle({ open: false, roundIndex: null })}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => {
-                  if (confirmShuffle.roundIndex === null) return
-                  const idx = confirmShuffle.roundIndex
-                  setConfirmShuffle({ open: false, roundIndex: null })
-                  doShuffle(idx)
-                }}
-              >
-                Sim, embaralhar
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {confirmDelete.open && (
-        <Dialog open={confirmDelete.open} onOpenChange={(isOpen) => setConfirmDelete((p) => ({ ...p, open: isOpen }))}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {hasScoresInRound(confirmDelete.roundIndex)
-                  ? 'Excluir rodada e descartar resultados?'
-                  : 'Excluir esta rodada?'}
-              </DialogTitle>
-            </DialogHeader>
-            <p className="text-sm">
-              {hasScoresInRound(confirmDelete.roundIndex)
-                ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
-                : 'Esta ação é irreversível.'}
-            </p>
-            <DialogFooter>
-              <Button variant="secondary" onClick={() => setConfirmDelete({ open: false, roundIndex: null })}>
-                Cancelar
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (confirmDelete.roundIndex === null) return
-                  const idx = confirmDelete.roundIndex
-                  setConfirmDelete({ open: false, roundIndex: null })
-                  doDelete(idx)
-                }}
-              >
-                Sim, excluir
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
+      {/* Confirm shuffle dialog */}
+      <ConfirmDialog
+        open={confirmShuffle.open}
+        onOpenChange={(open) => setConfirmShuffle((p) => ({ ...p, open }))}
+        title={
+          hasScoresInRound(confirmShuffle.roundIndex) ? 'Descartar resultados e embaralhar?' : 'Embaralhar esta rodada?'
+        }
+        description={
+          hasScoresInRound(confirmShuffle.roundIndex)
+            ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
+            : 'Confirme que os jogos ainda não começaram.'
+        }
+        onConfirm={() => {
+          if (confirmShuffle.roundIndex !== null) {
+            doShuffle(confirmShuffle.roundIndex)
+            setConfirmShuffle({ open: false, roundIndex: null })
+          }
+        }}
+        confirmText="Sim, embaralhar"
+        cancelText="Cancelar"
+      />
+      {/* Confirm delete dialog */}
+      <ConfirmDialog
+        open={confirmDelete.open}
+        onOpenChange={(open) => setConfirmDelete((p) => ({ ...p, open }))}
+        title={
+          hasScoresInRound(confirmDelete.roundIndex) ? 'Excluir rodada e descartar resultados?' : 'Excluir esta rodada?'
+        }
+        description={
+          hasScoresInRound(confirmDelete.roundIndex)
+            ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
+            : 'Esta ação é irreversível.'
+        }
+        onConfirm={() => {
+          if (confirmDelete.roundIndex !== null) {
+            doDelete(confirmDelete.roundIndex)
+            setConfirmDelete({ open: false, roundIndex: null })
+          }
+        }}
+        confirmText="Sim, excluir"
+        cancelText="Cancelar"
+        confirmVariant="destructive"
+      />
       <ScoreModal
         key={modalState.matchId || ''}
         open={modalState.open}
