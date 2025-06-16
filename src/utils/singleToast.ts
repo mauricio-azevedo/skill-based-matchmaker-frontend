@@ -16,3 +16,8 @@ export function singleToastError(message: string | JSX.Element, options?: Parame
   toast.dismiss()
   return toast.error(message, options)
 }
+
+export function singleToastWarn(message: string | JSX.Element, options?: Parameters<typeof toast.error>[1]) {
+  toast.dismiss()
+  return toast.warning(message, options)
+}

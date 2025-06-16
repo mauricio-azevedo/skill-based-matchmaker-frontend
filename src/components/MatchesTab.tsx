@@ -16,7 +16,7 @@ import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AnimatePresence, motion } from 'framer-motion'
 import { itemVariants, spring } from '@/consts/animation'
-import { singleToastSuccess } from '@/utils/singleToast'
+import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/singleToast'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -121,7 +121,7 @@ const MatchesTab: FC = () => {
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
       singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
     } catch (error) {
-      singleToastSuccess((error as Error).message, { duration: 6000 })
+      singleToastError((error as Error).message, { duration: 6000 })
     }
   }
 
@@ -182,12 +182,12 @@ const MatchesTab: FC = () => {
     setGames(modalState.roundIdx, modalState.matchId, 'A', scoreA)
     setGames(modalState.roundIdx, modalState.matchId, 'B', scoreB)
     setModalState((prev) => ({ ...prev, open: false }))
-    singleToastSuccess('Placar salvo!', { duration: 2500 })
+    singleToastSuccess('Placar salvo!', { duration: 3000 })
   }
 
   const warnIfInsufficient = (): boolean => {
     if (!hasEnoughForCourts(players, courts)) {
-      singleToastSuccess(
+      singleToastWarn(
         `Precisamos de pelo menos ${courts * PLAYERS_PER_MATCH} jogadores ativos para preencher ${courts} ${
           courts === 1 ? 'quadra' : 'quadras'
         }`,
@@ -468,7 +468,7 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
 
   const handleSave = () => {
     if (scoreA === null || scoreB === null) {
-      singleToastSuccess('Selecione o placar de ambos os times.')
+      singleToastError('Selecione o placar de ambos os times.')
       return
     }
     onSave(scoreA, scoreB)
