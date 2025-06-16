@@ -134,6 +134,7 @@ const MatchesTab: FC = () => {
       const onScroll = () => {
         if (listRef.current!.scrollTop === 0) {
           listRef.current!.removeEventListener('scroll', onScroll)
+          generateNewRound()
         }
       }
       listRef.current.addEventListener('scroll', onScroll)
