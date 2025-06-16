@@ -1,12 +1,11 @@
 import { useState, type FC, type FormEvent, useRef } from 'react'
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
@@ -113,44 +112,40 @@ const PlayersTab: FC = () => {
         {players.length === 0 ? (
           <p className="italic text-muted-foreground flex-1">Adicione pelo menos 4 jogadores.</p>
         ) : (
-          <ScrollArea className="min-h-0 flex-1" type="scroll">
-            <LayoutGroup>
-              <motion.ul layout initial={false} className="flex flex-col gap-3 flex-1">
-                <AnimatePresence initial={false}>
-                  {players.map((p) => (
-                    <motion.li
-                      key={p.id}
-                      layout="position"
-                      variants={itemVariants}
-                      initial="initial"
-                      animate="animate"
-                      exit="exit"
-                      transition={spring}
-                      className="flex items-center gap-1"
-                    >
-                      {/* cartão interno */}
-                      <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center">
-                            <p className="font-medium text-sm">{p.name}</p>
-                            <Badge variant="secondary" className="ml-2 text-xs">
-                              Nív. {p.level}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
-                        </div>
+          <ul className="flex flex-col gap-3 flex-1 overflow-y-auto">
+            <AnimatePresence initial={false}>
+              {players.map((p) => (
+                <motion.li
+                  key={p.id}
+                  layout="position"
+                  variants={itemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={spring}
+                  className="flex items-center gap-1"
+                >
+                  {/* cartão interno */}
+                  <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center">
+                        <p className="font-medium text-sm">{p.name}</p>
+                        <Badge variant="secondary" className="ml-2 text-xs">
+                          Nív. {p.level}
+                        </Badge>
                       </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
+                    </div>
+                  </div>
 
-                      {/* trigger do modal de edição */}
-                      <EditPlayerModal player={p} />
-                    </motion.li>
-                  ))}
-                </AnimatePresence>
-              </motion.ul>
-            </LayoutGroup>
-          </ScrollArea>
+                  {/* trigger do modal de edição */}
+                  <EditPlayerModal player={p} />
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </ul>
         )}
 
         {/* Formulário de adição */}
