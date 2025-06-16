@@ -11,6 +11,7 @@ import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
 import { Plus, Minus, Users } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
+import { toast } from 'sonner'
 
 export const itemVariants = {
   initial: { opacity: 0, scale: 0.9, y: 12 },
@@ -33,6 +34,7 @@ const PlayersTab: FC = () => {
     const trimmed = name.trim()
     if (!trimmed) return
     add(trimmed, level)
+    toast.success('player added')
     setName('')
     queueMicrotask(() => nameInputRef.current?.focus())
   }
