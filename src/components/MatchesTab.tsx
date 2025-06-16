@@ -34,7 +34,7 @@ const DISABLE_SNAP_TIMEOUT = 800 as const
  * @param round   Round whose stats will be applied.
  * @param factor  +1 to add stats, -1 to remove.
  */
-function applyRoundStats(players: Player[], round: ReturnType<typeof generateSchedule>, factor: 1 | -1) {
+function applyRoundStats(players: Player[], round: ReturnType<typeof generateSchedule>, factor: 1 | -1): Player[] {
   return players.map((player) => {
     let deltaMatches = 0
     const updatedPartners: Record<string, number> = { ...player.partnerCounts }
@@ -144,10 +144,13 @@ const MatchesTab: FC = () => {
   const doShuffle = (idx: number) => {
     const oldRound = rounds[idx]
     if (!oldRound) return
-    const fresh: UnsavedRound = generateSchedule(activePlayers, courts)
+    const cleanedPlayers = applyRoundStats(activePlayers, oldRound, -1)
+    const fresh: UnsavedRound = generateSchedule(cleanedPlayers, courts)
     const newRound = { ...fresh, id: oldRound.id, roundNumber: oldRound.roundNumber }
-    updatePlayers((prev) => applyRoundStats(prev, oldRound, -1))
-    updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
+    updatePlayers((prev) => {
+      const cleaned = applyRoundStats(prev, oldRound, -1)
+      return applyRoundStats(cleaned, newRound, 1)
+    })
     replaceRound(idx, newRound)
     singleToastSuccess(`Rodada ${oldRound.roundNumber} embaralhada!`, { duration: 3000 })
   }
