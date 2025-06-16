@@ -218,7 +218,6 @@ const MatchesTab: FC = () => {
                   transition={{ duration: 0.2 }}
                   className="flex flex-col gap-6 pb-12 snap-start"
                 >
-                  {' '}
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {round.roundNumber}</h2>
                     <DropdownMenu>
