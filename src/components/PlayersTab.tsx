@@ -34,7 +34,7 @@ const PlayersTab: FC = () => {
     const trimmed = name.trim()
     if (!trimmed) return
     add(trimmed, level)
-    toast.success('player added')
+    toast.success(`${trimmed} adicionado!`, { position: 'bottom-center', duration: 1000 })
     setName('')
     queueMicrotask(() => nameInputRef.current?.focus())
   }
