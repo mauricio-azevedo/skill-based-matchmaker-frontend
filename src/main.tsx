@@ -11,7 +11,7 @@ createRoot(document.getElementById('root')!).render(
     <PlayersProvider>
       <RoundsProvider>
         <App />
-        <Toaster position="top-center" />
+        <Toaster position="top-center" visibleToasts={1} />
       </RoundsProvider>
     </PlayersProvider>
   </CourtsProvider>,
