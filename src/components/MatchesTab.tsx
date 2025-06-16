@@ -15,7 +15,8 @@ import { cn } from '@/lib/utils'
 import { Crown, Edit, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, spring } from 'framer-motion'
+import { itemVariants } from '@/components/PlayersTab'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -106,8 +107,14 @@ const MatchesTab: FC = () => {
   const hasEnoughForCourts = (plist: Player[], courts: number) =>
     plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
 
+  const [disableSnap, setDisableSnap] = useState(false)
+
   const handleGenerate = () => {
     if (warnIfInsufficient()) return
+
+    // turn snap off immediately before adding
+    setDisableSnap(true)
+
     try {
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
@@ -117,6 +124,13 @@ const MatchesTab: FC = () => {
       toast.error((error as Error).message, { duration: 6000 })
     }
   }
+
+  // once rounds have updated, re-enable snap after a short delay
+  useEffect(() => {
+    if (!disableSnap) return
+    const timer = setTimeout(() => setDisableSnap(false), 1000)
+    return () => clearTimeout(timer)
+  }, [rounds, disableSnap])
 
   const doShuffle = (idx: number) => {
     const oldRound = rounds[idx]
@@ -132,6 +146,10 @@ const MatchesTab: FC = () => {
   const doDelete = (idx: number) => {
     const roundToRemove = rounds[idx]
     if (!roundToRemove) return
+
+    // turn snap off immediately before removing
+    setDisableSnap(true)
+
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
     toast.success('Rodada excluída!', { duration: 3000 })
@@ -177,7 +195,7 @@ const MatchesTab: FC = () => {
         <CardHeader>
           <CardTitle>Partidas</CardTitle>
         </CardHeader>
-        <CardContent className="!gap-2 relative">
+        <CardContent className="!gap-2 relative flex flex-col justify-between">
           {/* Empty State */}
           <AnimatePresence initial={false}>
             {rounds.length === 0 && (
@@ -194,16 +212,17 @@ const MatchesTab: FC = () => {
           </AnimatePresence>
 
           {/* Rounds List */}
-          <div className="overflow-y-auto h-full snap-y snap-mandatory">
+          <ul className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}>
             <AnimatePresence initial={false}>
               {rounds.map((round, idx) => (
-                <motion.div
+                <motion.li
                   key={round.id}
-                  layout
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  transition={{ duration: 0.2 }}
+                  layout="position"
+                  variants={itemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={spring}
                   className="flex flex-col gap-6 pb-12 snap-start"
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -269,10 +288,10 @@ const MatchesTab: FC = () => {
                       )
                     })}
                   </ol>
-                </motion.div>
+                </motion.li>
               ))}
             </AnimatePresence>
-          </div>
+          </ul>
         </CardContent>
         <CardFooter>
           <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
