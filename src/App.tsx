@@ -97,7 +97,7 @@ export default function App() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem disabled={isSeedLoaded} onSelect={() => setWarning('seed')}>
-                Carregar seed
+                Inicializar jogadores
               </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={!hasRounds}
@@ -117,9 +117,9 @@ export default function App() {
       <ConfirmDialog
         open={warning === 'seed'}
         onOpenChange={() => setWarning(null)}
-        title="Carregar seed?"
-        description="Esta ação apagará todos os registros atuais de jogadres e partidas. Você tem certeza?"
-        confirmText="Sim, carregar seed"
+        title="Inicializar jogadores?"
+        description="Esta ação apagará os registros atuais de jogadores e partidas e carregará os jogadores pré definidos. Deseja continuar?"
+        confirmText="Sim, inicializar jogadores"
         onConfirm={() => {
           handleLoadSeed()
           setWarning(null)
