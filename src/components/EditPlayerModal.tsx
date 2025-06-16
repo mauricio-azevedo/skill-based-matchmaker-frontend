@@ -10,6 +10,18 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
+
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,7 +37,7 @@ interface EditPlayerModalProps {
 
 /**
  * Modal para editar ou remover um jogador.
- * Segue SRP: apenas aqui ficam os controles de edição/exclusão.
+ * Confirma exclusão usando AlertDialog.
  */
 const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
   const { updatePlayers, remove } = usePlayers()
@@ -107,10 +119,30 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
 
         <DialogFooter>
           <div className="flex flex-row justify-between w-full">
-            {/* Apagar */}
-            <Button variant="ghost" onClick={handleDelete} aria-label={`Remover ${player.name}`}>
-              <Trash className="text-destructive" size={16} />
-            </Button>
+            {/* Deleção com confirmação */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" aria-label={`Remover ${player.name}`}>
+                  <Trash className="text-destructive" size={16} />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tem certeza que deseja remover <strong>{player.name}</strong>?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction className="bg-transparent p-0 hover:bg-transparent">
+                    <Button variant="destructive" className="w-full" onClick={handleDelete}>
+                      Excluir
+                    </Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             <div className="flex gap-2">
               <DialogClose asChild>
