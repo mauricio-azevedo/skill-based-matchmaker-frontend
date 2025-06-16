@@ -1,6 +1,6 @@
 // src/App.tsx
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
@@ -34,6 +34,13 @@ export default function App() {
   // -----------------------------------------------------------
   const { rounds, clear: clearRounds } = useRounds()
   const { players, updatePlayers } = usePlayers()
+
+  // Verifica se os jogadores atuais correspondem exatamente ao seed (ignorando ordem)
+  const isSeedLoaded = useMemo(() => {
+    if (players.length !== seedPlayers.length) return false
+    const seedIds = new Set(seedPlayers.map((p) => p.id))
+    return players.every((p) => seedIds.has(p.id))
+  }, [players])
 
   const hasRounds = rounds.length > 0
   const hasPlayers = players.length > 0
@@ -89,7 +96,9 @@ export default function App() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => setWarning('seed')}>Carregar seed</DropdownMenuItem>
+              <DropdownMenuItem disabled={isSeedLoaded} onSelect={() => setWarning('seed')}>
+                Carregar seed
+              </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={!hasRounds}
                 className="text-destructive"
