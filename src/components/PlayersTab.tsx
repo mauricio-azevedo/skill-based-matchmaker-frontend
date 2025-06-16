@@ -11,7 +11,7 @@ import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
 import { Plus, Minus, Users } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
-import { itemVariants, spring } from '@/consts/animation'
+import { itemVariants } from '@/consts/animation'
 import { singleToastSuccess } from '@/utils/singleToast'
 
 const PlayersTab: FC = () => {
@@ -118,7 +118,6 @@ const PlayersTab: FC = () => {
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  transition={spring}
                   className="flex items-center gap-1"
                 >
                   {/* cartão interno */}

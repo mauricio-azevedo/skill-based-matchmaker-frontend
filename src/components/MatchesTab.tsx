@@ -15,7 +15,7 @@ import { Crown, Edit, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AnimatePresence, motion } from 'framer-motion'
-import { itemVariants, spring } from '@/consts/animation'
+import { itemVariants } from '@/consts/animation'
 import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/singleToast'
 
 // -----------------------------------------------------------------------------
@@ -136,7 +136,7 @@ const MatchesTab: FC = () => {
   // Re-enable snap after rounds update
   useEffect(() => {
     if (!disableSnap) return
-    const timer = setTimeout(() => setDisableSnap(false), 600)
+    const timer = setTimeout(() => setDisableSnap(false), 800)
     return () => clearTimeout(timer)
   }, [rounds, disableSnap])
 
@@ -233,8 +233,9 @@ const MatchesTab: FC = () => {
                   initial="initial"
                   animate="animate"
                   exit="exit"
-                  transition={spring}
                   className="flex flex-col gap-6 pb-12 snap-start"
+                  onAnimationStart={() => console.time('addAnimation')}
+                  onAnimationComplete={() => console.timeEnd('addAnimation')}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <h2 className="border-l-4 border-primary pl-3 text-xl font-bold">Rodada {round.roundNumber}</h2>
