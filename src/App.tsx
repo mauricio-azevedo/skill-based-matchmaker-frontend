@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { buttonVariants } from '@/components/ui/button'
 import { singleToastSuccess } from '@/utils/singleToast'
+import { seedPlayers } from '@/data/seedPlayers'
 
 export default function App() {
   // -----------------------------------------------------------
@@ -66,7 +67,8 @@ export default function App() {
   }
 
   const handleTitleDoubleClick = () => {
-    singleToastSuccess('🏖️ Você encontrou o easter egg!', { duration: 3000 })
+    clearRounds()
+    updatePlayers(() => seedPlayers)
   }
 
   return (
