@@ -318,12 +318,11 @@ const MatchesTab: FC = () => {
                 ? 'Há resultados salvos. Eles serão perdidos permanentemente. Confirme que quer sobrescrever esta rodada.'
                 : 'Confirme que os jogos ainda não começaram.'}
             </p>
-            <DialogFooter className="pt-4">
+            <DialogFooter>
               <Button variant="secondary" onClick={() => setConfirmShuffle({ open: false, roundIndex: null })}>
                 Cancelar
               </Button>
               <Button
-                variant="destructive"
                 onClick={() => {
                   if (confirmShuffle.roundIndex === null) return
                   const idx = confirmShuffle.roundIndex
@@ -353,7 +352,7 @@ const MatchesTab: FC = () => {
                 ? 'Há resultados salvos. Eles serão perdidos permanentemente.'
                 : 'Esta ação é irreversível.'}
             </p>
-            <DialogFooter className="pt-4">
+            <DialogFooter>
               <Button variant="secondary" onClick={() => setConfirmDelete({ open: false, roundIndex: null })}>
                 Cancelar
               </Button>
