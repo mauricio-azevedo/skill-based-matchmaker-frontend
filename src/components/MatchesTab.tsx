@@ -152,7 +152,7 @@ const MatchesTab: FC = () => {
 
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
-    toast.success('Rodada excluída!', { duration: 3000 })
+    toast.success(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
   }
 
   const openScoreModalFor = (matchId: string, idx: number) => {
