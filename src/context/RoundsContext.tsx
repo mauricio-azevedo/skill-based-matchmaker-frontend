@@ -33,7 +33,6 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const addRound = (r: Omit<Round, 'roundNumber'>) => {
     setRounds((prev) => {
-      // compute next roundNumber by looking at existing max
       const maxNum = prev.reduce((max, rt) => Math.max(max, rt.roundNumber), 0)
       const nextNumber = maxNum + 1
       const newRound: Round = { ...r, roundNumber: nextNumber }
@@ -41,7 +40,19 @@ export const RoundsProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     })
   }
 
-  const removeRound = (idx: number) => setRounds((prev) => prev.filter((_, i) => i !== idx))
+  const removeRound = (idx: number) => {
+    setRounds((prev) => {
+      // Remove the specified round
+      const filtered = prev.filter((_, i) => i !== idx)
+      // Re-number all remaining rounds sequentially:
+      // newest (index 0) gets highest number = filtered.length,
+      // down to 1
+      return filtered.map((round, index) => ({
+        ...round,
+        roundNumber: filtered.length - index,
+      }))
+    })
+  }
 
   const replaceRound = (idx: number, r: Round) => setRounds((prev) => prev.map((old, i) => (i === idx ? r : old)))
 
