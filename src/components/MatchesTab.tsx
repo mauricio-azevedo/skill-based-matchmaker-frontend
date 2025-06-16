@@ -136,7 +136,7 @@ const MatchesTab: FC = () => {
   // Re-enable snap after rounds update
   useEffect(() => {
     if (!disableSnap) return
-    const timer = setTimeout(() => setDisableSnap(false), 1000)
+    const timer = setTimeout(() => setDisableSnap(false), 400)
     return () => clearTimeout(timer)
   }, [rounds, disableSnap])
 
