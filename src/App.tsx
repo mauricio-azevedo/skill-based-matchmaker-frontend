@@ -8,7 +8,6 @@ import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'
 import { Moon, Sun, Settings } from 'lucide-react'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { toast } from 'sonner'
 import { useRounds } from '@/context/RoundsContext'
 import { usePlayers } from '@/context/PlayersContext'
 import {
@@ -22,6 +21,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { buttonVariants } from '@/components/ui/button'
+import { singleToastSuccess } from '@/utils/singleToast'
 
 export default function App() {
   // -----------------------------------------------------------
@@ -56,13 +56,13 @@ export default function App() {
         partnerCounts: {},
       })),
     )
-    toast.success('Todas as partidas apagadas!', { duration: 3000 })
+    singleToastSuccess('Todas as partidas apagadas!', { duration: 3000 })
   }
 
   const handleClearAll = () => {
     clearRounds()
     updatePlayers(() => [])
-    toast.success('Todos os dados apagados!', { duration: 3000 })
+    singleToastSuccess('Todos os dados apagados!', { duration: 3000 })
   }
 
   return (

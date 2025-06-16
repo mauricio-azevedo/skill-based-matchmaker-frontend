@@ -11,8 +11,8 @@ import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
 import { Plus, Minus, Users } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
-import { toast } from 'sonner'
 import { itemVariants, spring } from '@/consts/animation'
+import { singleToastSuccess } from '@/utils/singleToast'
 
 const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
@@ -28,7 +28,7 @@ const PlayersTab: FC = () => {
     const trimmed = name.trim()
     if (!trimmed) return
     add(trimmed, level)
-    toast.success(`${trimmed} adicionado!`, { position: 'bottom-center', duration: 1000 })
+    singleToastSuccess(`${trimmed} adicionado!`, { position: 'bottom-center', duration: 1000 })
     setName('')
     queueMicrotask(() => nameInputRef.current?.focus())
   }

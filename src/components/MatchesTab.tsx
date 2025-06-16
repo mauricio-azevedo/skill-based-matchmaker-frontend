@@ -6,7 +6,6 @@ import { generateSchedule } from '@/lib/algorithm'
 import type { Player, UnsavedRound } from '@/types/players'
 
 // shadcn/ui
-import { toast } from 'sonner'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -17,6 +16,7 @@ import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AnimatePresence, motion } from 'framer-motion'
 import { itemVariants, spring } from '@/consts/animation'
+import { singleToastSuccess } from '@/utils/singleToast'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -119,9 +119,9 @@ const MatchesTab: FC = () => {
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-      toast.success(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
+      singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
     } catch (error) {
-      toast.error((error as Error).message, { duration: 6000 })
+      singleToastSuccess((error as Error).message, { duration: 6000 })
     }
   }
 
@@ -148,7 +148,7 @@ const MatchesTab: FC = () => {
     updatePlayers((prev) => applyRoundStats(prev, oldRound, -1))
     updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
     replaceRound(idx, newRound)
-    toast.success(`Rodada ${oldRound.roundNumber} embaralhada!`, { duration: 3000 })
+    singleToastSuccess(`Rodada ${oldRound.roundNumber} embaralhada!`, { duration: 3000 })
   }
 
   const doDelete = (idx: number) => {
@@ -160,7 +160,7 @@ const MatchesTab: FC = () => {
 
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
-    toast.success(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
+    singleToastSuccess(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
   }
 
   const openScoreModalFor = (matchId: string, idx: number) => {
@@ -182,12 +182,12 @@ const MatchesTab: FC = () => {
     setGames(modalState.roundIdx, modalState.matchId, 'A', scoreA)
     setGames(modalState.roundIdx, modalState.matchId, 'B', scoreB)
     setModalState((prev) => ({ ...prev, open: false }))
-    toast.success('Placar salvo!', { duration: 2500 })
+    singleToastSuccess('Placar salvo!', { duration: 2500 })
   }
 
   const warnIfInsufficient = (): boolean => {
     if (!hasEnoughForCourts(players, courts)) {
-      toast.error(
+      singleToastSuccess(
         `Precisamos de pelo menos ${courts * PLAYERS_PER_MATCH} jogadores ativos para preencher ${courts} ${
           courts === 1 ? 'quadra' : 'quadras'
         }`,
@@ -468,7 +468,7 @@ const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initial
 
   const handleSave = () => {
     if (scoreA === null || scoreB === null) {
-      toast.error('Selecione o placar de ambos os times.')
+      singleToastSuccess('Selecione o placar de ambos os times.')
       return
     }
     onSave(scoreA, scoreB)
