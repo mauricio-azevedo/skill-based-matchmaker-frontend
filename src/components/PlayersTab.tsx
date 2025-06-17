@@ -217,8 +217,8 @@ const PlayersTab: FC = () => {
                         Kontra Beach Tennis – “Beach Tennis Skill Levels”
                       </a>
                       , que descreve os estágios C → AA usados em camps e treinos internacionais{' '}
-                      <strong>(também adotado pelo Cordel para nivelar seus alunos)</strong>. Embora cada academia possa
-                      adaptar rótulos, essa matriz é amplamente adotada e serve como checklist para autoavaliação.
+                      <strong>(também adotado pelo Cordel para o nivelamento de turmas)</strong>. Embora cada academia
+                      possa adaptar rótulos, essa matriz é amplamente adotada e serve como checklist para autoavaliação.
                     </p>
                   </div>
 
