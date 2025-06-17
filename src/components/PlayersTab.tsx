@@ -155,7 +155,7 @@ const PlayersTab: FC = () => {
         <form onSubmit={handleSubmit} className="flex gap-2 items-center pt-4">
           <div className="flex flex-col gap-2 flex-1">
             <div className="flex gap-2 flex-1">
-              <Label htmlFor="player-name" className="w-[3.75rem]">
+              <Label htmlFor="player-name" className="w-[3.25rem]">
                 Nome
               </Label>
               <Input
@@ -168,19 +168,19 @@ const PlayersTab: FC = () => {
             </div>
 
             <div className="flex gap-2 flex-1">
-              <Label htmlFor="player-level" className="w-[3.75rem]">
+              <Label htmlFor="player-level" className="w-[3.25rem] gap-1">
                 Nível
                 <Button
                   type="button"
                   size="icon"
                   variant="ghost"
                   aria-label="Sobre os níveis"
-                  className="h-4 w-4 p-0"
+                  className="h-3 w-3 p-0"
                   onClick={() => {
                     /* TODO: abrir modal com descrição dos níveis */
                   }}
                 >
-                  <HelpCircle className="h-4 w-4" />
+                  <HelpCircle className="!h-3 !w-3" />
                 </Button>
               </Label>
               <ToggleGroup
