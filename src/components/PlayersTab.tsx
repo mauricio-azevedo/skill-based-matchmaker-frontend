@@ -9,10 +9,18 @@ import { Badge } from '@/components/ui/badge'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
-import { Plus, Minus, Users } from 'lucide-react'
+import { Plus, Minus, Users, HelpCircle } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { itemVariants } from '@/consts/animation'
 import { singleToastSuccess } from '@/utils/singleToast'
+
+const levelOptions = [
+  { value: 1, label: 'C' },
+  { value: 2, label: 'B' },
+  { value: 3, label: 'BB' },
+  { value: 4, label: 'A' },
+  { value: 5, label: 'AA' },
+]
 
 const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
@@ -147,15 +155,33 @@ const PlayersTab: FC = () => {
         <form onSubmit={handleSubmit} className="flex gap-2 items-center pt-4">
           <div className="flex flex-col gap-2 flex-1">
             <div className="flex gap-2 flex-1">
-              <Label htmlFor="player-name" className="w-[2.5rem]">
+              <Label htmlFor="player-name" className="w-[3.75rem]">
                 Nome
               </Label>
-              <Input ref={nameInputRef} id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
+              <Input
+                className="flex-1"
+                ref={nameInputRef}
+                id="player-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
 
             <div className="flex gap-2 flex-1">
-              <Label htmlFor="player-level" className="w-[2.5rem]">
+              <Label htmlFor="player-level" className="w-[3.75rem]">
                 Nível
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Sobre os níveis"
+                  className="h-4 w-4 p-0"
+                  onClick={() => {
+                    /* TODO: abrir modal com descrição dos níveis */
+                  }}
+                >
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
               </Label>
               <ToggleGroup
                 id="player-level"
@@ -164,21 +190,21 @@ const PlayersTab: FC = () => {
                 onValueChange={(val: string) => val && setLevel(Number(val))}
                 className="flex flex-wrap gap-2 flex-1"
               >
-                {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
+                {levelOptions.map(({ value, label }) => (
                   <ToggleGroupItem
-                    key={lvl}
-                    value={lvl.toString()}
-                    aria-label={`Level ${lvl}`}
+                    key={value}
+                    value={value.toString()} // mantém o valor original
+                    aria-label={`Nível ${value}`} // acessibilidade
                     className="w-8 justify-center"
                     onMouseDown={(e) => e.preventDefault()} // ★ keeps current focus
                     onClick={() => {
-                      setLevel(lvl)
+                      setLevel(value)
                       // iOS sometimes closes the keyboard before the click bubbles,
                       // so force-refocus in the next tick:
                       queueMicrotask(() => nameInputRef.current?.focus())
                     }}
                   >
-                    {lvl}
+                    {label}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
