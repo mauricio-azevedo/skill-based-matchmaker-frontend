@@ -23,7 +23,7 @@ import { useCourts } from '@/context/CourtsContext'
 import { itemVariants } from '@/consts/animation'
 import { singleToastSuccess } from '@/utils/singleToast'
 import { getLevelLabel, LEVELS, LEVEL_DESCRIPTIONS } from '@/consts/levels'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import React from 'react'
 
 const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
@@ -171,61 +171,68 @@ const PlayersTab: FC = () => {
             </div>
 
             <div className="flex gap-2 flex-1">
-              <Label htmlFor="player-level" className="w-[3.25rem] gap-1">
-                Nível
-                {/* Dialog de ajuda sobre níveis */}
-                <Dialog>
-                  <DialogTrigger asChild>
+              {/* Dialog de ajuda sobre níveis */}
+              <Dialog>
+                {/* ----------- Trigger --------------- */}
+                <DialogTrigger asChild>
+                  <Label htmlFor="player-level" className="w-[3.25rem] gap-1">
+                    Nível
                     <Button
                       type="button"
                       size="icon"
                       variant="ghost"
                       aria-label="Sobre os níveis"
                       className="h-3 w-3 p-0"
-                      onMouseDown={(e) => e.preventDefault()} // não rouba o foco do input
+                      onMouseDown={(e) => e.preventDefault()}
                     >
                       <HelpCircle className="!h-3 !w-3" />
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-                    <DialogHeader>
-                      <DialogTitle>Descrição dos níveis</DialogTitle>
-                    </DialogHeader>
-                    <ScrollArea>
-                      <div className="text-xs leading-snug min-h-0 h-120">
-                        {LEVELS.map(({ value }) => (
-                          <>
-                            <div key={value} dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[value] }} />
-                            <br />
-                            <br />
-                          </>
-                        ))}
-                        <hr />
+                  </Label>
+                </DialogTrigger>
+
+                {/* ----------- Content (fora do Trigger!) --------------- */}
+                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+                  <DialogHeader>
+                    <DialogTitle>Descrição dos níveis</DialogTitle>
+                  </DialogHeader>
+
+                  <div className="text-xs leading-snug min-h-0 h-120 overflow-y-auto">
+                    {LEVELS.map(({ value }) => (
+                      <React.Fragment key={value}>
+                        <div dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[value] }} />
                         <br />
-                        <p className="pt-2">
-                          🔎 Fonte:{' '}
-                          <a
-                            href="https://kontrabeach.com/beach-tennis-levels/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline"
-                          >
-                            Kontra Beach Tennis – “Beach Tennis Skill Levels”
-                          </a>
-                          , que descreve os estágios C → AA usados em camps e treinos internacionais. Embora cada
-                          academia possa adaptar rótulos, essa matriz é amplamente adotada e serve como checklist para
-                          autoavaliação.
-                        </p>
-                      </div>
-                    </ScrollArea>
-                    <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant="secondary">Voltar</Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </Label>
+                        <br />
+                      </React.Fragment>
+                    ))}
+                    <hr />
+                    <br />
+                    <p className="pt-2">
+                      🔎 Fonte:{' '}
+                      <a
+                        href="https://kontrabeach.com/beach-tennis-levels/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Kontra Beach Tennis – “Beach Tennis Skill Levels”
+                      </a>
+                      , que descreve os estágios C → AA usados em camps e treinos internacionais. Embora cada academia
+                      possa adaptar rótulos, essa matriz é amplamente adotada e serve como checklist para autoavaliação.
+                    </p>
+                  </div>
+
+                  <DialogFooter>
+                    {/* Botão de fechar funciona porque agora está fora do trigger */}
+                    <DialogClose asChild>
+                      <Button type="button" variant="secondary">
+                        OK, voltar
+                      </Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* Outros controles */}
               <ToggleGroup
                 id="player-level"
                 type="single"
@@ -236,14 +243,12 @@ const PlayersTab: FC = () => {
                 {LEVELS.map(({ value, label }) => (
                   <ToggleGroupItem
                     key={value}
-                    value={value.toString()} // mantém o valor original
-                    aria-label={`Nível ${value}`} // acessibilidade
+                    value={value.toString()}
+                    aria-label={`Nível ${value}`}
                     className="w-8 justify-center"
-                    onMouseDown={(e) => e.preventDefault()} // ★ keeps current focus
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
                       setLevel(value)
-                      // iOS sometimes closes the keyboard before the click bubbles,
-                      // so force-refocus in the next tick:
                       queueMicrotask(() => nameInputRef.current?.focus())
                     }}
                   >
