@@ -27,10 +27,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Edit, HelpCircle, Trash } from 'lucide-react'
+import { Edit, Trash } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import type { Player } from '@/types/players'
-import { LEVELS } from '@/consts/levels'
+import { LEVEL_DESCRIPTIONS, LEVELS } from '@/consts/levels'
 
 interface EditPlayerModalProps {
   player: Player
@@ -88,21 +88,7 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
           </div>
 
           <div className="grid gap-3">
-            <Label htmlFor="edit-level">
-              Nível
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                aria-label="Sobre os níveis"
-                className="h-3 w-3 p-0"
-                onClick={() => {
-                  /* TODO: abrir modal com descrição dos níveis */
-                }}
-              >
-                <HelpCircle className="!h-3 !w-3" />
-              </Button>
-            </Label>
+            <Label htmlFor="edit-level">Nível</Label>
             <ToggleGroup
               id="edit-level"
               type="single"
@@ -121,6 +107,12 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
+
+            {/* Descrição do nível selecionado */}
+            <p
+              className="text-muted-foreground text-xs leading-snug"
+              dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[level] }}
+            />
           </div>
 
           {/* Ativo/Inativo */}
