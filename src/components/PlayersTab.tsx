@@ -7,13 +7,23 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
 import { Plus, Minus, Users, HelpCircle } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { itemVariants } from '@/consts/animation'
 import { singleToastSuccess } from '@/utils/singleToast'
-import { getLevelLabel, LEVELS } from '@/consts/levels'
+import { getLevelLabel, LEVELS, LEVEL_DESCRIPTIONS } from '@/consts/levels'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
@@ -163,18 +173,58 @@ const PlayersTab: FC = () => {
             <div className="flex gap-2 flex-1">
               <Label htmlFor="player-level" className="w-[3.25rem] gap-1">
                 Nível
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  aria-label="Sobre os níveis"
-                  className="h-3 w-3 p-0"
-                  onClick={() => {
-                    /* TODO: abrir modal com descrição dos níveis */
-                  }}
-                >
-                  <HelpCircle className="!h-3 !w-3" />
-                </Button>
+                {/* Dialog de ajuda sobre níveis */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      aria-label="Sobre os níveis"
+                      className="h-3 w-3 p-0"
+                      onMouseDown={(e) => e.preventDefault()} // não rouba o foco do input
+                    >
+                      <HelpCircle className="!h-3 !w-3" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+                    <DialogHeader>
+                      <DialogTitle>Descrição dos níveis</DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea>
+                      <div className="text-xs leading-snug min-h-0 h-120">
+                        {LEVELS.map(({ value }) => (
+                          <>
+                            <div key={value} dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[value] }} />
+                            <br />
+                            <br />
+                          </>
+                        ))}
+                        <hr />
+                        <br />
+                        <p className="pt-2">
+                          🔎 Fonte:{' '}
+                          <a
+                            href="https://kontrabeach.com/beach-tennis-levels/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            Kontra Beach Tennis – “Beach Tennis Skill Levels”
+                          </a>
+                          , que descreve os estágios C → AA usados em camps e treinos internacionais. Embora cada
+                          academia possa adaptar rótulos, essa matriz é amplamente adotada e serve como checklist para
+                          autoavaliação.
+                        </p>
+                      </div>
+                    </ScrollArea>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="secondary">Voltar</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </Label>
               <ToggleGroup
                 id="player-level"
