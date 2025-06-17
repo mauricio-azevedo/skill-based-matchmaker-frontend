@@ -1,5 +1,5 @@
 // src/components/EditPlayerModal.tsx
-import { useState, type FC, useEffect } from 'react'
+import { useState, type FC, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogTrigger,
@@ -45,19 +45,27 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
 
   // estado local para editar
   const [name, setName] = useState(player.name)
-  const [level, setLevel] = useState(player.level)
+  const [level, setLevel] = useState(player.level.toString())
   const [active, setActive] = useState(player.active)
 
-  // sincroniza ao reabrir modal, caso o jogador seja recarregado
-  useEffect(() => {
+  /** ---- função que restaura o estado para o valor do jogador atual ---- */
+  const resetForm = useCallback(() => {
     setName(player.name)
-    setLevel(player.level)
+    setLevel(player.level.toString())
     setActive(player.active)
   }, [player])
 
+  /** Se o jogador em edição mudar (ex.: props atualizadas), sincroniza-se */
+  useEffect(() => {
+    resetForm()
+  }, [player, resetForm])
+
+  /** ---------------- handlers ---------------- */
   const handleSave = () => {
     updatePlayers((players) =>
-      players.map((p) => (p.id === player.id ? { ...p, name: name.trim() || p.name, level, active } : p)),
+      players.map((p) =>
+        p.id === player.id ? { ...p, name: name.trim() || p.name, level: Number(level), active } : p,
+      ),
     )
   }
 
@@ -66,7 +74,7 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
   }
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={(open) => !open && resetForm()}>
       {/* Trigger: ícone de lápis */}
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon" aria-label={`Editar ${player.name}`}>
@@ -82,18 +90,20 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
 
         {/* Form simples */}
         <div className="flex flex-col gap-6">
+          {/* Nome */}
           <div className="grid gap-3">
             <Label htmlFor="player-name">Nome</Label>
             <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
+          {/* Nível */}
           <div className="grid gap-3">
             <Label htmlFor="edit-level">Nível</Label>
             <ToggleGroup
               id="edit-level"
               type="single"
-              value={level.toString()}
-              onValueChange={(val: string) => val && setLevel(Number(val))}
+              value={level}
+              onValueChange={(val) => val && setLevel(val)}
               className="flex flex-wrap gap-2 w-full"
             >
               {LEVELS.map(({ value, label }) => (
@@ -111,7 +121,7 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
             {/* Descrição do nível selecionado */}
             <p
               className="text-muted-foreground text-xs leading-snug"
-              dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[level] }}
+              dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[Number(level)] }}
             />
           </div>
 
@@ -120,7 +130,7 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
             <Label htmlFor="edit-active" className="text-sm">
               Ativo
             </Label>
-            <Switch id="edit-active" checked={active} onCheckedChange={(checked) => setActive(checked)} />
+            <Switch id="edit-active" checked={active} onCheckedChange={setActive} />
           </div>
         </div>
 
