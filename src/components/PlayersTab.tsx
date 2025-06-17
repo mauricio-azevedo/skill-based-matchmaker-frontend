@@ -196,7 +196,7 @@ const PlayersTab: FC = () => {
                     <DialogTitle>Descrição dos níveis</DialogTitle>
                   </DialogHeader>
 
-                  <div className="text-xs leading-snug min-h-0 h-100 overflow-y-auto">
+                  <div className="text-xs leading-snug min-h-0 h-[calc(100vh-18rem)] overflow-y-auto">
                     {LEVELS.map(({ value }) => (
                       <React.Fragment key={value}>
                         <div dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[value] }} />
