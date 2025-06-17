@@ -27,9 +27,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Edit, Trash } from 'lucide-react'
+import { Edit, HelpCircle, Trash } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import type { Player } from '@/types/players'
+import { LEVELS } from '@/consts/levels'
 
 interface EditPlayerModalProps {
   player: Player
@@ -87,7 +88,21 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
           </div>
 
           <div className="grid gap-3">
-            <Label htmlFor="edit-level">Nível</Label>
+            <Label htmlFor="edit-level">
+              Nível
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label="Sobre os níveis"
+                className="h-3 w-3 p-0"
+                onClick={() => {
+                  /* TODO: abrir modal com descrição dos níveis */
+                }}
+              >
+                <HelpCircle className="!h-3 !w-3" />
+              </Button>
+            </Label>
             <ToggleGroup
               id="edit-level"
               type="single"
@@ -95,14 +110,14 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
               onValueChange={(val: string) => val && setLevel(Number(val))}
               className="flex flex-wrap gap-2 w-full"
             >
-              {Array.from({ length: 5 }, (_, i) => i + 1).map((lvl) => (
+              {LEVELS.map(({ value, label }) => (
                 <ToggleGroupItem
-                  key={lvl}
-                  value={lvl.toString()}
-                  aria-label={`Level ${lvl}`}
+                  key={value}
+                  value={value.toString()} // mantém o valor original
+                  aria-label={`Nível ${value}`} // acessibilidade
                   className="w-8 justify-center"
                 >
-                  {lvl}
+                  {label}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>

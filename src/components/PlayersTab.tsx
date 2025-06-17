@@ -13,14 +13,7 @@ import { Plus, Minus, Users, HelpCircle } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { itemVariants } from '@/consts/animation'
 import { singleToastSuccess } from '@/utils/singleToast'
-
-const levelOptions = [
-  { value: 1, label: 'C' },
-  { value: 2, label: 'B' },
-  { value: 3, label: 'BB' },
-  { value: 4, label: 'A' },
-  { value: 5, label: 'AA' },
-]
+import { getLevelLabel, LEVELS } from '@/consts/levels'
 
 const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
@@ -134,7 +127,7 @@ const PlayersTab: FC = () => {
                       <div className="flex items-center">
                         <p className="font-medium text-sm">{p.name}</p>
                         <Badge variant="secondary" className="ml-2 text-xs">
-                          Nív. {p.level}
+                          {getLevelLabel(p.level)}
                         </Badge>
                       </div>
                     </div>
@@ -190,7 +183,7 @@ const PlayersTab: FC = () => {
                 onValueChange={(val: string) => val && setLevel(Number(val))}
                 className="flex flex-wrap gap-2 flex-1"
               >
-                {levelOptions.map(({ value, label }) => (
+                {LEVELS.map(({ value, label }) => (
                   <ToggleGroupItem
                     key={value}
                     value={value.toString()} // mantém o valor original
