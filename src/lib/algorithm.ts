@@ -12,6 +12,7 @@ const WEIGHT = {
   MATCH_COUNT_TOTAL: 6, // β: prioriza partidas com jogadores que, em média, jogaram menos até agora
   MATCH_COUNT_IMBALANCE: 8, // δ: evita partidas com desequilíbrio (ex: alguém com 4 jogos e outro com 0)
   PARTNER_COUNT: 2, // γ: evita repetir duplas que já jogaram juntas antes
+  WITHIN_TEAM_VARIATION: 1, // ε: evita variação interna de nível dentro do mesmo time
 }
 
 /**
@@ -46,6 +47,9 @@ function calculateMatchScore(a1: Player, a2: Player, b1: Player, b2: Player): nu
   // diferença de skill total dos times
   const teamImbalance = Math.abs(a1.level + a2.level - (b1.level + b2.level))
 
+  // variação de nível dentro de cada time
+  const withinTeamVariation = Math.abs(a1.level - a2.level) + Math.abs(b1.level - b2.level)
+
   // média de partidas que cada um já jogou
   const playedSum = a1.matchCount + a2.matchCount + b1.matchCount + b2.matchCount
 
@@ -62,7 +66,8 @@ function calculateMatchScore(a1: Player, a2: Player, b1: Player, b2: Player): nu
     WEIGHT.SKILL_IMBALANCE * teamImbalance +
     WEIGHT.MATCH_COUNT_IMBALANCE * matchCountImbalance +
     WEIGHT.MATCH_COUNT_TOTAL * playedSum +
-    WEIGHT.PARTNER_COUNT * pastPairSum
+    WEIGHT.PARTNER_COUNT * pastPairSum +
+    WEIGHT.WITHIN_TEAM_VARIATION * withinTeamVariation
   )
 }
 
