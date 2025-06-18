@@ -1,145 +1,177 @@
 // src/lib/algorithm.ts
-
 import type { Player, UnsavedRound } from '@/types/players'
-import { shuffle } from '@/utils/shuffle'
 
-// mínimo de jogadores necessários para uma rodada
+/* ─────────────────────────────── Constantes ──────────────────────────────── */
+
 const MIN_PLAYERS = 4 as const
 
-// constantes de peso para o cálculo de score
+/** Pesos já na mesma ordem de grandeza dos fatores normalizados */
 const WEIGHT = {
-  SKILL_IMBALANCE: 6, // α: evita times com diferença grande de habilidade
-  MATCH_COUNT_TOTAL: 999, // β: prioriza partidas com jogadores que, em média, jogaram menos até agora
-  MATCH_COUNT_IMBALANCE: 99, // δ: evita partidas com desequilíbrio (ex: alguém com 4 jogos e outro com 0)
-  PARTNER_COUNT: 999, // γ: evita repetir duplas que já jogaram juntas antes
-  WITHIN_TEAM_VARIATION: 6, // ε: evita variação interna de nível dentro do mesmo time
-  PREFERRED_PAIR: 6, // ζ: recompensa formar duplas preferidas (quanto maior, mais forte o incentivo)
+  PARTNER_COUNT: 5,
+  SKILL_IMBALANCE: 4,
+  MATCH_COUNT_IMBALANCE: 3,
+  PREFERRED_PAIR: 3,
+  WITHIN_TEAM_VARIATION: 2,
+  MATCH_COUNT_TOTAL: 1,
+} as const
+
+/* ────────────────────────────── Tipos Internos ───────────────────────────── */
+
+type IdxPair = readonly [number, number]
+
+interface InternalMatch {
+  teamA: IdxPair
+  teamB: IdxPair
+  score: number
 }
 
-/**
- * Gera todos os pares únicos de jogadores.
- */
-function generatePairs(players: Player[]): [Player, Player][] {
-  const pairs: [Player, Player][] = []
-  for (let i = 0; i < players.length; i++) {
-    for (let j = i + 1; j < players.length; j++) {
-      pairs.push([players[i], players[j]])
+/* ──────────────────────────── Funções utilitárias ────────────────────────── */
+
+/** Gera todas as combinações únicas de índices (i < j). O(n²). */
+function generateIndexPairs(count: number): IdxPair[] {
+  const pairs: IdxPair[] = []
+  for (let i = 0; i < count - 1; i++) {
+    for (let j = i + 1; j < count; j++) {
+      pairs.push([i, j])
     }
   }
   return pairs
 }
 
-type InternalMatch = {
-  teamA: [Player, Player]
-  teamB: [Player, Player]
-  score: number
+/** Atalho para obter `partnerCounts[id]` devolvendo 0 se inexistente. */
+function getPartnerCount(p: Player, partnerId: string): number {
+  return (p.partnerCounts && p.partnerCounts[partnerId]) || 0
 }
 
-/**
- * Calcula o "score" de balanceamento para dois pares formarem uma partida.
- * Quanto menor o score, mais balanceada a partida.
- */
-function calculateMatchScore(a1: Player, a2: Player, b1: Player, b2: Player): number {
-  // diferença de skill individual
-  const diff1 = Math.abs(a1.level - b1.level) + Math.abs(a2.level - b2.level)
-  const diff2 = Math.abs(a1.level - b2.level) + Math.abs(a2.level - b1.level)
+/** Pré‑processa players para lookup O(1) em pares preferidos. */
+function buildPreferredSet(players: readonly Player[]): ReadonlyArray<Set<string>> {
+  return players.map((p) => new Set(p.preferredPairs ?? []))
+}
+
+/* ────────────────────── Cálculo do score normalizado ─────────────────────── */
+
+function calculateMatchScore(
+  players: readonly Player[],
+  prefSets: ReadonlyArray<Set<string>>,
+  a1: number,
+  a2: number,
+  b1: number,
+  b2: number,
+): number {
+  const pA1 = players[a1]
+  const pA2 = players[a2]
+  const pB1 = players[b1]
+  const pB2 = players[b2]
+
+  // 1) Desequilíbrio de habilidade (entre duplas e total)
+  const diff1 = Math.abs(pA1.level - pB1.level) + Math.abs(pA2.level - pB2.level)
+  const diff2 = Math.abs(pA1.level - pB2.level) + Math.abs(pA2.level - pB1.level)
   const skillPairImbalance = Math.min(diff1, diff2)
 
-  // diferença de skill total dos times
-  const teamImbalance = Math.abs(a1.level + a2.level - (b1.level + b2.level))
+  const teamImbalance = Math.abs(pA1.level + pA2.level - (pB1.level + pB2.level))
 
-  // variação de nível dentro de cada time
-  const withinTeamVariation = Math.abs(a1.level - a2.level) + Math.abs(b1.level - b2.level)
+  const withinTeamVariation = Math.abs(pA1.level - pA2.level) + Math.abs(pB1.level - pB2.level)
 
-  // média de partidas que cada um já jogou
-  const playedSum = a1.matchCount + a2.matchCount + b1.matchCount + b2.matchCount
+  // 2) Volume e equilíbrio de partidas jogadas
+  const playedSum = pA1.matchCount + pA2.matchCount + pB1.matchCount + pB2.matchCount
 
-  // diferença entre a quantidade de partidas que cada um já jogou
   const matchCountImbalance =
-    Math.max(a1.matchCount, a2.matchCount, b1.matchCount, b2.matchCount) -
-    Math.min(a1.matchCount, a2.matchCount, b1.matchCount, b2.matchCount)
+    Math.max(pA1.matchCount, pA2.matchCount, pB1.matchCount, pB2.matchCount) -
+    Math.min(pA1.matchCount, pA2.matchCount, pB1.matchCount, pB2.matchCount)
 
-  // quantas vezes já foram parceiros
-  const pastPairSum = (a1.partnerCounts[a2.id] || 0) + (b1.partnerCounts[b2.id] || 0)
+  // 3) Parcerias prévias
+  const pastPairSum = getPartnerCount(pA1, pA2.id) + getPartnerCount(pB1, pB2.id)
 
-  // bônus por duplas preferidas (cada preferência satisfeita reduz o score)
+  // 4) Preferências atendidas
   const preferredPairBonus =
-    (a1.preferredPairs?.includes(a2.id) ? 1 : 0) +
-    (a2.preferredPairs?.includes(a1.id) ? 1 : 0) +
-    (b1.preferredPairs?.includes(b2.id) ? 1 : 0) +
-    (b2.preferredPairs?.includes(b1.id) ? 1 : 0)
+    Number(prefSets[a1].has(pA2.id)) +
+    Number(prefSets[a2].has(pA1.id)) +
+    Number(prefSets[b1].has(pB2.id)) +
+    Number(prefSets[b2].has(pB1.id))
 
   return (
     skillPairImbalance +
     WEIGHT.SKILL_IMBALANCE * teamImbalance +
     WEIGHT.MATCH_COUNT_IMBALANCE * matchCountImbalance +
     WEIGHT.MATCH_COUNT_TOTAL * playedSum +
-    WEIGHT.PARTNER_COUNT * pastPairSum +
-    WEIGHT.WITHIN_TEAM_VARIATION * withinTeamVariation -
-    WEIGHT.PREFERRED_PAIR * preferredPairBonus
+    WEIGHT.PARTNER_COUNT * pastPairSum -
+    WEIGHT.PREFERRED_PAIR * preferredPairBonus +
+    WEIGHT.WITHIN_TEAM_VARIATION * withinTeamVariation
   )
 }
 
-/**
- * Constrói todas as partidas possíveis (dois pares distintos).
- */
-function generateAllMatches(pairs: [Player, Player][]): InternalMatch[] {
+/* ──────────────────────── Construção de partidas ─────────────────────────── */
+
+/** Constrói todas as partidas possíveis (duas duplas disjuntas). O(n²·m) onde m≈n². */
+function generateAllMatches(players: readonly Player[]): InternalMatch[] {
+  const prefSets = buildPreferredSet(players)
+  const pairs = generateIndexPairs(players.length)
+
   const matches: InternalMatch[] = []
+
   for (let i = 0; i < pairs.length; i++) {
     const [a1, a2] = pairs[i]
+
+    // Evitar instanciar Set dentro do loop interno – interseção manual.
     for (let j = i + 1; j < pairs.length; j++) {
       const [b1, b2] = pairs[j]
-      if (new Set([a1.id, a2.id]).has(b1.id) || new Set([a1.id, a2.id]).has(b2.id)) continue
-      const score = calculateMatchScore(a1, a2, b1, b2)
+      if (a1 === b1 || a1 === b2 || a2 === b1 || a2 === b2) {
+        continue
+      }
+
+      const score = calculateMatchScore(players, prefSets, a1, a2, b1, b2)
+
       matches.push({ teamA: [a1, a2], teamB: [b1, b2], score })
     }
   }
   return matches
 }
 
-/**
- * Seleciona as melhores partidas até o número de quadras, garantindo
- * que nenhum jogador seja usado em mais de uma partida nesta rodada.
- */
+/* ─────────────────────────── Seleção final ───────────────────────────────── */
+
 function selectTopMatches(matches: InternalMatch[], courts: number): InternalMatch[] {
+  // Ordena por score crescente; usa random como tie‑break (estável).
+  matches.sort((m1, m2) => {
+    if (m1.score !== m2.score) return m1.score - m2.score
+    return Math.random() - 0.5
+  })
+
   const selected: InternalMatch[] = []
-  const usedIds = new Set<string>()
+  const used = new Set<number>()
 
-  for (const match of matches) {
-    if (selected.length >= courts) break
+  for (const m of matches) {
+    if (selected.length === courts) break
 
-    const ids = [...match.teamA, ...match.teamB].map((p) => p.id)
-    if (ids.some((id) => usedIds.has(id))) continue
+    const ids = [...m.teamA, ...m.teamB]
+    if (ids.some((i) => used.has(i))) continue
 
-    ids.forEach((id) => usedIds.add(id))
-    selected.push(match)
+    ids.forEach((i) => used.add(i))
+    selected.push(m)
+  }
+
+  if (selected.length < courts) {
+    throw new Error(`Não foi possível preencher todas as ${courts} quadras (apenas ${selected.length}).`)
   }
 
   return selected
 }
 
-/**
- * Gera um Round com partidas balanceadas.
- */
-export function generateSchedule(players: Player[], courts: number): UnsavedRound {
+/* ─────────────────────────── API pública ─────────────────────────────────── */
+
+export function generateSchedule(players: readonly Player[], courts: number): UnsavedRound {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
-  const pairs = generatePairs(players)
-  const allMatches = generateAllMatches(pairs)
-
-  shuffle(allMatches)
-  allMatches.sort((m1, m2) => m1.score - m2.score)
-
+  const allMatches = generateAllMatches(players)
   const best = selectTopMatches(allMatches, courts)
 
   return {
     id: crypto.randomUUID(),
     matches: best.map(({ teamA, teamB }) => ({
       id: crypto.randomUUID(),
-      teamA,
-      teamB,
+      teamA: [players[teamA[0]], players[teamA[1]]],
+      teamB: [players[teamB[0]], players[teamB[1]]],
       gamesA: null,
       gamesB: null,
       winner: null,
