@@ -8,11 +8,11 @@ const MIN_PLAYERS = 4 as const
 
 // constantes de peso para o cálculo de score
 const WEIGHT = {
-  SKILL_IMBALANCE: 4, // α: evita times com diferença grande de habilidade
-  MATCH_COUNT_TOTAL: 6, // β: prioriza partidas com jogadores que, em média, jogaram menos até agora
-  MATCH_COUNT_IMBALANCE: 8, // δ: evita partidas com desequilíbrio (ex: alguém com 4 jogos e outro com 0)
-  PARTNER_COUNT: 2, // γ: evita repetir duplas que já jogaram juntas antes
-  WITHIN_TEAM_VARIATION: 1, // ε: evita variação interna de nível dentro do mesmo time
+  SKILL_IMBALANCE: 2, // α: evita times com diferença grande de habilidade
+  MATCH_COUNT_TOTAL: 10, // β: prioriza partidas com jogadores que, em média, jogaram menos até agora
+  MATCH_COUNT_IMBALANCE: 10, // δ: evita partidas com desequilíbrio (ex: alguém com 4 jogos e outro com 0)
+  PARTNER_COUNT: 6, // γ: evita repetir duplas que já jogaram juntas antes
+  WITHIN_TEAM_VARIATION: 2, // ε: evita variação interna de nível dentro do mesmo time
 }
 
 /**
