@@ -57,7 +57,7 @@ function calculateMatchScore(a1: Player, a2: Player, b1: Player, b2: Player): nu
   // diferença entre a quantidade de partidas que cada um já jogou
   const matchCountImbalance =
     Math.max(a1.matchCount, a2.matchCount, b1.matchCount, b2.matchCount) -
-      Math.min(a1.matchCount, a2.matchCount, b1.matchCount, b2.matchCount) || 1
+    Math.min(a1.matchCount, a2.matchCount, b1.matchCount, b2.matchCount)
 
   // quantas vezes já foram parceiros
   const pastPairSum = (a1.partnerCounts[a2.id] || 0) + (b1.partnerCounts[b2.id] || 0)
