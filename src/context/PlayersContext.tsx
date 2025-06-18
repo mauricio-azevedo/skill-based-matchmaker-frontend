@@ -44,6 +44,7 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
         active: p.active !== false,
         matchCount: p.matchCount ?? 0,
         partnerCounts: p.partnerCounts ?? {},
+        preferredPairs: p.preferredPairs ?? [],
       }))
     } catch {
       return []
@@ -73,6 +74,7 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
           active: true,
           matchCount: minCount, // inicia igual ao menor existente
           partnerCounts: {}, // sem parcerias ainda
+          preferredPairs: [],
         },
         ...prev,
       ]

@@ -13,6 +13,7 @@ const WEIGHT = {
   MATCH_COUNT_IMBALANCE: 99, // δ: evita partidas com desequilíbrio (ex: alguém com 4 jogos e outro com 0)
   PARTNER_COUNT: 999, // γ: evita repetir duplas que já jogaram juntas antes
   WITHIN_TEAM_VARIATION: 6, // ε: evita variação interna de nível dentro do mesmo time
+  PREFERRED_PAIR: 6, // ζ: recompensa formar duplas preferidas (quanto maior, mais forte o incentivo)
 }
 
 /**
@@ -61,13 +62,21 @@ function calculateMatchScore(a1: Player, a2: Player, b1: Player, b2: Player): nu
   // quantas vezes já foram parceiros
   const pastPairSum = (a1.partnerCounts[a2.id] || 0) + (b1.partnerCounts[b2.id] || 0)
 
+  // bônus por duplas preferidas (cada preferência satisfeita reduz o score)
+  const preferredPairBonus =
+    (a1.preferredPairs?.includes(a2.id) ? 1 : 0) +
+    (a2.preferredPairs?.includes(a1.id) ? 1 : 0) +
+    (b1.preferredPairs?.includes(b2.id) ? 1 : 0) +
+    (b2.preferredPairs?.includes(b1.id) ? 1 : 0)
+
   return (
     skillPairImbalance +
     WEIGHT.SKILL_IMBALANCE * teamImbalance +
     WEIGHT.MATCH_COUNT_IMBALANCE * matchCountImbalance +
     WEIGHT.MATCH_COUNT_TOTAL * playedSum +
     WEIGHT.PARTNER_COUNT * pastPairSum +
-    WEIGHT.WITHIN_TEAM_VARIATION * withinTeamVariation
+    WEIGHT.WITHIN_TEAM_VARIATION * withinTeamVariation -
+    WEIGHT.PREFERRED_PAIR * preferredPairBonus
   )
 }
 

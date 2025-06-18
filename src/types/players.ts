@@ -13,6 +13,8 @@ export interface Player {
   matchCount: number
   /** Histórico de parcerias: parceiroId → vezes jogadas juntos */
   partnerCounts: Record<string, number>
+  /** Lista de jogadores com quem esse jogador prefere fazr dupla */
+  preferredPairs: string[]
 }
 
 /** Cada partida contém dois times de dois jogadores. */
