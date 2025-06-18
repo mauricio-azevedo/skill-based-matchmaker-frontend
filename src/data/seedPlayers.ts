@@ -6,6 +6,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: [],
   },
   {
     id: '1a1b7ed8-a52a-4059-9a19-b987b0fedfe2',
@@ -14,6 +15,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: [],
   },
   {
     id: '9176a9fd-66ca-43e7-9bf6-a6454d27f3cf',
@@ -22,6 +24,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['654abc59-238b-44db-ae28-3042fab03306'],
   },
   {
     id: '5671cf68-1a52-4ca7-9809-b16662ae47ad',
@@ -30,6 +33,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['f0736bbb-0988-4dfd-9b82-d8249a39c0ed'],
   },
   {
     id: '9a0abea2-e85a-4510-ae11-f1e42f33c0f7',
@@ -38,6 +42,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: [],
   },
   {
     id: 'f0b05950-dabd-4f91-8d66-9c74af001dc0',
@@ -46,6 +51,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['faf619d0-9840-4eb8-ad61-ed6ace245338'],
   },
   {
     id: 'ca63bdb2-0e96-4e9b-8644-0d7a492373a9',
@@ -54,6 +60,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: [],
   },
   {
     id: '31e16a49-1837-4b73-9804-6e818eb0dfe6',
@@ -62,6 +69,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['4ad7d39d-9b12-4a70-a454-c15b0bbc754f'],
   },
   {
     id: 'b5e6d9ab-2fac-44c0-a8be-ce01ebf88fa0',
@@ -70,6 +78,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['9d8da099-9ad8-4a85-aaf0-f84d4061563d'],
   },
   {
     id: '4ad7d39d-9b12-4a70-a454-c15b0bbc754f',
@@ -78,6 +87,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['31e16a49-1837-4b73-9804-6e818eb0dfe6'],
   },
   {
     id: 'f0736bbb-0988-4dfd-9b82-d8249a39c0ed',
@@ -86,6 +96,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['5671cf68-1a52-4ca7-9809-b16662ae47ad'],
   },
   {
     id: '9d8da099-9ad8-4a85-aaf0-f84d4061563d',
@@ -94,6 +105,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['b5e6d9ab-2fac-44c0-a8be-ce01ebf88fa0'],
   },
   {
     id: '654abc59-238b-44db-ae28-3042fab03306',
@@ -102,6 +114,7 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['9176a9fd-66ca-43e7-9bf6-a6454d27f3cf'],
   },
   {
     id: 'faf619d0-9840-4eb8-ad61-ed6ace245338',
@@ -110,5 +123,6 @@ export const seedPlayers = [
     active: true,
     matchCount: 0,
     partnerCounts: {},
+    preferredPairs: ['f0b05950-dabd-4f91-8d66-9c74af001dc0'],
   },
 ]
