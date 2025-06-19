@@ -1,6 +1,6 @@
-import { useState, type FC, type FormEvent, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+import React, { type FC, type FormEvent, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -9,25 +9,29 @@ import { Badge } from '@/components/ui/badge'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
   Dialog,
-  DialogTrigger,
+  DialogClose,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogClose,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { usePlayers } from '@/context/PlayersContext'
 import EditPlayerModal from './EditPlayerModal'
-import { Plus, Minus, Users, HelpCircle } from 'lucide-react'
+import { HelpCircle, Minus, Plus, Users } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { itemVariants } from '@/consts/animation'
 import { singleToastSuccess } from '@/utils/singleToast'
-import { getLevelLabel, LEVELS, LEVEL_DESCRIPTIONS } from '@/consts/levels'
-import React from 'react'
+import { getLevelLabel, LEVEL_DESCRIPTIONS, LEVELS } from '@/consts/levels'
+import { type SortBy, usePlayerSort } from '@/hooks/usePlayerSort'
+import PlayerSortDropdown from '@/components/PlayerSortDropdown'
 
 const PlayersTab: FC = () => {
   const { players, add, toggleActive } = usePlayers()
   const { courts, setCourts } = useCourts()
+
+  const [sortBy, setSortBy] = useState<SortBy>('active')
+  const sortedPlayers = usePlayerSort(players, sortBy)
 
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
@@ -100,7 +104,11 @@ const PlayersTab: FC = () => {
 
         {/* Título Jogadores e contador */}
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-semibold">Jogadores</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">Jogadores</h2>
+            <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
+          </div>
+
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" aria-hidden="true" />
             <span className="text-sm">
@@ -121,10 +129,10 @@ const PlayersTab: FC = () => {
         ) : (
           <ul className="flex flex-col gap-3 flex-1 overflow-y-auto">
             <AnimatePresence initial={false}>
-              {players.map((p) => (
+              {sortedPlayers.map((p) => (
                 <motion.li
                   key={p.id}
-                  layout="position"
+                  layout={sortBy === 'level' ? false : 'position'}
                   variants={itemVariants}
                   initial="initial"
                   animate="animate"
