@@ -2,7 +2,7 @@ export const seedPlayers = [
   {
     id: '9a0abea2-e85a-4510-ae11-f1e42f33c0f7',
     name: 'JP',
-    level: 5,
+    level: 4,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -11,7 +11,7 @@ export const seedPlayers = [
   {
     id: '9d8da099-9ad8-4a85-aaf0-f84d4061563d',
     name: 'Karine',
-    level: 2,
+    level: 4,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -29,7 +29,7 @@ export const seedPlayers = [
   {
     id: '5671cf68-1a52-4ca7-9809-b16662ae47ad',
     name: 'Hector',
-    level: 5,
+    level: 4,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -38,7 +38,7 @@ export const seedPlayers = [
   {
     id: 'b7b1877a-adc4-4df7-b605-894dd481bf60',
     name: 'Luciana',
-    level: 1,
+    level: 2,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -47,7 +47,7 @@ export const seedPlayers = [
   {
     id: 'ca63bdb2-0e96-4e9b-8644-0d7a492373a9',
     name: 'Gabriel',
-    level: 5,
+    level: 4,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -65,7 +65,7 @@ export const seedPlayers = [
   {
     id: 'f0736bbb-0988-4dfd-9b82-d8249a39c0ed',
     name: 'Daniela',
-    level: 2,
+    level: 3,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -74,7 +74,7 @@ export const seedPlayers = [
   {
     id: '1a1b7ed8-a52a-4059-9a19-b987b0fedfe2',
     name: 'Gabriela',
-    level: 1,
+    level: 2,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -83,7 +83,7 @@ export const seedPlayers = [
   {
     id: '9176a9fd-66ca-43e7-9bf6-a6454d27f3cf',
     name: 'Maurício',
-    level: 5,
+    level: 4,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -92,7 +92,7 @@ export const seedPlayers = [
   {
     id: 'b5e6d9ab-2fac-44c0-a8be-ce01ebf88fa0',
     name: 'Alberto',
-    level: 5,
+    level: 4,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -101,7 +101,7 @@ export const seedPlayers = [
   {
     id: '654abc59-238b-44db-ae28-3042fab03306',
     name: 'Mariane',
-    level: 2,
+    level: 3,
     active: true,
     matchCount: 0,
     partnerCounts: {},
@@ -110,7 +110,7 @@ export const seedPlayers = [
   {
     id: 'f0b05950-dabd-4f91-8d66-9c74af001dc0',
     name: 'Ítalo',
-    level: 5,
+    level: 4,
     active: true,
     matchCount: 0,
     partnerCounts: {},
