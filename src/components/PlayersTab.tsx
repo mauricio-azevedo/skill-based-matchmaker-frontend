@@ -132,7 +132,7 @@ const PlayersTab: FC = () => {
               {sortedPlayers.map((p) => (
                 <motion.li
                   key={p.id}
-                  layout={sortBy === 'level' ? false : 'position'}
+                  layout="position"
                   variants={itemVariants}
                   initial="initial"
                   animate="animate"
