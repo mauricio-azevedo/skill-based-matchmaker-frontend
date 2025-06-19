@@ -11,7 +11,7 @@ export const seedPlayers = [
   {
     id: '9d8da099-9ad8-4a85-aaf0-f84d4061563d',
     name: 'Karine',
-    level: 4,
+    level: 3,
     active: true,
     matchCount: 0,
     partnerCounts: {},
