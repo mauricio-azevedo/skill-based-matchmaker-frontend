@@ -221,7 +221,10 @@ const MatchesTab: FC = () => {
         </AnimatePresence>
 
         {/* Rounds List */}
-        <ul ref={listRef} className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}>
+        <ul
+          ref={listRef}
+          className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory', 'shadow-inner')}
+        >
           <AnimatePresence initial={false}>
             {rounds.map((round, idx) => (
               <motion.li
