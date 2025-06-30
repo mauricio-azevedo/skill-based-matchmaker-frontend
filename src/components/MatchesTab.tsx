@@ -309,7 +309,7 @@ const MatchesTab: FC = () => {
         </ul>
       </div>
 
-      <div className="p-2">
+      <div className="p-2 w-full flex">
         <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
           Nova rodada
         </Button>
