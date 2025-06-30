@@ -1,13 +1,13 @@
 // src/App.tsx
 
 import { useEffect, useMemo, useState } from 'react'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
 import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'
-import { Moon, Sun, Settings } from 'lucide-react'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Moon, Settings, Sun } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useRounds } from '@/context/RoundsContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
@@ -152,7 +152,7 @@ export default function App() {
         }}
       />
 
-      {/* ---------- Tabs ---------- */}
+      {/* --------- Tabs --------- */}
       <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden gap-2">
         {/* Conteúdo */}
         <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center">
