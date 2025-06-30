@@ -5,17 +5,14 @@ import { PlayersProvider } from './context/PlayersContext.js'
 import { RoundsProvider } from './context/RoundsContext.js'
 import { Toaster } from '@/components/ui/sonner'
 import { CourtsProvider } from '@/context/CourtsContext'
-import { AuthProvider } from '@/context/AuthContext'
 
 createRoot(document.getElementById('root')!).render(
-  <AuthProvider>
-    <CourtsProvider>
-      <PlayersProvider>
-        <RoundsProvider>
-          <App />
-          <Toaster position="top-center" visibleToasts={1} />
-        </RoundsProvider>
-      </PlayersProvider>
-    </CourtsProvider>
-  </AuthProvider>,
+  <CourtsProvider>
+    <PlayersProvider>
+      <RoundsProvider>
+        <App />
+        <Toaster position="top-center" visibleToasts={1} />
+      </RoundsProvider>
+    </PlayersProvider>
+  </CourtsProvider>,
 )
