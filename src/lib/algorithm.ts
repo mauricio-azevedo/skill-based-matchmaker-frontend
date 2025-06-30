@@ -7,12 +7,12 @@ const MIN_PLAYERS = 4 as const
 
 /** Pesos já na mesma ordem de grandeza dos fatores normalizados */
 const WEIGHT = {
-  PARTNER_COUNT: 99,
-  SKILL_IMBALANCE: 20,
-  MATCH_COUNT_IMBALANCE: 99,
-  PREFERRED_PAIR: 1.9,
-  WITHIN_TEAM_VARIATION: 0,
-  MATCH_COUNT_TOTAL: 99,
+  MATCH_COUNT_TOTAL: 100,
+  MATCH_COUNT_IMBALANCE: 100,
+  SKILL_IMBALANCE: 80,
+  WITHIN_TEAM_VARIATION: -70,
+  PARTNER_COUNT: 50,
+  PREFERRED_PAIR: 40,
 } as const
 
 /* ────────────────────────────── Tipos Internos ───────────────────────────── */
