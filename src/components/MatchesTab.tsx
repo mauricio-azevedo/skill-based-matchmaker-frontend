@@ -392,7 +392,7 @@ const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
     <div className="flex flex-col max-w-full gap-1">
       {players.map((p) => (
         <div key={p.id} className={cn('flex items-end gap-2 text-base', team === 'B' && 'justify-end')}>
-          <p className={cn('text-sm font-medium', p.level === 4 ? 'text-blue-400' : '')}>{p.name}</p>
+          <p className="text-sm font-medium">{p.name}</p>
         </div>
       ))}
     </div>
