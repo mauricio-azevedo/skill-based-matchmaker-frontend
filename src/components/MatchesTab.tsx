@@ -203,7 +203,7 @@ const MatchesTab: FC = () => {
 
   return (
     <>
-      <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Partidas</h3>
+      <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight self-start mb-2">Partidas</h3>
       <div className="!gap-2 relative flex flex-col justify-between overflow-hidden w-full">
         {/* Empty State */}
         <AnimatePresence initial={false}>
@@ -304,12 +304,10 @@ const MatchesTab: FC = () => {
             ))}
           </AnimatePresence>
         </ul>
+      </div>
 
-        <Button
-          className="flex-1 absolute bottom-4 left-1/2 -translate-x-1/2 shadow-2xl"
-          onClick={handleGenerate}
-          disabled={players.length < PLAYERS_PER_MATCH}
-        >
+      <div className="pt-2">
+        <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
           Nova rodada
         </Button>
       </div>
