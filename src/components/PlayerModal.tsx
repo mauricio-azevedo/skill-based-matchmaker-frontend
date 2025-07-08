@@ -117,7 +117,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
         </DialogHeader>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           {/* Nome */}
           <div className="grid gap-3">
             <Label htmlFor="player-name">Nome</Label>
