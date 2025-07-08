@@ -165,7 +165,7 @@ const MatchesTab: FC = () => {
       <div className="flex w-full h-8">
         <div className="text-lg font-semibold">Rodadas</div>
       </div>
-      <div className="!gap-2 relative flex flex-col justify-between overflow-hidden w-full">
+      <div className="!gap-2 relative flex flex-col justify-between overflow-hidden w-full h-full">
         {/* Empty State */}
         <AnimatePresence initial={false}>
           {rounds.length === 0 && (
