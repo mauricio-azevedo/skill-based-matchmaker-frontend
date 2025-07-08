@@ -204,7 +204,7 @@ const MatchesTab: FC = () => {
 
   return (
     <>
-      <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight self-start mb-2">Partidas</h3>
+      <h4 className="scroll-m-20 text-xl font-semibold tracking-tight self-start mb-2">Partidas</h4>
       <div className="!gap-2 relative flex flex-col justify-between overflow-hidden w-full">
         {/* Empty State */}
         <AnimatePresence initial={false}>
@@ -240,7 +240,7 @@ const MatchesTab: FC = () => {
                 <Card>
                   <CardContent>
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">Rodada {round.roundNumber}</h4>
+                      <div className="scroll-m-20 text-lg font-semibold tracking-tight">Rodada {round.roundNumber}</div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="shrink-0">

@@ -14,6 +14,7 @@ import { singleToastSuccess } from '@/utils/singleToast'
 import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import SetupTab from '@/components/SetupTab'
 
 export default function App() {
   // -----------------------------------------------------------
@@ -73,7 +74,7 @@ export default function App() {
   return (
     <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
       {/* ---------- Header ---------- */}
-      <header className="flex items-center border-b px-4 py-2">
+      <header className="flex items-center border-b px-2 py-2">
         <h1 className="text-xl font-semibold tracking-tight">BeachRank</h1>
         <div className="ml-auto flex items-center gap-4">
           {/* Tema */}
@@ -159,6 +160,9 @@ export default function App() {
           <TabsContent value="players" asChild>
             <PlayersTab />
           </TabsContent>
+          <TabsContent value="setup" asChild>
+            <SetupTab />
+          </TabsContent>
           <TabsContent value="matches" asChild>
             <MatchesTab />
           </TabsContent>
@@ -169,7 +173,8 @@ export default function App() {
 
         {/* Barra de triggers */}
         <TabsList className="self-center">
-          <TabsTrigger value="players">Setup</TabsTrigger>
+          <TabsTrigger value="players">Jogadores</TabsTrigger>
+          <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="matches">Partidas</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
