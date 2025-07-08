@@ -81,7 +81,7 @@ const PlayersTab: FC = () => {
           {/* Botão que abre o dialog de adição */}
           <Dialog open={openAdd} onOpenChange={setOpenAdd}>
             <DialogTrigger asChild>
-              <Button size="icon" className="rounded-full" variant="outline" aria-label="Adicionar jogador">
+              <Button size="icon" variant="default" aria-label="Adicionar jogador">
                 <Plus className="h-4 w-4" />
               </Button>
             </DialogTrigger>
