@@ -162,7 +162,7 @@ const MatchesTab: FC = () => {
 
   return (
     <React.Fragment>
-      <div className="flex w-full !h-8">
+      <div className="flex w-full h-8">
         <div className="text-lg font-semibold">Rodadas</div>
       </div>
       <div className="!gap-2 relative flex flex-col justify-between overflow-hidden flex-1 w-full">
