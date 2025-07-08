@@ -1,6 +1,6 @@
 import React, { type FC, type FormEvent, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -34,6 +34,9 @@ const PlayersTab: FC = () => {
   const [name, setName] = useState('')
   const [level, setLevel] = useState(1)
 
+  // Dialog open state for the add player form
+  const [openAdd, setOpenAdd] = useState(false)
+
   const nameInputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -43,7 +46,8 @@ const PlayersTab: FC = () => {
     add(trimmed, level)
     singleToastSuccess(`${trimmed} adicionado!`, { position: 'bottom-center', duration: 1000 })
     setName('')
-    queueMicrotask(() => nameInputRef.current?.focus())
+    // setLevel(1)
+    // setOpenAdd(false)
   }
 
   const activeCount = players.filter((p) => p.active).length
@@ -52,34 +56,156 @@ const PlayersTab: FC = () => {
 
   return (
     <React.Fragment>
-      {/*<Card>*/}
-      {/*  <CardHeader>*/}
+      {/* Header */}
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-1">
           <CardTitle>Jogadores</CardTitle>
           <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
         </div>
 
-        <div className="flex items-center gap-1">
-          <Users className="h-4 w-4" aria-hidden="true" />
-          <span className="text-sm">
-            {activeCount === total ? (
-              `${total}`
-            ) : (
-              <>
-                {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
-              </>
-            )}
-          </span>
+        <div className="flex items-center gap-3">
+          {/* Contador de jogadores ativos */}
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" aria-hidden="true" />
+            <span className="text-sm">
+              {activeCount === total ? (
+                `${total}`
+              ) : (
+                <>
+                  {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
+                </>
+              )}
+            </span>
+          </div>
+
+          {/* Botão que abre o dialog de adição */}
+          <Dialog open={openAdd} onOpenChange={setOpenAdd}>
+            <DialogTrigger asChild>
+              <Button size="icon" className="rounded-full" variant="outline" aria-label="Adicionar jogador">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]" onOpenAutoFocus={(e) => e.preventDefault()}>
+              <DialogHeader>
+                <DialogTitle>Novo jogador</DialogTitle>
+              </DialogHeader>
+
+              {/* Formulário de adição */}
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2 items-center">
+                    <Label htmlFor="player-name" className="w-[3.25rem]">
+                      Nome
+                    </Label>
+                    <Input
+                      className="flex-1"
+                      ref={nameInputRef}
+                      id="player-name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+
+                  <div className="flex gap-2 items-center">
+                    {/* Dialog de ajuda sobre níveis */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Label htmlFor="player-level" className="w-[3.25rem] gap-1">
+                          Nível
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            aria-label="Sobre os níveis"
+                            className="h-3 w-3 p-0"
+                            onMouseDown={(e) => e.preventDefault()}
+                          >
+                            <HelpCircle className="!h-3 !w-3" />
+                          </Button>
+                        </Label>
+                      </DialogTrigger>
+
+                      <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
+                        <DialogHeader>
+                          <DialogTitle>Descrição dos níveis</DialogTitle>
+                        </DialogHeader>
+
+                        <div className="text-xs leading-snug min-h-0 h-[calc(100dvh-17rem)] overflow-y-auto">
+                          {LEVELS.map(({ value }) => (
+                            <React.Fragment key={value}>
+                              <div dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[value] }} />
+                              <br />
+                              <br />
+                            </React.Fragment>
+                          ))}
+                          <hr />
+                          <br />
+                          <p className="pt-2">
+                            🔎 Fonte:{' '}
+                            <a
+                              href="https://kontrabeach.com/beach-tennis-levels/"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline"
+                            >
+                              Kontra Beach Tennis – “Beach Tennis Skill Levels”
+                            </a>
+                            , que descreve os estágios C → AA usados em camps e treinos internacionais{' '}
+                            <strong>(também adotado pelo Cordel para nivelamento de turmas)</strong>. Embora cada
+                            academia possa adaptar rótulos, essa matriz é amplamente adotada e serve como checklist para
+                            autoavaliação.
+                          </p>
+                        </div>
+
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                              OK, voltar
+                            </Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* ToggleGroup para escolher nível */}
+                    <ToggleGroup
+                      id="player-level"
+                      type="single"
+                      value={level.toString()}
+                      onValueChange={(val: string) => val && setLevel(Number(val))}
+                      className="flex flex-wrap gap-2 flex-1"
+                    >
+                      {LEVELS.map(({ value, label }) => (
+                        <ToggleGroupItem
+                          key={value}
+                          value={value.toString()}
+                          aria-label={`Nível ${value}`}
+                          className="w-8 justify-center"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => setLevel(value)}
+                        >
+                          {label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+                </div>
+
+                <Button type="submit" className="self-end">
+                  Adicionar
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
-      {/*</CardHeader>*/}
-      {/*<CardContent className="flex flex-col justify-between !gap-0">*/}
+
       {/* Lista de jogadores */}
       {players.length === 0 ? (
         <p className="italic text-muted-foreground flex-1">Adicione pelo menos 4 jogadores.</p>
       ) : (
-        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto">
+        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto mt-4">
           <AnimatePresence initial={false}>
             {sortedPlayers.map((p) => (
               <motion.li
@@ -113,129 +239,6 @@ const PlayersTab: FC = () => {
           </AnimatePresence>
         </ul>
       )}
-
-      {/* Formulário de adição */}
-      <Card className="!h-[unset] !py-3">
-        <CardContent className="!px-2">
-          <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-            <div className="flex flex-col gap-2 flex-1">
-              <div className="flex gap-2 flex-1">
-                <Label htmlFor="player-name" className="w-[3.25rem]">
-                  Nome
-                </Label>
-                <Input
-                  className="flex-1"
-                  ref={nameInputRef}
-                  id="player-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-
-              <div className="flex gap-2 flex-1">
-                {/* Dialog de ajuda sobre níveis */}
-                <Dialog>
-                  {/* ----------- Trigger --------------- */}
-                  <DialogTrigger asChild>
-                    <Label htmlFor="player-level" className="w-[3.25rem] gap-1">
-                      Nível
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        aria-label="Sobre os níveis"
-                        className="h-3 w-3 p-0"
-                        onMouseDown={(e) => e.preventDefault()}
-                      >
-                        <HelpCircle className="!h-3 !w-3" />
-                      </Button>
-                    </Label>
-                  </DialogTrigger>
-
-                  {/* ----------- Content (fora do Trigger!) --------------- */}
-                  <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
-                    <DialogHeader>
-                      <DialogTitle>Descrição dos níveis</DialogTitle>
-                    </DialogHeader>
-
-                    <div className="text-xs leading-snug min-h-0 h-[calc(100dvh-17rem)] overflow-y-auto">
-                      {LEVELS.map(({ value }) => (
-                        <React.Fragment key={value}>
-                          <div dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[value] }} />
-                          <br />
-                          <br />
-                        </React.Fragment>
-                      ))}
-                      <hr />
-                      <br />
-                      <p className="pt-2">
-                        🔎 Fonte:{' '}
-                        <a
-                          href="https://kontrabeach.com/beach-tennis-levels/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline"
-                        >
-                          Kontra Beach Tennis – “Beach Tennis Skill Levels”
-                        </a>
-                        , que descreve os estágios C → AA usados em camps e treinos internacionais{' '}
-                        <strong>(também adotado pelo Cordel para nivelamento de turmas)</strong>. Embora cada academia
-                        possa adaptar rótulos, essa matriz é amplamente adotada e serve como checklist para
-                        autoavaliação.
-                      </p>
-                    </div>
-
-                    <DialogFooter>
-                      {/* Botão de fechar funciona porque agora está fora do trigger */}
-                      <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                          OK, voltar
-                        </Button>
-                      </DialogClose>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-
-                {/* Outros controles */}
-                <ToggleGroup
-                  id="player-level"
-                  type="single"
-                  value={level.toString()}
-                  onValueChange={(val: string) => val && setLevel(Number(val))}
-                  className="flex flex-wrap gap-2 flex-1"
-                >
-                  {LEVELS.map(({ value, label }) => (
-                    <ToggleGroupItem
-                      key={value}
-                      value={value.toString()}
-                      aria-label={`Nível ${value}`}
-                      className="w-8 justify-center"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        setLevel(value)
-                        queueMicrotask(() => nameInputRef.current?.focus())
-                      }}
-                    >
-                      {label}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
-              </div>
-            </div>
-
-            <Button
-              size="icon"
-              className="rounded-full"
-              onMouseDown={(e) => e.preventDefault()} // ★ don't steal focus
-              type="submit"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-      {/*</CardContent>*/}
-      {/*</Card>*/}
     </React.Fragment>
   )
 }
