@@ -79,9 +79,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
     if (mode === 'add') {
       add(name.trim(), Number(level), preferredPairs)
-      singleToastSuccess(`${name.trim()} adicionado!`, { position: 'bottom-center', duration: 1000 })
+      singleToastSuccess(`${name.trim()} adicionado!`, { position: 'top-center', duration: 1000 })
       resetForm()
-      nameInputRef.current?.focus() // <-- Aqui garantimos o foco novamente
+      nameInputRef.current?.focus()
       return
     }
 
