@@ -225,26 +225,32 @@ const MatchesTab: FC = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <ol className="flex flex-col gap-10 flex-1">
+                <ol className="flex flex-col gap-4 flex-1">
                   {round.matches.map((m) => {
+                    const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
+
                     return (
                       <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
                         <div className="flex flex-1 items-center justify-between">
-                          <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
+                          <TeamView players={m.teamA} team="A" />
                           <div className="flex items-center gap-1">
-                            <ScoreSelect
-                              value={m.gamesA}
-                              onChange={(val) => setGames(idx, m.id, 'A', val)}
-                              label={`games-team-a-${m.id}`}
+                            <ScoreBlock
+                              teamKey="A"
+                              games={m.gamesA}
+                              isWinner={winner === 'A'}
+                              matchId={m.id}
+                              onChange={(team, val) => setGames(idx, m.id, team, val)}
                             />
                             <X size={14} />
-                            <ScoreSelect
-                              value={m.gamesB}
-                              onChange={(val) => setGames(idx, m.id, 'B', val)}
-                              label={`games-team-b-${m.id}`}
+                            <ScoreBlock
+                              teamKey="B"
+                              games={m.gamesB}
+                              isWinner={winner === 'B'}
+                              matchId={m.id}
+                              onChange={(team, val) => setGames(idx, m.id, team, val)}
                             />
                           </div>
-                          <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+                          <TeamView players={m.teamB} team="B" />
                         </div>
                       </li>
                     )
@@ -312,20 +318,11 @@ const MatchesTab: FC = () => {
 // -----------------------------------------------------------------------------
 interface TeamViewProps {
   players: Player[]
-  isWinner: boolean
   team: 'A' | 'B'
 }
 
-const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
+const TeamView: FC<TeamViewProps> = ({ players, team }) => (
   <div className={cn('flex flex-1 items-center gap-2 justify-end', team === 'A' && 'justify-end flex-row-reverse')}>
-    {isWinner && (
-      <div>
-        <Crown
-          className={cn('h-4 w-4 text-yellow-500', team === 'B' ? 'self-end' : 'self-start')}
-          aria-label="Winner"
-        />
-      </div>
-    )}
     <div className="flex flex-col max-w-full gap-2">
       {players.map((p) => (
         <div key={p.id} className={cn('flex gap-2 text-base items-center', team === 'B' && 'flex-row-reverse')}>
@@ -371,6 +368,29 @@ const ScoreSelect: FC<{
       </SelectContent>
     </Select>
   )
+}
+
+type ScoreBlockProps = {
+  teamKey: 'A' | 'B'
+  games: number | null
+  isWinner: boolean
+  matchId: string | number
+  onChange: (team: 'A' | 'B', val: number | null) => void
+}
+
+const ScoreBlock: React.FC<ScoreBlockProps> = ({ teamKey, games, isWinner, matchId, onChange }) => (
+  <div className="flex flex-col items-center relative">
+    <Crown
+      className={cn('!h-4 !w-4 absolute top-[-50%]', isWinner ? 'text-yellow-500' : 'text-transparent')}
+      aria-label="Winner"
+    />
+    <ScoreSelect value={games} onChange={(val) => onChange(teamKey, val)} label={`games-team-${teamKey}-${matchId}`} />
+  </div>
+)
+
+function getWinner(gamesA: number | null, gamesB: number | null): 'A' | 'B' | null {
+  if (gamesA === null || gamesB === null || gamesA === gamesB) return null
+  return gamesA > gamesB ? 'A' : 'B'
 }
 
 export default MatchesTab
