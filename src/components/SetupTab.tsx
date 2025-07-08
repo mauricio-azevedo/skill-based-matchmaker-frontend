@@ -10,7 +10,7 @@ const SetupTab: FC = () => {
 
   return (
     <React.Fragment>
-      <div className="flex w-full h-8">
+      <div className="flex w-full items-center h-8">
         <div className="text-lg font-semibold">Setup</div>
       </div>
       {/* Número de quadras */}
