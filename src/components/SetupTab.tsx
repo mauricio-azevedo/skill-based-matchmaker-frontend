@@ -21,14 +21,14 @@ const SetupTab: FC = () => {
             {/* Botão de diminuir */}
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon"
               onMouseDown={(e) => e.preventDefault()} // mantém o foco atual
               onClick={() => setCourts((prev) => Math.max(1, prev - 1))}
               aria-label="Diminuir número de quadras"
-              className="h-8 text-xs"
+              className="h-8 w-8"
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="!h-3 !w-3" />
             </Button>
 
             {/* Campo numérico (também permite digitação direta) */}
@@ -46,14 +46,14 @@ const SetupTab: FC = () => {
             {/* Botão de aumentar */}
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="icon"
               onMouseDown={(e) => e.preventDefault()} // mantém o foco atual
               onClick={() => setCourts((prev) => prev + 1)}
               aria-label="Aumentar número de quadras"
-              className="h-8 text-xs"
+              className="h-8 w-8"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="!h-3 !w-3" />
             </Button>
           </div>
         </div>
