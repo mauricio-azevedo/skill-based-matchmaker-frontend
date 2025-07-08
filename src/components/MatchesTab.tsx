@@ -381,63 +381,6 @@ interface TeamViewProps {
   team: 'A' | 'B'
 }
 
-// const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
-//   <div className={cn('flex flex-1 items-center gap-4 justify-end', team === 'A' && 'justify-end flex-row-reverse')}>
-//     {/*{isWinner && (*/}
-//     {/*  <div>*/}
-//     {/*    <Crown*/}
-//     {/*      className={cn('h-4 w-4 text-yellow-500', team === 'B' ? 'self-end' : 'self-start')}*/}
-//     {/*      aria-label="Winner"*/}
-//     {/*    />*/}
-//     {/*  </div>*/}
-//     {/*)}*/}
-//     <div className="flex flex-col max-w-full gap-1">
-//       <div className="*:data-[slot=avatar]:ring-background flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:grayscale">
-//         <Avatar>
-//           <AvatarImage
-//             src={`https://ui-avatars.com/api/?name=${encodeURIComponent(players[0].name)}&background=random`}
-//             alt={players[0].name}
-//           />
-//
-//           <AvatarFallback>
-//             {players[0].name.charAt(0).toUpperCase()}
-//             {players[0].name.charAt(1).toUpperCase()}
-//           </AvatarFallback>
-//         </Avatar>
-//         <Avatar>
-//           <AvatarImage
-//             src={`https://ui-avatars.com/api/?name=${encodeURIComponent(players[1].name)}&background=random`}
-//             alt={players[1].name}
-//           />
-//
-//           <AvatarFallback>
-//             {players[1].name.charAt(0).toUpperCase()}
-//             {players[1].name.charAt(1).toUpperCase()}
-//           </AvatarFallback>
-//         </Avatar>
-//       </div>
-//       <p className="text-sm font-medium">
-//         {players[0].name} & {players[1].name}
-//       </p>
-//       {/*{players.map((p) => (*/}
-//       {/*  <div key={p.id} className={cn('flex items-end gap-2 text-base', team === 'B' && 'justify-end')}>*/}
-//       {/*    <Avatar>*/}
-//       {/*      <AvatarImage*/}
-//       {/*        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=random`}*/}
-//       {/*        alt={p.name}*/}
-//       {/*      />*/}
-//
-//       {/*      <AvatarFallback>*/}
-//       {/*        {p.name.charAt(0).toUpperCase()}*/}
-//       {/*        {p.name.charAt(1).toUpperCase()}*/}
-//       {/*      </AvatarFallback>*/}
-//       {/*    </Avatar>*/}
-//       {/*    <p className="text-sm font-medium">{p.name}</p>*/}
-//       {/*  </div>*/}
-//       {/*))}*/}
-//     </div>
-//   </div>
-// )
 const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
   <div className={cn('flex flex-1 items-center gap-4 justify-end', team === 'A' && 'justify-end flex-row-reverse')}>
     {isWinner && (
