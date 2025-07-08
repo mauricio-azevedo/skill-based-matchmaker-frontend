@@ -115,7 +115,7 @@ const PlayersTab: FC = () => {
       )}
 
       {/* Formulário de adição */}
-      <Card className="!h-[unset] !py-2">
+      <Card className="!h-[unset] !py-3">
         <CardContent className="!px-2">
           <form onSubmit={handleSubmit} className="flex gap-2 items-center">
             <div className="flex flex-col gap-2 flex-1">
