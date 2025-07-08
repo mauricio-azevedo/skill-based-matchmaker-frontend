@@ -47,6 +47,8 @@ interface PlayerModalProps {
 const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const { players, add, updatePlayers, remove } = usePlayers()
 
+  const nameInputRef = React.useRef<HTMLInputElement>(null)
+
   // ----------------------- estado local -----------------------
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(player?.name ?? '')
@@ -78,7 +80,8 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     if (mode === 'add') {
       add(name.trim(), Number(level), preferredPairs)
       singleToastSuccess(`${name.trim()} adicionado!`, { position: 'bottom-center', duration: 1000 })
-      resetForm() // mantém o modal aberto para adicionar múltiplos jogadores
+      resetForm()
+      nameInputRef.current?.focus() // <-- Aqui garantimos o foco novamente
       return
     }
 
@@ -88,7 +91,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
         p.id === player!.id ? { ...p, name: name.trim() || p.name, level: Number(level), active, preferredPairs } : p,
       ),
     )
-    setOpen(false) // fecha o modal após editar
+    setOpen(false)
   }
 
   const handleDelete = () => remove(player!.id)
@@ -120,6 +123,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             <Label htmlFor="player-name">Nome</Label>
             <Input
               id="player-name"
+              ref={nameInputRef}
               value={name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
               autoFocus
