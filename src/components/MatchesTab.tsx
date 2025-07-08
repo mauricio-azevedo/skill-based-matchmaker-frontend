@@ -6,7 +6,6 @@ import { generateSchedule } from '@/lib/algorithm'
 import type { Player, UnsavedRound } from '@/types/players'
 
 // shadcn/ui
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
@@ -237,73 +236,69 @@ const MatchesTab: FC = () => {
                 exit="exit"
                 className="flex flex-col gap-6 pb-12 snap-start"
               >
-                <Card>
-                  <CardContent>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="scroll-m-20 text-lg font-semibold tracking-tight">Rodada {round.roundNumber}</div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="shrink-0">
-                            <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              if (warnIfInsufficient()) return
-                              setConfirmShuffle({ open: true, roundIndex: idx })
-                            }}
-                          >
-                            <Shuffle size={14} aria-hidden="true" /> Embaralhar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => {
-                              setConfirmDelete({ open: true, roundIndex: idx })
-                            }}
-                          >
-                            <Trash size={14} aria-hidden="true" /> Apagar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <ol className="flex flex-col gap-10 flex-1">
-                      {round.matches.map((m) => {
-                        const hasScore = m.gamesA !== null && m.gamesB !== null
-                        return (
-                          <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
-                            <div className="flex flex-1 items-center gap-4">
-                              <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                              <div className="flex flex-col items-center gap-1">
-                                <div className="absolute -top-1/4 items-center flex">
-                                  <Button
-                                    className="border"
-                                    size="sm"
-                                    variant="secondary"
-                                    onClick={() => openScoreModalFor(m.id, idx)}
-                                  >
-                                    {!hasScore ? (
-                                      <>
-                                        <Edit size={8} />
-                                        <span className="text-xs">Resultado</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        {m.gamesA} × {m.gamesB}
-                                      </>
-                                    )}
-                                  </Button>
-                                </div>
-                                <X size={14} />
-                              </div>
-                              <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+                <div className="flex items-center justify-between gap-2">
+                  <div className="scroll-m-20 text-lg font-semibold tracking-tight">Rodada {round.roundNumber}</div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="shrink-0">
+                        <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (warnIfInsufficient()) return
+                          setConfirmShuffle({ open: true, roundIndex: idx })
+                        }}
+                      >
+                        <Shuffle size={14} aria-hidden="true" /> Embaralhar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => {
+                          setConfirmDelete({ open: true, roundIndex: idx })
+                        }}
+                      >
+                        <Trash size={14} aria-hidden="true" /> Apagar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <ol className="flex flex-col gap-10 flex-1">
+                  {round.matches.map((m) => {
+                    const hasScore = m.gamesA !== null && m.gamesB !== null
+                    return (
+                      <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
+                        <div className="flex flex-1 items-center gap-4">
+                          <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="absolute -top-1/4 items-center flex">
+                              <Button
+                                className="border"
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => openScoreModalFor(m.id, idx)}
+                              >
+                                {!hasScore ? (
+                                  <>
+                                    <Edit size={8} />
+                                    <span className="text-xs">Resultado</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    {m.gamesA} × {m.gamesB}
+                                  </>
+                                )}
+                              </Button>
                             </div>
-                          </li>
-                        )
-                      })}
-                    </ol>
-                  </CardContent>
-                </Card>
+                            <X size={14} />
+                          </div>
+                          <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ol>
               </motion.li>
             ))}
           </AnimatePresence>
