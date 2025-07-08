@@ -202,7 +202,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-row justify-between">
           {mode === 'edit' && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
