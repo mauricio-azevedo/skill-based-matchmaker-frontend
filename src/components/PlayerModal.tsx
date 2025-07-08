@@ -1,4 +1,3 @@
-// src/components/PlayerModal.tsx
 import {
   Dialog,
   DialogClose,
@@ -49,6 +48,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const { players, add, updatePlayers, remove } = usePlayers()
 
   // ----------------------- estado local -----------------------
+  const [open, setOpen] = useState(false)
   const [name, setName] = useState(player?.name ?? '')
   const [level, setLevel] = useState((player?.level ?? 1).toString())
   const [active, setActive] = useState(player?.active ?? true)
@@ -78,16 +78,17 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     if (mode === 'add') {
       add(name.trim(), Number(level), preferredPairs)
       singleToastSuccess(`${name.trim()} adicionado!`, { position: 'bottom-center', duration: 1000 })
-      resetForm()
-      return true // fecha modal
+      resetForm() // mantém o modal aberto para adicionar múltiplos jogadores
+      return
     }
 
+    // modo edit
     updatePlayers((plrs) =>
       plrs.map((p) =>
         p.id === player!.id ? { ...p, name: name.trim() || p.name, level: Number(level), active, preferredPairs } : p,
       ),
     )
-    return true
+    setOpen(false) // fecha o modal após editar
   }
 
   const handleDelete = () => remove(player!.id)
@@ -96,8 +97,16 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const title = mode === 'add' ? 'Novo jogador' : 'Editar jogador'
 
   return (
-    <Dialog onOpenChange={(o) => !o && resetForm()}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) resetForm()
+        setOpen(o)
+      }}
+    >
+      <DialogTrigger asChild onClick={() => setOpen(true)}>
+        {trigger}
+      </DialogTrigger>
 
       <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
@@ -133,10 +142,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
-            {/*<p*/}
-            {/*  className="text-muted-foreground text-xs leading-snug"*/}
-            {/*  dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[Number(level)] }}*/}
-            {/*/>*/}
           </div>
 
           {/* Ativo? (somente edição) */}
@@ -228,9 +233,13 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             <DialogClose asChild>
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
-            <DialogClose asChild>
+            {mode === 'edit' ? (
+              <DialogClose asChild>
+                <Button onClick={handleSave}>Salvar</Button>
+              </DialogClose>
+            ) : (
               <Button onClick={handleSave}>Salvar</Button>
-            </DialogClose>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>
