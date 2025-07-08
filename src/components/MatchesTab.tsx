@@ -7,10 +7,8 @@ import type { Player, UnsavedRound } from '@/types/players'
 
 // shadcn/ui
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { cn } from '@/lib/utils'
-import { Crown, Edit, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
+import { Crown, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -18,6 +16,7 @@ import { itemVariants } from '@/consts/animation'
 import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/singleToast'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -79,24 +78,6 @@ const MatchesTab: FC = () => {
   // Ref for scroll container
   const listRef = useRef<HTMLUListElement>(null)
   const [disableSnap, setDisableSnap] = useState(false)
-
-  const [modalState, setModalState] = useState<{
-    open: boolean
-    matchId: string | null
-    roundIdx: number | null
-    initialA: number | null
-    initialB: number | null
-    namesA: string[]
-    namesB: string[]
-  }>({
-    open: false,
-    matchId: null,
-    roundIdx: null,
-    initialA: null,
-    initialB: null,
-    namesA: [],
-    namesB: [],
-  })
 
   const [confirmShuffle, setConfirmShuffle] = useState<{ open: boolean; roundIndex: number | null }>({
     open: false,
@@ -165,28 +146,6 @@ const MatchesTab: FC = () => {
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
     singleToastSuccess(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
-  }
-
-  const openScoreModalFor = (matchId: string, idx: number) => {
-    const match = rounds[idx]?.matches.find((m) => m.id === matchId)
-    if (!match) return
-    setModalState({
-      open: true,
-      matchId,
-      roundIdx: idx,
-      initialA: match.gamesA ?? null,
-      initialB: match.gamesB ?? null,
-      namesA: match.teamA.map((p) => p.name),
-      namesB: match.teamB.map((p) => p.name),
-    })
-  }
-
-  const handleSaveScore = (scoreA: number, scoreB: number) => {
-    if (modalState.roundIdx === null || !modalState.matchId) return
-    setGames(modalState.roundIdx, modalState.matchId, 'A', scoreA)
-    setGames(modalState.roundIdx, modalState.matchId, 'B', scoreB)
-    setModalState((prev) => ({ ...prev, open: false }))
-    singleToastSuccess('Placar salvo!', { duration: 3000 })
   }
 
   const warnIfInsufficient = (): boolean => {
@@ -268,32 +227,22 @@ const MatchesTab: FC = () => {
                 </div>
                 <ol className="flex flex-col gap-10 flex-1">
                   {round.matches.map((m) => {
-                    const hasScore = m.gamesA !== null && m.gamesB !== null
                     return (
                       <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
-                        <div className="flex flex-1 items-center gap-4">
+                        <div className="flex flex-1 items-center justify-between">
                           <TeamView players={m.teamA} isWinner={m.winner === 'A'} team={'A'} />
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="absolute -top-1/4 items-center flex">
-                              <Button
-                                className="border"
-                                size="sm"
-                                variant="secondary"
-                                onClick={() => openScoreModalFor(m.id, idx)}
-                              >
-                                {!hasScore ? (
-                                  <>
-                                    <Edit size={8} />
-                                    <span className="text-xs">Resultado</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    {m.gamesA} × {m.gamesB}
-                                  </>
-                                )}
-                              </Button>
-                            </div>
+                          <div className="flex items-center gap-1">
+                            <ScoreSelect
+                              value={m.gamesA}
+                              onChange={(val) => setGames(idx, m.id, 'A', val)}
+                              label={`games-team-a-${m.id}`}
+                            />
                             <X size={14} />
+                            <ScoreSelect
+                              value={m.gamesB}
+                              onChange={(val) => setGames(idx, m.id, 'B', val)}
+                              label={`games-team-b-${m.id}`}
+                            />
                           </div>
                           <TeamView players={m.teamB} isWinner={m.winner === 'B'} team={'B'} />
                         </div>
@@ -354,16 +303,6 @@ const MatchesTab: FC = () => {
         cancelText="Cancelar"
         confirmVariant="destructive"
       />
-      <ScoreModal
-        key={modalState.matchId || ''}
-        open={modalState.open}
-        onClose={() => setModalState((p) => ({ ...p, open: false }))}
-        initialScoreA={modalState.initialA}
-        initialScoreB={modalState.initialB}
-        namesA={modalState.namesA}
-        namesB={modalState.namesB}
-        onSave={handleSaveScore}
-      />
     </React.Fragment>
   )
 }
@@ -378,7 +317,7 @@ interface TeamViewProps {
 }
 
 const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
-  <div className={cn('flex flex-1 items-center gap-4 justify-end', team === 'A' && 'justify-end flex-row-reverse')}>
+  <div className={cn('flex flex-1 items-center gap-2 justify-end', team === 'A' && 'justify-end flex-row-reverse')}>
     {isWinner && (
       <div>
         <Crown
@@ -408,84 +347,29 @@ const TeamView: FC<TeamViewProps> = ({ players, isWinner, team }) => (
   </div>
 )
 
-// -----------------------------------------------------------------------------
-// ScoreModal sub-component (handles its own local state for robustness)
-// -----------------------------------------------------------------------------
-interface ScoreModalProps {
-  open: boolean
-  onClose: () => void
-  initialScoreA: number | null
-  initialScoreB: number | null
-  namesA: string[]
-  namesB: string[]
-  onSave: (scoreA: number, scoreB: number) => void
-}
-
-const ScoreModal: FC<ScoreModalProps> = ({ open, onClose, initialScoreA, initialScoreB, namesA, namesB, onSave }) => {
-  const [scoreA, setScoreA] = useState<number | null>(initialScoreA)
-  const [scoreB, setScoreB] = useState<number | null>(initialScoreB)
-
-  useEffect(() => {
-    setScoreA(initialScoreA)
-    setScoreB(initialScoreB)
-  }, [initialScoreA, initialScoreB])
-
-  const renderScoreToggle = (value: number | null, onChange: (v: number) => void) => (
-    <ToggleGroup
-      type="single"
-      value={value !== null ? String(value) : ''}
-      onValueChange={(val) => {
-        if (!val) return
-        onChange(Number(val))
-      }}
-      className="grid grid-cols-7 gap-1 w-full"
-    >
-      {SCORE_OPTIONS.map((opt) => (
-        <ToggleGroupItem key={opt} value={String(opt)} className="px-2 py-1">
-          {opt}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  )
-
-  const handleSave = () => {
-    if (scoreA === null || scoreB === null) {
-      singleToastError('Selecione o placar de ambos os times.')
-      return
-    }
-    onSave(scoreA, scoreB)
-  }
+const ScoreSelect: FC<{
+  value: number | null
+  onChange: (val: number | null) => void
+  label: string
+}> = ({ value, onChange, label }) => {
+  const PLACEHOLDER = '-'
+  const display = value !== null ? String(value) : PLACEHOLDER
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Inserir resultado</DialogTitle>
-        </DialogHeader>
+    <Select value={display} onValueChange={(val) => onChange(val === PLACEHOLDER ? null : Number(val))}>
+      <SelectTrigger id={label} className="!w-8 !h-8 text-center justify-center text-xs [&>svg]:hidden">
+        <SelectValue>{display}</SelectValue>
+      </SelectTrigger>
 
-        {/* ---------- Nomes das duplas ---------- */}
-        <div className="flex flex-col gap-6">
-          <div>
-            <p className="font-semibold mb-3">{namesA.join(' & ')}</p>
-            {renderScoreToggle(scoreA, setScoreA)}
-          </div>
-          <div>
-            <p className="font-semibold mb-3">{namesB.join(' & ')}</p>
-            {renderScoreToggle(scoreB, setScoreB)}
-          </div>
-        </div>
-
-        {/* ---------- Botões ---------- */}
-        <DialogFooter>
-          <div className="flex gap-2 justify-end">
-            <Button variant="secondary" onClick={onClose}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <SelectContent align="center">
+        <SelectItem value={PLACEHOLDER}>-</SelectItem>
+        {SCORE_OPTIONS.map((opt) => (
+          <SelectItem key={opt} value={String(opt)}>
+            {opt}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 
