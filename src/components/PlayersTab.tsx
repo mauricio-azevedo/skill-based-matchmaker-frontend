@@ -24,7 +24,7 @@ const PlayersTab: FC = () => {
   return (
     <React.Fragment>
       {/* Header */}
-      <div className="flex w-full items-center justify-between h-7">
+      <div className="flex w-full items-center justify-between h-8">
         <div className="flex items-center gap-1">
           <div className="text-lg font-semibold">Jogadores</div>
           <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
@@ -49,7 +49,7 @@ const PlayersTab: FC = () => {
           <PlayerModal
             mode="add"
             trigger={
-              <Button className="h-7 w-7" size="icon" variant="default" aria-label="Adicionar jogador">
+              <Button className="h-8 w-8" size="icon" variant="default" aria-label="Adicionar jogador">
                 <Plus className="h-4 w-4" />
               </Button>
             }
