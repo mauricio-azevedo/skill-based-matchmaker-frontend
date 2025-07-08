@@ -93,7 +93,7 @@ const PlayersTab: FC = () => {
                   mode="edit"
                   player={p}
                   trigger={
-                    <Button variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
+                    <Button className="h-8 w-8" variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
                       <Edit size={16} />
                     </Button>
                   }
