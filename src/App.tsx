@@ -173,8 +173,8 @@ export default function App() {
 
         {/* Barra de triggers */}
         <TabsList className="self-center">
-          <TabsTrigger value="players">Jogadores</TabsTrigger>
           <TabsTrigger value="setup">Setup</TabsTrigger>
+          <TabsTrigger value="players">Jogadores</TabsTrigger>
           <TabsTrigger value="matches">Partidas</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
