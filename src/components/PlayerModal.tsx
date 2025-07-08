@@ -108,7 +108,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
         {trigger}
       </DialogTrigger>
 
-      <DialogContent className="max-h-[100dvh]" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent className="top-2 translate-y-2" onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
