@@ -8,7 +8,7 @@ import type { Player, UnsavedRound } from '@/types/players'
 // shadcn/ui
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Crown, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
+import { ChevronUp, Crown, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -78,6 +78,9 @@ const MatchesTab: FC = () => {
   // Ref for scroll container
   const listRef = useRef<HTMLUListElement>(null)
   const [disableSnap, setDisableSnap] = useState(false)
+  const [showScrollTop, setShowScrollTop] = useState(false)
+
+  const SCROLL_THRESHOLD = 200
 
   const [confirmShuffle, setConfirmShuffle] = useState<{ open: boolean; roundIndex: number | null }>({
     open: false,
@@ -87,6 +90,15 @@ const MatchesTab: FC = () => {
     open: false,
     roundIndex: null,
   })
+
+  const handleScroll = () => {
+    const scrollTop = listRef.current?.scrollTop ?? 0
+    setShowScrollTop(scrollTop > SCROLL_THRESHOLD)
+  }
+
+  const scrollToTop = () => {
+    listRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const hasScoresInRound = (idx: number | null) =>
     idx !== null && rounds[idx]?.matches.some((m) => m.gamesA !== null || m.gamesB !== null)
@@ -165,7 +177,7 @@ const MatchesTab: FC = () => {
       <div className="flex w-full items-center justify-between h-8">
         <div className="text-lg font-semibold">Rodadas</div>
       </div>
-      <div className="!gap-2 relative flex flex-col justify-between overflow-hidden flex-1 w-full">
+      <div className="!gap-2 relative flex flex-col justify-between overflow-hidden flex-1 w-full relative">
         {/* Empty State */}
         <AnimatePresence initial={false}>
           {rounds.length === 0 && (
@@ -184,11 +196,13 @@ const MatchesTab: FC = () => {
         {/* Rounds List */}
         <ul
           ref={listRef}
+          onScroll={handleScroll}
           className={cn(
             'overflow-y-auto gap-12 flex flex-col',
             disableSnap ? 'snap-none' : 'snap-y snap-mandatory',
             'shadow-inner',
           )}
+          style={{ scrollBehavior: 'smooth' }}
         >
           <AnimatePresence initial={false}>
             {rounds.map((round, idx) => (
@@ -264,6 +278,20 @@ const MatchesTab: FC = () => {
             ))}
           </AnimatePresence>
         </ul>
+        {showScrollTop && (
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              className="absolute bottom-4 right-4 z-50"
+            >
+              <Button size="icon" onClick={scrollToTop} aria-label="Voltar ao topo" className="shadow-lg">
+                <ChevronUp className="!w-4 !h-4" />
+              </Button>
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
       <div className="w-full flex">
         <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
