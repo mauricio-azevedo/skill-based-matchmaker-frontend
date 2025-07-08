@@ -1,6 +1,5 @@
 import React, { type FC, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
@@ -27,7 +26,7 @@ const PlayersTab: FC = () => {
       {/* Header */}
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-1">
-          <CardTitle>Jogadores</CardTitle>
+          <div className="text-lg font-semibold">Jogadores</div>
           <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
         </div>
 
@@ -62,7 +61,7 @@ const PlayersTab: FC = () => {
       {players.length === 0 ? (
         <p className="italic text-muted-foreground flex-1">Adicione pelo menos 4 jogadores.</p>
       ) : (
-        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto mt-4">
+        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto">
           <AnimatePresence initial={false}>
             {sortedPlayers.map((p) => (
               <motion.li
