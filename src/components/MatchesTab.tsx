@@ -184,7 +184,11 @@ const MatchesTab: FC = () => {
         {/* Rounds List */}
         <ul
           ref={listRef}
-          className={cn('overflow-y-auto h-full', disableSnap ? 'snap-none' : 'snap-y snap-mandatory', 'shadow-inner')}
+          className={cn(
+            'overflow-y-auto h-full gap-12 flex flex-col',
+            disableSnap ? 'snap-none' : 'snap-y snap-mandatory',
+            'shadow-inner',
+          )}
         >
           <AnimatePresence initial={false}>
             {rounds.map((round, idx) => (
@@ -195,7 +199,7 @@ const MatchesTab: FC = () => {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="flex flex-col gap-6 pb-12 snap-start"
+                className="flex flex-col gap-2 snap-start"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-2xl font-semibold tracking-tight">Rodada {round.roundNumber}</div>
@@ -225,7 +229,7 @@ const MatchesTab: FC = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <ol className="flex flex-col gap-4 flex-1">
+                <ol className="flex flex-col gap-2 flex-1">
                   {round.matches.map((m) => {
                     const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
 
