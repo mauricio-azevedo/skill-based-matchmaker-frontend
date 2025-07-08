@@ -23,7 +23,7 @@ import {
 
 import { Check, ChevronsUpDown, Trash } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { LEVEL_DESCRIPTIONS, LEVELS } from '@/consts/levels'
+import { LEVELS } from '@/consts/levels'
 import { usePlayers } from '@/context/PlayersContext'
 import React, { type FC, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { singleToastSuccess } from '@/utils/singleToast'
@@ -133,10 +133,10 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
-            <p
-              className="text-muted-foreground text-xs leading-snug"
-              dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[Number(level)] }}
-            />
+            {/*<p*/}
+            {/*  className="text-muted-foreground text-xs leading-snug"*/}
+            {/*  dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[Number(level)] }}*/}
+            {/*/>*/}
           </div>
 
           {/* Ativo? (somente edição) */}
