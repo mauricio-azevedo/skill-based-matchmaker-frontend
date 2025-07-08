@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState } from 'react'
+import React, { type FC, useEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -202,8 +202,10 @@ const MatchesTab: FC = () => {
   }
 
   return (
-    <>
-      <h4 className="scroll-m-20 text-xl font-semibold tracking-tight self-start mb-2">Partidas</h4>
+    <React.Fragment>
+      <div className="flex w-full h-8">
+        <div className="text-lg font-semibold">Rodadas</div>
+      </div>
       <div className="!gap-2 relative flex flex-col justify-between overflow-hidden w-full">
         {/* Empty State */}
         <AnimatePresence initial={false}>
@@ -237,7 +239,7 @@ const MatchesTab: FC = () => {
                 className="flex flex-col gap-6 pb-12 snap-start"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="scroll-m-20 text-lg font-semibold tracking-tight">Rodada {round.roundNumber}</div>
+                  <div className="text-md font-semibold tracking-tight">Rodada {round.roundNumber}</div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="shrink-0">
@@ -304,7 +306,6 @@ const MatchesTab: FC = () => {
           </AnimatePresence>
         </ul>
       </div>
-
       <div className="pt-2 w-full flex">
         <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
           Nova rodada
@@ -363,7 +364,7 @@ const MatchesTab: FC = () => {
         namesB={modalState.namesB}
         onSave={handleSaveScore}
       />
-    </>
+    </React.Fragment>
   )
 }
 
