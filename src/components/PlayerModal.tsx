@@ -80,7 +80,8 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     if (mode === 'add') {
       add(name.trim(), Number(level), preferredPairs)
       singleToastSuccess(`${name.trim()} adicionado!`, { position: 'top-center', duration: 1000 })
-      resetForm()
+      setName(player?.name ?? '')
+      setPreferredPairs(player?.preferredPairs ?? [])
       nameInputRef.current?.focus()
       return
     }
@@ -99,6 +100,13 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   // ----------------------- UI -----------------------
   const title = mode === 'add' ? 'Novo jogador' : 'Editar jogador'
 
+  useEffect(() => {
+    if (open && mode === 'add') {
+      // Dá tempo do componente abrir completamente antes de focar
+      setTimeout(() => nameInputRef.current?.focus(), 0)
+    }
+  }, [open, mode])
+
   return (
     <Dialog
       open={open}
@@ -111,12 +119,23 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
         {trigger}
       </DialogTrigger>
 
-      <DialogContent className="top-2 translate-y-2" onOpenAutoFocus={(e) => e.preventDefault()}>
+      <DialogContent
+        className="top-2 translate-y-2"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onMouseDown={(e) => {
+          if (mode === 'add' && nameInputRef.current) {
+            const target = e.target as HTMLElement
+            if (!nameInputRef.current.contains(target)) {
+              e.preventDefault()
+              nameInputRef.current.focus()
+            }
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
         </DialogHeader>
-
         <div className="flex flex-col gap-4">
           {/* Nome */}
           <div className="grid gap-3">
@@ -205,7 +224,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             </Popover>
           </div>
         </div>
-
         <DialogFooter className="flex-row justify-between">
           {mode === 'edit' && (
             <AlertDialog>
