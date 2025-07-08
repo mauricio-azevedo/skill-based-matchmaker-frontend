@@ -1,5 +1,6 @@
 // src/lib/algorithm.ts
 import type { Player, UnsavedRound } from '@/types/players'
+import type { VariationLevel } from '@/context/CourtsContext'
 
 /* ─────────────────────────────── Constantes ──────────────────────────────── */
 
@@ -10,13 +11,10 @@ const WEIGHT = {
   MATCH_COUNT_TOTAL: 100,
   MATCH_COUNT_IMBALANCE: 100,
   SKILL_IMBALANCE: 80,
-  HIGH_WITHIN_TEAM_VARIATION: 70,
-  LOW_WITHIN_TEAM_VARIATION: -70,
+  WITHIN_TEAM_VARIATION: 70,
   PARTNER_COUNT: 50,
   PREFERRED_PAIR: 40,
 } as const
-
-type VariationLevel = 'low' | 'high'
 
 /* ────────────────────────────── Tipos Internos ───────────────────────────── */
 
@@ -73,7 +71,7 @@ function calculateMatchScore(
   const skillPairImbalance = Math.min(diff1, diff2)
   const teamImbalance = Math.abs(pA1.level + pA2.level - (pB1.level + pB2.level))
   const withinTeamVariation = Math.abs(pA1.level - pA2.level) + Math.abs(pB1.level - pB2.level)
-  const withinWeight = variationLevel === 'high' ? WEIGHT.HIGH_WITHIN_TEAM_VARIATION : WEIGHT.LOW_WITHIN_TEAM_VARIATION
+  const withinWeight = variationLevel === 'high' ? -WEIGHT.WITHIN_TEAM_VARIATION : +WEIGHT.WITHIN_TEAM_VARIATION
 
   // 2) Volume e equilíbrio de partidas jogadas
   const playedSum = pA1.matchCount + pA2.matchCount + pB1.matchCount + pB2.matchCount
