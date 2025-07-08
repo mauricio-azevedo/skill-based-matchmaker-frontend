@@ -174,7 +174,7 @@ const MatchesTab: FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex top-0 left-4 pointer-events-none"
+              className="absolute inset-0 flex top-0 left-0 pointer-events-none"
             >
               <p className="italic text-muted-foreground">Nenhuma rodada gerada ainda.</p>
             </motion.div>

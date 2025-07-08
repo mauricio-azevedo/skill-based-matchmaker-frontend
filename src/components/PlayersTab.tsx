@@ -59,7 +59,7 @@ const PlayersTab: FC = () => {
 
       {/* Lista de jogadores */}
       {players.length === 0 ? (
-        <p className="italic text-muted-foreground flex-1">Adicione pelo menos 4 jogadores.</p>
+        <p className="italic text-muted-foreground flex-1 w-full">Adicione pelo menos 4 jogadores.</p>
       ) : (
         <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto">
           <AnimatePresence initial={false}>
