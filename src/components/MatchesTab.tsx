@@ -242,8 +242,8 @@ const MatchesTab: FC = () => {
                   <div className="text-2xl font-semibold tracking-tight">Rodada {round.roundNumber}</div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="shrink-0">
-                        <MoreVertical className="w-4 h-4" aria-label="Mais opções" />
+                      <Button variant="ghost" size="icon" className="w-8 h-8">
+                        <MoreVertical className="!w-5 !h-5" aria-label="Mais opções" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
