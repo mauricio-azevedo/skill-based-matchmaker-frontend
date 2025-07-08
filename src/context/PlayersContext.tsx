@@ -5,7 +5,7 @@
 // persiste tudo em localStorage e expõe operações CRUD + estatísticas.
 // ============================================================================
 
-import { createContext, useContext, useEffect, useState, type FC, type ReactNode } from 'react'
+import { createContext, type FC, type ReactNode, useContext, useEffect, useState } from 'react'
 import type { Player } from '@/types/players'
 
 // ----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ function getMinMatchCount(players: Player[]): number {
 // Interface pública do contexto
 type Ctx = {
   players: Player[]
-  add: (name: string, level: number) => void
+  add: (name: string, level: number, preferredPairs?: string[]) => void
   remove: (id: string) => void
   toggleActive: (id: string) => void
   /** Atualiza múltiplos players de uma vez (usado para incrementar estatísticas) */
@@ -61,20 +61,18 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
   // - Quando um novo jogador entra TARDIO, damos a ele o matchCount mínimo atual.
   // - Assim ele não sai na frente na hora de gerar próximas rodadas.
   // -----------------------------------------------------------------------------
-  const add = (name: string, level: number) =>
+  const add = (name: string, level: number, preferredPairs: string[] = []) =>
     setPlayers((prev) => {
-      // Se houver jogadores, pega o menor matchCount entre os existentes
       const minCount = getMinMatchCount(prev.filter((pl) => pl.active))
-
       return [
         {
           id: crypto.randomUUID(),
           name,
           level,
           active: true,
-          matchCount: minCount, // inicia igual ao menor existente
-          partnerCounts: {}, // sem parcerias ainda
-          preferredPairs: [],
+          matchCount: minCount,
+          partnerCounts: {},
+          preferredPairs,
         },
         ...prev,
       ]

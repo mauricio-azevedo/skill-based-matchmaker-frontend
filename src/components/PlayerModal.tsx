@@ -1,162 +1,155 @@
-// src/components/EditPlayerModal.tsx
-import { useState, type FC, useEffect, useCallback } from 'react'
+// src/components/PlayerModal.tsx
 import {
   Dialog,
-  DialogTrigger,
+  DialogClose,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
-
 import {
   AlertDialog,
-  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from '@/components/ui/command'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
-import { Edit, Trash, Check, ChevronsUpDown } from 'lucide-react'
-import { usePlayers } from '@/context/PlayersContext'
-import type { Player } from '@/types/players'
-import { LEVEL_DESCRIPTIONS, LEVELS } from '@/consts/levels'
 
-interface EditPlayerModalProps {
-  player: Player
+import { Check, ChevronsUpDown, Trash } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { LEVEL_DESCRIPTIONS, LEVELS } from '@/consts/levels'
+import { usePlayers } from '@/context/PlayersContext'
+import React, { type FC, type ReactNode, useCallback, useEffect, useState } from 'react'
+import { singleToastSuccess } from '@/utils/singleToast'
+import type { Player } from '@/types/players'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Switch } from '@/components/ui/switch'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Badge } from '@/components/ui/badge'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
+
+type Mode = 'add' | 'edit'
+
+interface PlayerModalProps {
+  mode: Mode
+  trigger: ReactNode
+  player?: Player // obrigatório no modo 'edit'
 }
 
-/**
- * Modal para editar ou remover um jogador.
- * Confirma exclusão usando AlertDialog.
- */
-const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
-  const { players, updatePlayers, remove } = usePlayers()
+const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
+  const { players, add, updatePlayers, remove } = usePlayers()
 
-  // estado local para editar
-  const [name, setName] = useState(player.name)
-  const [level, setLevel] = useState(player.level.toString())
-  const [active, setActive] = useState(player.active)
-  const [preferredPairs, setPreferredPairs] = useState<string[]>(player.preferredPairs)
+  // ----------------------- estado local -----------------------
+  const [name, setName] = useState(player?.name ?? '')
+  const [level, setLevel] = useState((player?.level ?? 1).toString())
+  const [active, setActive] = useState(player?.active ?? true)
+  const [preferredPairs, setPreferredPairs] = useState<string[]>(player?.preferredPairs ?? [])
 
-  /** ---- função que restaura o estado para o valor do jogador atual ---- */
+  // (re)sinc quando abrir outro player
   const resetForm = useCallback(() => {
-    setName(player.name)
-    setLevel(player.level.toString())
-    setActive(player.active)
-    setPreferredPairs(player.preferredPairs)
+    setName(player?.name ?? '')
+    setLevel((player?.level ?? 1).toString())
+    setActive(player?.active ?? true)
+    setPreferredPairs(player?.preferredPairs ?? [])
   }, [player])
 
-  /** Se o jogador em edição mudar (ex.: props atualizadas), sincroniza-se */
   useEffect(() => {
     resetForm()
   }, [player, resetForm])
 
-  /** ---------------- handlers ---------------- */
+  // ----------------------- helpers -----------------------
+  const selectablePlayers = players.filter((p) => p.id !== player?.id && p.active)
+  const togglePair = (id: string) =>
+    setPreferredPairs((prev) => (prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]))
+
+  // ----------------------- ações -----------------------
   const handleSave = () => {
-    updatePlayers((players) =>
-      players.map((p) =>
-        p.id === player.id
-          ? {
-              ...p,
-              name: name.trim() || p.name,
-              level: Number(level),
-              active,
-              preferredPairs,
-            }
-          : p,
+    if (!name.trim()) return
+
+    if (mode === 'add') {
+      add(name.trim(), Number(level), preferredPairs)
+      singleToastSuccess(`${name.trim()} adicionado!`, { position: 'bottom-center', duration: 1000 })
+      resetForm()
+      return true // fecha modal
+    }
+
+    updatePlayers((plrs) =>
+      plrs.map((p) =>
+        p.id === player!.id ? { ...p, name: name.trim() || p.name, level: Number(level), active, preferredPairs } : p,
       ),
     )
+    return true
   }
 
-  const handleDelete = () => {
-    remove(player.id)
-  }
+  const handleDelete = () => remove(player!.id)
 
-  /* ------------------------------------------------------------------- */
-  // Lista de jogadores que podem ser escolhidos como parceiros (ativos e != self)
-  const selectablePlayers = players.filter((p) => p.id !== player.id && p.active)
+  // ----------------------- UI -----------------------
+  const title = mode === 'add' ? 'Novo jogador' : 'Editar jogador'
 
-  const togglePair = (id: string) => {
-    setPreferredPairs((prev) => (prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]))
-  }
-
-  /* ------------------------------------------------------------------- */
   return (
-    <Dialog onOpenChange={(open) => !open && resetForm()}>
-      {/* Trigger: ícone de lápis */}
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={`Editar ${player.name}`}>
-          <Edit size={16} />
-        </Button>
-      </DialogTrigger>
+    <Dialog onOpenChange={(o) => !o && resetForm()}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
 
       <DialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>Editar jogador</DialogTitle>
-          <DialogDescription>{player.name}</DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
         </DialogHeader>
 
-        {/* Form simples */}
         <div className="flex flex-col gap-6">
           {/* Nome */}
           <div className="grid gap-3">
             <Label htmlFor="player-name">Nome</Label>
-            <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              id="player-name"
+              value={name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+              autoFocus
+            />
           </div>
 
           {/* Nível */}
           <div className="grid gap-3">
-            <Label htmlFor="edit-level">Nível</Label>
+            <Label htmlFor="player-level">Nível</Label>
             <ToggleGroup
-              id="edit-level"
+              id="player-level"
               type="single"
               value={level}
-              onValueChange={(val) => val && setLevel(val)}
+              onValueChange={(val: string) => val && setLevel(val)}
               className="flex flex-wrap gap-2 w-full"
             >
               {LEVELS.map(({ value, label }) => (
-                <ToggleGroupItem
-                  key={value}
-                  value={value.toString()} // mantém o valor original
-                  aria-label={`Nível ${value}`} // acessibilidade
-                  className="w-8 justify-center"
-                >
+                <ToggleGroupItem key={value} value={value.toString()} className="w-8 justify-center">
                   {label}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
-
-            {/* Descrição do nível selecionado */}
             <p
               className="text-muted-foreground text-xs leading-snug"
               dangerouslySetInnerHTML={{ __html: LEVEL_DESCRIPTIONS[Number(level)] }}
             />
           </div>
 
-          {/* Ativo/Inativo */}
-          <div className="flex items-center gap-2">
-            <Label htmlFor="edit-active" className="text-sm">
-              Ativo
-            </Label>
-            <Switch id="edit-active" checked={active} onCheckedChange={setActive} />
-          </div>
+          {/* Ativo? (somente edição) */}
+          {mode === 'edit' && (
+            <div className="flex items-center gap-2">
+              <Label htmlFor="edit-active" className="text-sm">
+                Ativo
+              </Label>
+              <Switch id="edit-active" checked={active} onCheckedChange={setActive} />
+            </div>
+          )}
 
-          {/* Pares Preferidos */}
+          {/* Duplas preferidas */}
           <div className="grid gap-3">
             <Label>Duplas preferidas</Label>
             <Popover>
@@ -205,11 +198,10 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
         </div>
 
         <DialogFooter>
-          <div className="flex flex-row justify-between w-full">
-            {/* Deleção com confirmação */}
+          {mode === 'edit' && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" aria-label={`Remover ${player.name}`}>
+                <Button variant="ghost" aria-label={`Remover ${player!.name}`}>
                   <Trash className="text-destructive" size={16} />
                 </Button>
               </AlertDialogTrigger>
@@ -217,7 +209,7 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Tem certeza que deseja remover <strong>{player.name}</strong>?
+                    Tem certeza que deseja remover <strong>{player!.name}</strong>?
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -230,17 +222,15 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          )}
 
-            <div className="flex gap-2">
-              <DialogClose asChild>
-                <Button variant="outline">Cancelar</Button>
-              </DialogClose>
-              <DialogClose asChild>
-                <Button type="submit" onClick={handleSave}>
-                  Salvar
-                </Button>
-              </DialogClose>
-            </div>
+          <div className="flex gap-2 ml-auto">
+            <DialogClose asChild>
+              <Button variant="outline">Cancelar</Button>
+            </DialogClose>
+            <DialogClose asChild>
+              <Button onClick={handleSave}>Salvar</Button>
+            </DialogClose>
           </div>
         </DialogFooter>
       </DialogContent>
@@ -248,4 +238,4 @@ const EditPlayerModal: FC<EditPlayerModalProps> = ({ player }) => {
   )
 }
 
-export default EditPlayerModal
+export default PlayerModal
