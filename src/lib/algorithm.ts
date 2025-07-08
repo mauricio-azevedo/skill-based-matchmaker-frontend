@@ -10,10 +10,13 @@ const WEIGHT = {
   MATCH_COUNT_TOTAL: 100,
   MATCH_COUNT_IMBALANCE: 100,
   SKILL_IMBALANCE: 80,
-  WITHIN_TEAM_VARIATION: -70,
+  HIGH_WITHIN_TEAM_VARIATION: 70,
+  LOW_WITHIN_TEAM_VARIATION: -70,
   PARTNER_COUNT: 50,
   PREFERRED_PAIR: 40,
 } as const
+
+type VariationLevel = 'low' | 'high'
 
 /* ────────────────────────────── Tipos Internos ───────────────────────────── */
 
@@ -57,6 +60,7 @@ function calculateMatchScore(
   a2: number,
   b1: number,
   b2: number,
+  variationLevel: VariationLevel,
 ): number {
   const pA1 = players[a1]
   const pA2 = players[a2]
@@ -67,14 +71,12 @@ function calculateMatchScore(
   const diff1 = Math.abs(pA1.level - pB1.level) + Math.abs(pA2.level - pB2.level)
   const diff2 = Math.abs(pA1.level - pB2.level) + Math.abs(pA2.level - pB1.level)
   const skillPairImbalance = Math.min(diff1, diff2)
-
   const teamImbalance = Math.abs(pA1.level + pA2.level - (pB1.level + pB2.level))
-
   const withinTeamVariation = Math.abs(pA1.level - pA2.level) + Math.abs(pB1.level - pB2.level)
+  const withinWeight = variationLevel === 'high' ? WEIGHT.HIGH_WITHIN_TEAM_VARIATION : WEIGHT.LOW_WITHIN_TEAM_VARIATION
 
   // 2) Volume e equilíbrio de partidas jogadas
   const playedSum = pA1.matchCount + pA2.matchCount + pB1.matchCount + pB2.matchCount
-
   const matchCountImbalance =
     Math.max(pA1.matchCount, pA2.matchCount, pB1.matchCount, pB2.matchCount) -
     Math.min(pA1.matchCount, pA2.matchCount, pB1.matchCount, pB2.matchCount)
@@ -96,14 +98,14 @@ function calculateMatchScore(
     WEIGHT.MATCH_COUNT_TOTAL * playedSum +
     WEIGHT.PARTNER_COUNT * pastPairSum -
     WEIGHT.PREFERRED_PAIR * preferredPairBonus +
-    WEIGHT.WITHIN_TEAM_VARIATION * withinTeamVariation
+    withinWeight * withinTeamVariation
   )
 }
 
 /* ──────────────────────── Construção de partidas ─────────────────────────── */
 
 /** Constrói todas as partidas possíveis (duas duplas disjuntas). O(n²·m) onde m≈n². */
-function generateAllMatches(players: readonly Player[]): InternalMatch[] {
+function generateAllMatches(players: readonly Player[], variationLevel: VariationLevel): InternalMatch[] {
   const prefSets = buildPreferredSet(players)
   const pairs = generateIndexPairs(players.length)
 
@@ -119,7 +121,7 @@ function generateAllMatches(players: readonly Player[]): InternalMatch[] {
         continue
       }
 
-      const score = calculateMatchScore(players, prefSets, a1, a2, b1, b2)
+      const score = calculateMatchScore(players, prefSets, a1, a2, b1, b2, variationLevel)
 
       matches.push({ teamA: [a1, a2], teamB: [b1, b2], score })
     }
@@ -158,12 +160,16 @@ function selectTopMatches(matches: InternalMatch[], courts: number): InternalMat
 
 /* ─────────────────────────── API pública ─────────────────────────────────── */
 
-export function generateSchedule(players: readonly Player[], courts: number): UnsavedRound {
+export function generateSchedule(
+  players: readonly Player[],
+  courts: number,
+  variationLevel: VariationLevel = 'low',
+): UnsavedRound {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
-  const allMatches = generateAllMatches(players)
+  const allMatches = generateAllMatches(players, variationLevel)
   const best = selectTopMatches(allMatches, courts)
 
   return {
