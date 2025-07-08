@@ -202,11 +202,11 @@ const MatchesTab: FC = () => {
                 className="flex flex-col gap-2 snap-start"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="text-2xl font-semibold tracking-tight">Rodada {round.roundNumber}</div>
+                  <div className="text-md font-semibold tracking-tight">Rodada {round.roundNumber}</div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="w-8 h-8">
-                        <MoreVertical className="!w-5 !h-5" aria-label="Mais opções" />
+                      <Button variant="ghost" size="icon" className="w-7 h-7">
+                        <MoreVertical className="!w-4 !h-4" aria-label="Mais opções" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
