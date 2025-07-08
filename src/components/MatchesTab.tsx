@@ -278,20 +278,21 @@ const MatchesTab: FC = () => {
             ))}
           </AnimatePresence>
         </ul>
-        {showScrollTop && (
-          <AnimatePresence>
+        <AnimatePresence initial={false}>
+          {showScrollTop && (
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
+              key="scroll-top"
+              initial={{ opacity: 0, y: 80 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
+              exit={{ opacity: 0, y: 80 }}
               className="absolute bottom-4 right-4 z-50"
             >
               <Button size="icon" onClick={scrollToTop} aria-label="Voltar ao topo" className="shadow-lg">
-                <ChevronUp className="!w-4 !h-4" />
+                <ChevronUp className="w-5 h-5" />
               </Button>
             </motion.div>
-          </AnimatePresence>
-        )}
+          )}
+        </AnimatePresence>
       </div>
       <div className="w-full flex">
         <Button className="flex-1" onClick={handleGenerate} disabled={players.length < PLAYERS_PER_MATCH}>
