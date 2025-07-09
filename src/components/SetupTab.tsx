@@ -47,7 +47,7 @@ const SetupTab: FC = () => {
             <Label className="flex-col items-start">
               <span>Formação</span>
               <span className="text-xs text-muted-foreground">
-                Define como as duplas são formadas com base nos níveis dos jogadores.
+                Define como as duplas são formadas com base nos níveis de seus jogadores.
               </span>
             </Label>
             <RadioGroup
@@ -61,9 +61,7 @@ const SetupTab: FC = () => {
                 <Label htmlFor={FORMATION_MODES.HOMOGENEOUS} className="flex-col items-start">
                   <span>Homogêneo</span>
                   <span className="text-xs text-muted-foreground">
-                    Agrupa jogadores de níveis parecidos.
-                    <br />
-                    Ex: 5+5 vs 5+5
+                    <strong>Menor</strong> diferença entre níveis <span className="text-nowrap">(5+5 vs 5+5).</span>
                   </span>
                 </Label>
               </div>
@@ -72,9 +70,7 @@ const SetupTab: FC = () => {
                 <Label htmlFor={FORMATION_MODES.MIXED} className="flex-col items-start">
                   <span>Misto</span>
                   <span className="text-xs text-muted-foreground">
-                    Agrupa jogadores de níveis diferentes.
-                    <br />
-                    Ex: 5+1 vs 5+1
+                    <strong>Maior</strong> diferença entre níveis <span className="text-nowrap">(5+1 vs 5+1).</span>
                   </span>
                 </Label>
               </div>
