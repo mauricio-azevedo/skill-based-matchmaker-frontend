@@ -1,5 +1,7 @@
 // src/lib/algorithm.ts
 import type { Player, UnsavedRound } from '@/types/players'
+import type { FormationMode } from '@/context/CourtsContext'
+import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 
 /* ─────────────────────────────── Constantes ──────────────────────────────── */
 
@@ -57,7 +59,7 @@ function calculateMatchScore(
   a2: number,
   b1: number,
   b2: number,
-  variationEnabled: boolean,
+  formationMode: FormationMode,
 ): number {
   const pA1 = players[a1]
   const pA2 = players[a2]
@@ -70,7 +72,8 @@ function calculateMatchScore(
   const skillPairImbalance = Math.min(diff1, diff2)
   const teamImbalance = Math.abs(pA1.level + pA2.level - (pB1.level + pB2.level))
   const withinTeamVariation = Math.abs(pA1.level - pA2.level) + Math.abs(pB1.level - pB2.level)
-  const withinWeight = variationEnabled ? -WEIGHT.WITHIN_TEAM_VARIATION : +WEIGHT.WITHIN_TEAM_VARIATION
+  const withinWeight =
+    formationMode === FORMATION_MODES.HOMOGENEOUS ? +WEIGHT.WITHIN_TEAM_VARIATION : -WEIGHT.WITHIN_TEAM_VARIATION
 
   // 2) Volume e equilíbrio de partidas jogadas
   const playedSum = pA1.matchCount + pA2.matchCount + pB1.matchCount + pB2.matchCount
@@ -102,7 +105,7 @@ function calculateMatchScore(
 /* ──────────────────────── Construção de partidas ─────────────────────────── */
 
 /** Constrói todas as partidas possíveis (duas duplas disjuntas). O(n²·m) onde m≈n². */
-function generateAllMatches(players: readonly Player[], variationEnabled: boolean): InternalMatch[] {
+function generateAllMatches(players: readonly Player[], formationMode: FormationMode): InternalMatch[] {
   const prefSets = buildPreferredSet(players)
   const pairs = generateIndexPairs(players.length)
 
@@ -118,7 +121,7 @@ function generateAllMatches(players: readonly Player[], variationEnabled: boolea
         continue
       }
 
-      const score = calculateMatchScore(players, prefSets, a1, a2, b1, b2, variationEnabled)
+      const score = calculateMatchScore(players, prefSets, a1, a2, b1, b2, formationMode)
 
       matches.push({ teamA: [a1, a2], teamB: [b1, b2], score })
     }
@@ -160,14 +163,13 @@ function selectTopMatches(matches: InternalMatch[], courts: number): InternalMat
 export function generateSchedule(
   players: readonly Player[],
   courts: number,
-  variationEnabled: boolean = false,
+  formationMode: FormationMode,
 ): UnsavedRound {
-  console.log({ variationEnabled })
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
-  const allMatches = generateAllMatches(players, variationEnabled)
+  const allMatches = generateAllMatches(players, formationMode)
   const best = selectTopMatches(allMatches, courts)
 
   return {
