@@ -46,7 +46,7 @@ const SetupTab: FC = () => {
           <div className={cn('flex flex-col gap-2', autoAlternate ? 'opacity-50' : 'opacity-100')}>
             <Label className="flex-col items-start">
               <span>Formação</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground font-normal">
                 Define como as duplas são formadas com base nos níveis de seus jogadores.
               </span>
             </Label>
@@ -60,7 +60,7 @@ const SetupTab: FC = () => {
                 <RadioGroupItem id={FORMATION_MODES.HOMOGENEOUS} value={FORMATION_MODES.HOMOGENEOUS} />
                 <Label htmlFor={FORMATION_MODES.HOMOGENEOUS} className="flex-col items-start">
                   <span>Homogêneo</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground font-normal">
                     <strong>Menor</strong> diferença entre níveis <span className="text-nowrap">(5+5 vs 5+5).</span>
                   </span>
                 </Label>
@@ -69,7 +69,7 @@ const SetupTab: FC = () => {
                 <RadioGroupItem id={FORMATION_MODES.MIXED} value={FORMATION_MODES.MIXED} />
                 <Label htmlFor={FORMATION_MODES.MIXED} className="flex-col items-start">
                   <span>Misto</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground font-normal">
                     <strong>Maior</strong> diferença entre níveis <span className="text-nowrap">(5+1 vs 5+1).</span>
                   </span>
                 </Label>
@@ -78,10 +78,10 @@ const SetupTab: FC = () => {
           </div>
 
           {/* Automatic alternation toggle */}
-          <div className="flex justify-between items-center w-full">
+          <div className="flex justify-between items-center w-full gap-4">
             <Label htmlFor="auto-switch" className="flex-col items-start">
               <span>Automático</span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground font-normal">
                 Alterna automaticamente entre modos misto e homogêneo a cada nova rodada.
               </span>
             </Label>
