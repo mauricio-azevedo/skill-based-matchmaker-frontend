@@ -31,7 +31,6 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Switch } from '@/components/ui/switch'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
@@ -167,15 +166,15 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             </ToggleGroup>
           </div>
 
-          {/* Ativo? (somente edição) */}
-          {mode === 'edit' && (
-            <div className="flex items-center gap-2">
-              <Label htmlFor="edit-active" className="text-sm">
-                Ativo
-              </Label>
-              <Switch id="edit-active" checked={active} onCheckedChange={setActive} />
-            </div>
-          )}
+          {/*/!* Ativo? (somente edição) *!/*/}
+          {/*{mode === 'edit' && (*/}
+          {/*  <div className="flex items-center gap-2">*/}
+          {/*    <Label htmlFor="edit-active" className="text-sm">*/}
+          {/*      Ativo*/}
+          {/*    </Label>*/}
+          {/*    <Switch id="edit-active" checked={active} onCheckedChange={setActive} />*/}
+          {/*  </div>*/}
+          {/*)}*/}
 
           {/* Duplas preferidas */}
           <div className="grid gap-3">
