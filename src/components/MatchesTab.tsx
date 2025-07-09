@@ -219,7 +219,13 @@ const MatchesTab: FC = () => {
                 className="flex flex-col gap-2 snap-start"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="text-md font-semibold tracking-tight">Rodada {round.roundNumber}</div>
+                  <div className="text-md font-semibold tracking-tight">
+                    Rodada {round.roundNumber}
+                    <span className="text-muted-foreground text-xs font-medium">
+                      {' '}
+                      {autoAlternate ? formatModeLabel(autoAlternateMode) : formatModeLabel(formationMode)}
+                    </span>
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="w-7 h-7">
@@ -440,6 +446,10 @@ function pickAndAdvanceMode(
   const nextMode = useMode === FORMATION_MODES.MIXED ? FORMATION_MODES.HOMOGENEOUS : FORMATION_MODES.MIXED
   setNextAutoMode(nextMode)
   return useMode
+}
+
+function formatModeLabel(mode: FormationMode): string {
+  return mode === FORMATION_MODES.MIXED ? 'mista' : 'homogênea'
 }
 
 export default MatchesTab
