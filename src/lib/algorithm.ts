@@ -165,6 +165,7 @@ export function generateSchedule(
   courts: number,
   formationMode: FormationMode,
 ): UnsavedRound {
+  console.log(formationMode)
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
@@ -174,6 +175,7 @@ export function generateSchedule(
 
   return {
     id: crypto.randomUUID(),
+    formationMode,
     matches: best.map(({ teamA, teamB }) => ({
       id: crypto.randomUUID(),
       teamA: [players[teamA[0]], players[teamA[1]]],

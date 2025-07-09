@@ -4,6 +4,8 @@
 //   • name – string livre informada pelo usuário
 //   • level – inteiro >= 1 que representa habilidade; usado p/ balancear times
 // ---------------------------------------------------------------------------
+import type { FormationMode } from '@/context/CourtsContext'
+
 export interface Player {
   id: string
   name: string
@@ -31,7 +33,7 @@ export interface Match {
 export interface UnsavedRound {
   id: string
   matches: Match[]
-  // no roundNumber here
+  formationMode: FormationMode
 }
 
 export interface Round extends UnsavedRound {

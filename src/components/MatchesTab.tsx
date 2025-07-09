@@ -112,7 +112,7 @@ const MatchesTab: FC = () => {
     if (warnIfInsufficient()) return
     setDisableSnap(true)
     try {
-      const currentMode = pickAndAdvanceMode(autoAlternate, autoAlternateMode, formationMode, setAutoAlternateMode)
+      const currentMode = pickAndAdvanceMode()
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts, currentMode)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
@@ -141,7 +141,7 @@ const MatchesTab: FC = () => {
     const oldRound = rounds[idx]
     if (!oldRound) return
     const cleanedPlayers = applyRoundStats(activePlayers, oldRound, -1)
-    const currentMode = pickAndAdvanceMode(autoAlternate, autoAlternateMode, formationMode, setAutoAlternateMode)
+    const currentMode = pickAndAdvanceMode()
     const fresh: UnsavedRound = generateSchedule(cleanedPlayers, courts, currentMode)
     const newRound = { ...fresh, id: oldRound.id, roundNumber: oldRound.roundNumber }
     updatePlayers((prev) => {
@@ -150,6 +150,14 @@ const MatchesTab: FC = () => {
     })
     replaceRound(idx, newRound)
     singleToastSuccess(`Rodada ${oldRound.roundNumber} embaralhada!`, { duration: 3000 })
+  }
+
+  // Faz com que ao ligar o modo automático, o próximo modo seja sempre o inverso do selecionado anterior ao ligar o automático
+  const pickAndAdvanceMode = (): FormationMode => {
+    const useMode = autoAlternate ? autoAlternateMode : formationMode
+    const nextMode = useMode === FORMATION_MODES.MIXED ? FORMATION_MODES.HOMOGENEOUS : FORMATION_MODES.MIXED
+    setAutoAlternateMode(nextMode)
+    return useMode
   }
 
   const doDelete = (idx: number) => {
@@ -222,7 +230,7 @@ const MatchesTab: FC = () => {
                   <div className="text-md font-semibold tracking-tight">
                     Rodada {round.roundNumber}{' '}
                     <span className="text-muted-foreground text-xs font-medium">
-                      {autoAlternate ? formatModeLabel(autoAlternateMode) : formatModeLabel(formationMode)}
+                      {formatModeLabel(round.formationMode)}
                     </span>
                   </div>
                   <DropdownMenu>
@@ -432,19 +440,6 @@ const ScoreBlock: React.FC<ScoreBlockProps> = ({ teamKey, games, isWinner, match
 function getWinner(gamesA: number | null, gamesB: number | null): 'A' | 'B' | null {
   if (gamesA === null || gamesB === null || gamesA === gamesB) return null
   return gamesA > gamesB ? 'A' : 'B'
-}
-
-// Faz com que ao ligar o modo automático, o próximo modo seja sempre o inverso do selecionado anterior ao ligar o automático
-function pickAndAdvanceMode(
-  auto: boolean,
-  autoMode: FormationMode,
-  manualMode: FormationMode,
-  setNextAutoMode: (m: FormationMode) => void,
-): FormationMode {
-  const useMode = auto ? autoMode : manualMode
-  const nextMode = useMode === FORMATION_MODES.MIXED ? FORMATION_MODES.HOMOGENEOUS : FORMATION_MODES.MIXED
-  setNextAutoMode(nextMode)
-  return useMode
 }
 
 function formatModeLabel(mode: FormationMode): string {
