@@ -71,7 +71,7 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
 const MatchesTab: FC = () => {
   const { players, updatePlayers } = usePlayers()
   const { rounds, addRound, setGames, replaceRound, removeRound } = useRounds()
-  const { courts, variation } = useCourts()
+  const { courts, variationEnabled } = useCourts()
 
   const activePlayers = players.filter((p) => p.active)
 
@@ -111,7 +111,7 @@ const MatchesTab: FC = () => {
     if (warnIfInsufficient()) return
     setDisableSnap(true)
     try {
-      const newRound: UnsavedRound = generateSchedule(activePlayers, courts, variation)
+      const newRound: UnsavedRound = generateSchedule(activePlayers, courts, variationEnabled)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
       singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
@@ -139,7 +139,7 @@ const MatchesTab: FC = () => {
     const oldRound = rounds[idx]
     if (!oldRound) return
     const cleanedPlayers = applyRoundStats(activePlayers, oldRound, -1)
-    const fresh: UnsavedRound = generateSchedule(cleanedPlayers, courts, variation)
+    const fresh: UnsavedRound = generateSchedule(cleanedPlayers, courts, variationEnabled)
     const newRound = { ...fresh, id: oldRound.id, roundNumber: oldRound.roundNumber }
     updatePlayers((prev) => {
       const cleaned = applyRoundStats(prev, oldRound, -1)

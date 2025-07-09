@@ -3,15 +3,11 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Minus, Plus } from 'lucide-react'
-import { useCourts, type VariationLevel } from '@/context/CourtsContext'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { useCourts } from '@/context/CourtsContext'
+import { Switch } from '@/components/ui/switch'
 
 const SetupTab: FC = () => {
-  const { courts, setCourts, variation, setVariation } = useCourts()
-
-  function handleVariationChange(value: string) {
-    setVariation(value as VariationLevel)
-  }
+  const { courts, setCourts, variationEnabled, setVariationEnabled } = useCourts()
 
   return (
     <React.Fragment>
@@ -64,23 +60,9 @@ const SetupTab: FC = () => {
         </div>
 
         {/* Variação de nível da dupla */}
-        <div className="flex gap-2 justify-between w-full">
-          <Label>Variação de nível da dupla</Label>
-          <RadioGroup
-            value={variation}
-            onValueChange={handleVariationChange}
-            name="variation-level"
-            className="flex items-center gap-4"
-          >
-            <div className="flex items-center gap-1">
-              <RadioGroupItem value="low" id="variation-low" />
-              <Label htmlFor="variation-low">Baixa</Label>
-            </div>
-            <div className="flex items-center gap-1">
-              <RadioGroupItem value="high" id="variation-high" />
-              <Label htmlFor="variation-high">Alta</Label>
-            </div>
-          </RadioGroup>
+        <div className="flex justify-between items-center w-full gap-2">
+          <Label htmlFor="variation-switch">Duplas mistas</Label>
+          <Switch id="variation-switch" checked={variationEnabled} onCheckedChange={setVariationEnabled} />
         </div>
       </div>
     </React.Fragment>
