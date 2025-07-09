@@ -208,11 +208,7 @@ const MatchesTab: FC = () => {
         <ul
           ref={listRef}
           onScroll={handleScroll}
-          className={cn(
-            'overflow-y-auto gap-12 flex flex-col',
-            disableSnap ? 'snap-none' : 'snap-y snap-mandatory',
-            'shadow-inner',
-          )}
+          className={cn('overflow-y-auto gap-12 flex flex-col', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}
           style={{ scrollBehavior: 'smooth' }}
         >
           <AnimatePresence initial={false}>
