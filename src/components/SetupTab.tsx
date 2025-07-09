@@ -12,12 +12,12 @@ const SetupTab: FC = () => {
 
   return (
     <React.Fragment>
-      <div className="flex w-full items-center justify-between h-8 mb-2">
+      <div className="flex w-full items-center justify-between h-8 mb-4">
         <div className="text-lg font-semibold">Setup</div>
       </div>
-      <div className="flex flex-col items-start flex-1 gap-6 w-full">
+      <div className="flex flex-col items-start flex-1 gap-8 w-full">
         {/* Número de quadras */}
-        <div className="flex justify-between items-center w-full gap-4">
+        <fieldset className="flex justify-between items-center w-full gap-4 border rounded-lg p-3">
           <Label htmlFor="court-select" className="flex-col items-start flex-1">
             <span>Quadras</span>
             <span className="text-muted-foreground font-normal text-xs">Quantidade de quadras disponíveis.</span>
@@ -36,11 +36,12 @@ const SetupTab: FC = () => {
               </SelectContent>
             </Select>
           </div>
-        </div>
+        </fieldset>
 
         {/* Team formation */}
-        <div className="flex flex-col gap-4 w-full">
-          <h2 className="text-md font-medium">Duplas</h2>
+        <fieldset className="flex flex-col gap-4 w-full border rounded-lg p-3">
+          <legend className="text-md font-medium">Duplas</legend>
+          {/*<h2 className="text-md font-medium">Duplas</h2>*/}
 
           {/* Mode */}
           <div className={cn('flex flex-col gap-2', autoAlternate ? 'opacity-50' : 'opacity-100')}>
@@ -87,7 +88,7 @@ const SetupTab: FC = () => {
             </Label>
             <Switch id="auto-switch" checked={autoAlternate} onCheckedChange={setAutoAlternate} />
           </div>
-        </div>
+        </fieldset>
       </div>
     </React.Fragment>
   )
