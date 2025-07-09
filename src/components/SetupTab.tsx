@@ -40,13 +40,15 @@ const SetupTab: FC = () => {
 
         {/* Team formation */}
         <div className="flex flex-col gap-4 w-full">
-          <h2 className="text-md font-medium">Formação de duplas</h2>
+          <h2 className="text-md font-medium">Duplas</h2>
 
           {/* Mode */}
           <div className={cn('flex flex-col gap-2', autoAlternate ? 'opacity-50' : 'opacity-100')}>
             <Label className="flex-col items-start">
-              <span>Modo de formação</span>
-              <span className="text-xs text-muted-foreground">Diferença entre níveis em cada dupla.</span>
+              <span>Formação</span>
+              <span className="text-xs text-muted-foreground">
+                Define como as duplas são formadas com base nos níveis dos jogadores.
+              </span>
             </Label>
             <RadioGroup
               value={formationMode}
@@ -59,9 +61,9 @@ const SetupTab: FC = () => {
                 <Label htmlFor={FORMATION_MODES.HOMOGENEOUS} className="flex-col items-start">
                   <span>Homogêneo</span>
                   <span className="text-xs text-muted-foreground">
-                    Menor diferença
+                    Agrupa jogadores de níveis parecidos.
                     <br />
-                    5+5 vs 5+5; 1+1 vs 1+1.
+                    Ex: 5+5 vs 5+5
                   </span>
                 </Label>
               </div>
@@ -70,9 +72,9 @@ const SetupTab: FC = () => {
                 <Label htmlFor={FORMATION_MODES.MIXED} className="flex-col items-start">
                   <span>Misto</span>
                   <span className="text-xs text-muted-foreground">
-                    Maior diferença
+                    Agrupa jogadores de níveis diferentes.
                     <br />
-                    5+1 vs 5+1; 5+1 vs 5+1.
+                    Ex: 5+1 vs 5+1
                   </span>
                 </Label>
               </div>
@@ -82,8 +84,10 @@ const SetupTab: FC = () => {
           {/* Automatic alternation toggle */}
           <div className="flex justify-between items-center w-full">
             <Label htmlFor="auto-switch" className="flex-col items-start">
-              <span>Modo automático</span>
-              <span className="text-xs text-muted-foreground">Intercala uma rodada em cada modo.</span>
+              <span>Automático</span>
+              <span className="text-xs text-muted-foreground">
+                Alterna automaticamente entre modos misto e homogêneo a cada nova rodada.
+              </span>
             </Label>
             <Switch id="auto-switch" checked={autoAlternate} onCheckedChange={setAutoAlternate} />
           </div>
