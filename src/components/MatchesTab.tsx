@@ -1,4 +1,4 @@
-import React, { type FC, useEffect, useRef, useState } from 'react'
+import React, { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -183,32 +183,29 @@ const MatchesTab: FC = () => {
 
   const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // se não há rodada incompleta, garante ocultar
     if (firstIncompleteIndex < 0) {
       setShowScrollToFirstIncomplete(false)
       return
     }
-    const target = itemRefs.current[firstIncompleteIndex]
-    if (!target || !listRef.current) return
 
+    const target = itemRefs.current[firstIncompleteIndex]
+    const root = listRef.current
+    if (!target || !root) return
+
+    // cria o observer assim que o DOM estiver pronto
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // se 100% visível, entry.intersectionRatio === 1
         setShowScrollToFirstIncomplete(entry.intersectionRatio < 1)
       },
-      {
-        root: listRef.current,
-        threshold: [1.0],
-      },
+      { root, threshold: [1.0] },
     )
 
     observer.observe(target)
-
-    // Cleanup
-    return () => {
-      observer.disconnect()
-    }
-  }, [firstIncompleteIndex, rounds.length /* também reinspeciona quando muda tamanho */])
+    return () => observer.disconnect()
+    // re-executa sempre que a “primeira rodada incompleta” muda
+  }, [firstIncompleteIndex])
 
   return (
     <React.Fragment>
