@@ -329,7 +329,6 @@ const MatchesTab: FC = () => {
               className="absolute bottom-4 right-4 z-50"
             >
               <Button
-                // size="icon"
                 size="sm"
                 onClick={() => {
                   const el = itemRefs.current[firstIncompleteIndex]
@@ -338,7 +337,6 @@ const MatchesTab: FC = () => {
                 aria-label="Ir para primeira rodada incompleta"
                 className="shadow-lg text-xs"
               >
-                {/*<ChevronUp className="w-5 h-5" />*/}
                 Ir para rodada atual
               </Button>
             </motion.div>
