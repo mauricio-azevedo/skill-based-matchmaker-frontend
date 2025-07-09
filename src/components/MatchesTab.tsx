@@ -78,8 +78,9 @@ const MatchesTab: FC = () => {
 
   // Ref for scroll container
   const listRef = useRef<HTMLUListElement>(null)
-  const itemRefs = useRef<(HTMLLIElement | null)[]>([])
   const [disableSnap, setDisableSnap] = useState(false)
+
+  const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
 
   const [confirmShuffle, setConfirmShuffle] = useState<{ open: boolean; roundIndex: number | null }>({
     open: false,
@@ -181,31 +182,39 @@ const MatchesTab: FC = () => {
     return -1
   })()
 
-  const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
+  function scrollToFirstIncomplete() {
+    const root = listRef.current
+    if (!root || firstIncompleteIndex < 0) return
+
+    // busca o <li> que tem o data-round-idx igual ao índice da primeira incompleta
+    const selector = `[data-round-idx="${firstIncompleteIndex}"]`
+    const target = root.querySelector<HTMLElement>(selector)
+    if (!target) return
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   useLayoutEffect(() => {
-    // se não há rodada incompleta, garante ocultar
-    if (firstIncompleteIndex < 0) {
+    const root = listRef.current
+    // se não há rodada incompleta, ocultamos
+    if (!root || firstIncompleteIndex < 0) {
       setShowScrollToFirstIncomplete(false)
       return
     }
 
-    const target = itemRefs.current[firstIncompleteIndex]
-    const root = listRef.current
-    if (!target || !root) return
+    // encontra o elemento alvo
+    const selector = `[data-round-idx="${firstIncompleteIndex}"]`
+    const target = root.querySelector<HTMLElement>(selector)
+    if (!target) return
 
-    // cria o observer assim que o DOM estiver pronto
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowScrollToFirstIncomplete(entry.intersectionRatio < 1)
-      },
-      { root, threshold: [1.0] },
-    )
-
-    observer.observe(target)
-    return () => observer.disconnect()
-    // re-executa sempre que a “primeira rodada incompleta” muda
-  }, [firstIncompleteIndex])
+    // cria observer que dispara quando não estiver 100% visível
+    const obs = new IntersectionObserver(([entry]) => setShowScrollToFirstIncomplete(entry.intersectionRatio < 1), {
+      root,
+      threshold: [1],
+    })
+    obs.observe(target)
+    return () => obs.disconnect()
+  }, [firstIncompleteIndex, rounds])
 
   return (
     <React.Fragment>
@@ -237,16 +246,15 @@ const MatchesTab: FC = () => {
           <AnimatePresence initial={false}>
             {rounds.map((round, idx) => (
               <motion.li
-                ref={(el) => {
-                  itemRefs.current[idx] = el
-                }}
                 key={round.id}
+                data-round-idx={idx} // ← índice “embutido”
+                style={{ scrollSnapStop: idx === firstIncompleteIndex ? 'always' : 'normal' }}
+                className="flex flex-col gap-2 snap-start"
                 layout="position"
                 variants={itemVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="flex flex-col gap-2 snap-start"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-md font-semibold tracking-tight">
@@ -327,10 +335,7 @@ const MatchesTab: FC = () => {
             >
               <Button
                 size="sm"
-                onClick={() => {
-                  const el = itemRefs.current[firstIncompleteIndex]
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }}
+                onClick={scrollToFirstIncomplete}
                 aria-label="Ir para primeira rodada incompleta"
                 className="shadow-lg text-xs"
               >
