@@ -429,16 +429,16 @@ function getWinner(gamesA: number | null, gamesB: number | null): 'A' | 'B' | nu
   return gamesA > gamesB ? 'A' : 'B'
 }
 
+// Faz com que ao ligar o modo automático, o próximo modo seja sempre o inverso do selecionado anterior ao ligar o automático
 function pickAndAdvanceMode(
   auto: boolean,
   autoMode: FormationMode,
   manualMode: FormationMode,
-  setAutoMode: (m: FormationMode) => void,
+  setNextAutoMode: (m: FormationMode) => void,
 ): FormationMode {
   const useMode = auto ? autoMode : manualMode
-  const nextBase = auto ? autoMode : manualMode
-  const nextMode = nextBase === FORMATION_MODES.MIXED ? FORMATION_MODES.HOMOGENEOUS : FORMATION_MODES.MIXED
-  setAutoMode(nextMode)
+  const nextMode = useMode === FORMATION_MODES.MIXED ? FORMATION_MODES.HOMOGENEOUS : FORMATION_MODES.MIXED
+  setNextAutoMode(nextMode)
   return useMode
 }
 

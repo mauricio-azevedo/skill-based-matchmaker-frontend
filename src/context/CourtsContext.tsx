@@ -28,7 +28,7 @@ export const CourtsProvider = ({ children }: { children: ReactNode }) => {
     STORAGE_KEY_MODE,
     FORMATION_MODES.HOMOGENEOUS,
   )
-  const [autoAlternate, setAutoAlternate] = useLocalStorage<boolean>(STORAGE_KEY_AUTO, false)
+  const [autoAlternate, setAutoAlternate] = useLocalStorage<boolean>(STORAGE_KEY_AUTO, true)
   const [autoAlternateMode, setAutoAlternateMode] = useLocalStorage<FormationMode>(
     STORAGE_KEY_AUTO_MODE,
     FORMATION_MODES.HOMOGENEOUS,
