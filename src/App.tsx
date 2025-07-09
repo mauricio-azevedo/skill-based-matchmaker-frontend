@@ -41,7 +41,7 @@ export default function App() {
     if (players.length !== seedPlayers.length) return false
     const seedSet = new Set(seedPlayers.map(({ id, name, level }) => `${id}-${name}-${level}`))
     return players.every(({ id, name, level }) => seedSet.has(`${id}-${name}-${level}`))
-  }, [players, seedPlayers])
+  }, [players])
 
   const hasRounds = rounds.length > 0
   const hasPlayers = players.length > 0
@@ -154,7 +154,7 @@ export default function App() {
       />
 
       {/* --------- Tabs --------- */}
-      <Tabs defaultValue="players" className="flex flex-col flex-grow overflow-hidden gap-2">
+      <Tabs defaultValue="matches" className="flex flex-col flex-grow overflow-hidden gap-2">
         {/* Conteúdo */}
         <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center gap-2">
           <TabsContent value="players" asChild>
