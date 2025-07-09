@@ -8,7 +8,7 @@ import { useRounds } from '@/context/RoundsContext'
 import type { PlayerLBRow } from '@/types/players'
 
 // shadcn/ui
-import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
@@ -261,13 +261,7 @@ function applyMiniTieBreak(rows: PlayerLBRow[], pair: Pair): PlayerLBRow[] {
         gc += vs.gc
       }
     })
-    return {
-      ...p,
-      GPmini: gp,
-      GCmini: gc,
-      miniSG: gp - gc,
-      oppMini: ids.filter((id) => id !== p.id),
-    }
+    return { ...p, GPmini: gp, GCmini: gc, miniSG: gp - gc, oppMini: ids.filter((id) => id !== p.id) }
   })
 
   enriched.sort((a, b) => (b.miniSG! !== a.miniSG! ? b.miniSG! - a.miniSG! : a.name.localeCompare(b.name)))
@@ -288,7 +282,7 @@ function applyMiniSvTieBreak(rows: PlayerLBRow[], pair: Pair): PlayerLBRow[] {
       if (vs.gp > vs.gc) W++
       else if (vs.gp < vs.gc) L++
     })
-    return { ...p, miniW: W, miniL: L, miniSV: W - L }
+    return { ...p, miniW: W, miniL: L, miniSV: W - L, oppMini: ids.filter((id) => id !== p.id) }
   })
 
   // ordena primeiro por miniSV, depois nome (fallback simples)
