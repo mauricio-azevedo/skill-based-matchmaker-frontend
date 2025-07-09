@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator'
 
 const SetupTab: FC = () => {
   const { courts, setCourts, formationMode, setFormationMode, autoAlternate, setAutoAlternate } = useCourts()
@@ -15,9 +16,9 @@ const SetupTab: FC = () => {
       <div className="flex w-full items-center justify-between h-8 mb-4">
         <div className="text-lg font-semibold">Setup</div>
       </div>
-      <div className="flex flex-col items-start flex-1 gap-8 w-full">
+      <div className="flex flex-col items-start flex-1 w-full">
         {/* Número de quadras */}
-        <fieldset className="flex justify-between items-center w-full gap-4 border rounded-lg p-3">
+        <div className="flex justify-between items-center w-full gap-4">
           <Label htmlFor="court-select" className="flex-col items-start flex-1">
             <span>Quadras</span>
             <span className="text-muted-foreground font-normal text-xs">Quantidade de quadras disponíveis.</span>
@@ -36,15 +37,16 @@ const SetupTab: FC = () => {
               </SelectContent>
             </Select>
           </div>
-        </fieldset>
+        </div>
+
+        <Separator className="my-6" />
 
         {/* Team formation */}
-        <fieldset className="flex flex-col gap-4 w-full border rounded-lg p-3">
-          <legend className="text-md font-medium">Duplas</legend>
-          {/*<h2 className="text-md font-medium">Duplas</h2>*/}
+        <div className="flex flex-col w-full">
+          <h2 className="text-md font-medium mb-6">Duplas</h2>
 
           {/* Mode */}
-          <div className={cn('flex flex-col gap-2', autoAlternate ? 'opacity-50' : 'opacity-100')}>
+          <div className={cn('flex flex-col gap-2 mb-4', autoAlternate ? 'opacity-50' : 'opacity-100')}>
             <Label className="flex-col items-start">
               <span>Formação</span>
               <span className="text-xs text-muted-foreground font-normal">
@@ -88,7 +90,7 @@ const SetupTab: FC = () => {
             </Label>
             <Switch id="auto-switch" checked={autoAlternate} onCheckedChange={setAutoAlternate} />
           </div>
-        </fieldset>
+        </div>
       </div>
     </React.Fragment>
   )
