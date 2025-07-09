@@ -61,7 +61,12 @@ const SetupTab: FC = () => {
 
         {/* Variação de nível da dupla */}
         <div className="flex justify-between items-center w-full gap-2">
-          <Label htmlFor="variation-switch">Duplas mistas</Label>
+          <div>
+            <Label className="flex-col items-start" htmlFor="variation-switch">
+              <span>Duplas mistas</span>
+              <span className="text-muted-foreground leading-snug font-normal">Mistura níveis em cada dupla.</span>
+            </Label>
+          </div>
           <Switch id="variation-switch" checked={variationEnabled} onCheckedChange={setVariationEnabled} />
         </div>
       </div>
