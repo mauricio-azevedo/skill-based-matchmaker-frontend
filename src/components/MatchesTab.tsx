@@ -433,16 +433,22 @@ const ScoreSelect: FC<{
   label: string
 }> = ({ value, onChange, label }) => {
   const PLACEHOLDER = '-'
-  const display = value !== null ? String(value) : PLACEHOLDER
 
   return (
-    <Select value={display} onValueChange={(val) => onChange(val === PLACEHOLDER ? null : Number(val))}>
+    <Select
+      // quando value for null, passamos undefined pra mostrar o placeholder
+      value={value != null ? String(value) : undefined}
+      onValueChange={(val) =>
+        // como não há opção de “-” no dropdown, sempre virá um número
+        onChange(val ? Number(val) : null)
+      }
+    >
       <SelectTrigger id={label} className="!w-8 !h-8 text-center justify-center text-xs [&>svg]:hidden">
-        <SelectValue>{display}</SelectValue>
+        {/* Placeholder exibido quando não há value */}
+        <SelectValue placeholder={PLACEHOLDER} />
       </SelectTrigger>
 
       <SelectContent align="center">
-        <SelectItem value={PLACEHOLDER}>-</SelectItem>
         {SCORE_OPTIONS.map((opt) => (
           <SelectItem key={opt} value={String(opt)}>
             {opt}
