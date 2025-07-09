@@ -175,7 +175,7 @@ export default function App() {
         <TabsList className="self-center">
           <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="players">Jogadores</TabsTrigger>
-          <TabsTrigger value="matches">Rodadas</TabsTrigger>
+          <TabsTrigger value="matches">Partidas</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
       </Tabs>
