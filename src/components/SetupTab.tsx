@@ -11,13 +11,18 @@ const SetupTab: FC = () => {
 
   return (
     <React.Fragment>
-      <div className="flex w-full items-center justify-between h-8">
+      <div className="flex w-full items-center justify-between h-8 mb-2">
         <div className="text-lg font-semibold">Setup</div>
       </div>
-      <div className="flex flex-col items-start flex-1 gap-6 w-full">
+      <div className="flex flex-col items-start flex-1 gap-4 w-full">
         {/* Número de quadras */}
         <div className="flex gap-2 justify-between w-full">
-          <Label htmlFor="court-count">Número de quadras</Label>
+          <Label htmlFor="court-count" className="flex flex-col items-start">
+            <span>Quadras</span>
+            <span className="text-muted-foreground leading-snug font-normal text-xs">
+              Em quantas quadras você vai jogar?
+            </span>
+          </Label>
           <div className="flex items-center gap-1">
             {/* Botão de diminuir */}
             <Button
@@ -64,7 +69,9 @@ const SetupTab: FC = () => {
           <div>
             <Label className="flex-col items-start" htmlFor="variation-switch">
               <span>Duplas mistas</span>
-              <span className="text-muted-foreground leading-snug font-normal">Mistura níveis em cada dupla.</span>
+              <span className="text-muted-foreground leading-snug font-normal text-xs">
+                Mistura níveis em cada dupla.
+              </span>
             </Label>
           </div>
           <Switch id="variation-switch" checked={variationEnabled} onCheckedChange={setVariationEnabled} />
