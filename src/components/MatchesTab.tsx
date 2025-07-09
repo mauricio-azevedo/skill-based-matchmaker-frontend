@@ -8,7 +8,7 @@ import type { Player, UnsavedRound } from '@/types/players'
 // shadcn/ui
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { ChevronUp, Crown, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
+import { Crown, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { type FormationMode, useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -78,10 +78,8 @@ const MatchesTab: FC = () => {
 
   // Ref for scroll container
   const listRef = useRef<HTMLUListElement>(null)
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([])
   const [disableSnap, setDisableSnap] = useState(false)
-  const [showScrollTop, setShowScrollTop] = useState(false)
-
-  const SCROLL_THRESHOLD = 200
 
   const [confirmShuffle, setConfirmShuffle] = useState<{ open: boolean; roundIndex: number | null }>({
     open: false,
@@ -91,15 +89,6 @@ const MatchesTab: FC = () => {
     open: false,
     roundIndex: null,
   })
-
-  const handleScroll = () => {
-    const scrollTop = listRef.current?.scrollTop ?? 0
-    setShowScrollTop(scrollTop > SCROLL_THRESHOLD)
-  }
-
-  const scrollToTop = () => {
-    listRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-  }
 
   const hasScoresInRound = (idx: number | null) =>
     idx !== null && rounds[idx]?.matches.some((m) => m.gamesA !== null || m.gamesB !== null)
@@ -183,6 +172,44 @@ const MatchesTab: FC = () => {
     return false
   }
 
+  const firstIncompleteIndex = (() => {
+    for (let i = rounds.length - 1; i >= 0; i--) {
+      if (rounds[i].matches.some((m) => m.gamesA === null || m.gamesB === null)) {
+        return i
+      }
+    }
+    return -1
+  })()
+
+  const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
+
+  useEffect(() => {
+    if (firstIncompleteIndex < 0) {
+      setShowScrollToFirstIncomplete(false)
+      return
+    }
+    const target = itemRefs.current[firstIncompleteIndex]
+    if (!target || !listRef.current) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // se 100% visível, entry.intersectionRatio === 1
+        setShowScrollToFirstIncomplete(entry.intersectionRatio < 1)
+      },
+      {
+        root: listRef.current,
+        threshold: [1.0],
+      },
+    )
+
+    observer.observe(target)
+
+    // Cleanup
+    return () => {
+      observer.disconnect()
+    }
+  }, [firstIncompleteIndex, rounds.length /* também reinspeciona quando muda tamanho */])
+
   return (
     <React.Fragment>
       <div className="flex w-full items-center justify-between h-8">
@@ -207,13 +234,15 @@ const MatchesTab: FC = () => {
         {/* Rounds List */}
         <ul
           ref={listRef}
-          onScroll={handleScroll}
           className={cn('overflow-y-auto gap-12 flex flex-col', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}
           style={{ scrollBehavior: 'smooth' }}
         >
           <AnimatePresence initial={false}>
             {rounds.map((round, idx) => (
               <motion.li
+                ref={(el) => {
+                  itemRefs.current[idx] = el
+                }}
                 key={round.id}
                 layout="position"
                 variants={itemVariants}
@@ -291,7 +320,7 @@ const MatchesTab: FC = () => {
           </AnimatePresence>
         </ul>
         <AnimatePresence initial={false}>
-          {showScrollTop && (
+          {showScrollToFirstIncomplete && (
             <motion.div
               key="scroll-top"
               initial={{ opacity: 0, y: 80 }}
@@ -299,8 +328,18 @@ const MatchesTab: FC = () => {
               exit={{ opacity: 0, y: 80 }}
               className="absolute bottom-4 right-4 z-50"
             >
-              <Button size="icon" onClick={scrollToTop} aria-label="Voltar ao topo" className="shadow-lg">
-                <ChevronUp className="w-5 h-5" />
+              <Button
+                // size="icon"
+                size="sm"
+                onClick={() => {
+                  const el = itemRefs.current[firstIncompleteIndex]
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }}
+                aria-label="Ir para primeira rodada incompleta"
+                className="shadow-lg text-xs"
+              >
+                {/*<ChevronUp className="w-5 h-5" />*/}
+                Ir para rodada atual
               </Button>
             </motion.div>
           )}
