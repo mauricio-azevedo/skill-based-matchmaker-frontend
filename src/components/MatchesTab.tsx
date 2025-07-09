@@ -196,25 +196,24 @@ const MatchesTab: FC = () => {
 
   useLayoutEffect(() => {
     const root = listRef.current
-    // se não há rodada incompleta, ocultamos
-    if (!root || firstIncompleteIndex < 0) {
+
+    // Se não houver rodada incompleta **ou** só existir 1 rodada, nunca mostramos o botão
+    if (!root || firstIncompleteIndex < 0 || rounds.length <= 1) {
       setShowScrollToFirstIncomplete(false)
       return
     }
 
-    // encontra o elemento alvo
     const selector = `[data-round-idx="${firstIncompleteIndex}"]`
     const target = root.querySelector<HTMLElement>(selector)
     if (!target) return
 
-    // cria observer que dispara quando não estiver 100% visível
     const obs = new IntersectionObserver(([entry]) => setShowScrollToFirstIncomplete(entry.intersectionRatio < 1), {
       root,
       threshold: [1],
     })
     obs.observe(target)
     return () => obs.disconnect()
-  }, [firstIncompleteIndex, rounds])
+  }, [firstIncompleteIndex, rounds.length])
 
   return (
     <React.Fragment>
