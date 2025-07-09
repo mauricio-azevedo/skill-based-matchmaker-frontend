@@ -9,7 +9,7 @@ import type { Player, UnsavedRound } from '@/types/players'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ChevronUp, Crown, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
-import { useCourts } from '@/context/CourtsContext'
+import { type FormationMode, useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { AnimatePresence, motion } from 'framer-motion'
 import { itemVariants } from '@/consts/animation'
@@ -17,6 +17,7 @@ import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/s
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -71,7 +72,7 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
 const MatchesTab: FC = () => {
   const { players, updatePlayers } = usePlayers()
   const { rounds, addRound, setGames, replaceRound, removeRound } = useRounds()
-  const { courts, formationMode } = useCourts()
+  const { courts, formationMode, autoAlternate, autoAlternateMode, setAutoAlternateMode } = useCourts()
 
   const activePlayers = players.filter((p) => p.active)
 
@@ -111,7 +112,8 @@ const MatchesTab: FC = () => {
     if (warnIfInsufficient()) return
     setDisableSnap(true)
     try {
-      const newRound: UnsavedRound = generateSchedule(activePlayers, courts, formationMode)
+      const currentMode = pickAndAdvanceMode(autoAlternate, autoAlternateMode, formationMode, setAutoAlternateMode)
+      const newRound: UnsavedRound = generateSchedule(activePlayers, courts, currentMode)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
       singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
@@ -139,7 +141,8 @@ const MatchesTab: FC = () => {
     const oldRound = rounds[idx]
     if (!oldRound) return
     const cleanedPlayers = applyRoundStats(activePlayers, oldRound, -1)
-    const fresh: UnsavedRound = generateSchedule(cleanedPlayers, courts, formationMode)
+    const currentMode = pickAndAdvanceMode(autoAlternate, autoAlternateMode, formationMode, setAutoAlternateMode)
+    const fresh: UnsavedRound = generateSchedule(cleanedPlayers, courts, currentMode)
     const newRound = { ...fresh, id: oldRound.id, roundNumber: oldRound.roundNumber }
     updatePlayers((prev) => {
       const cleaned = applyRoundStats(prev, oldRound, -1)
@@ -424,6 +427,19 @@ const ScoreBlock: React.FC<ScoreBlockProps> = ({ teamKey, games, isWinner, match
 function getWinner(gamesA: number | null, gamesB: number | null): 'A' | 'B' | null {
   if (gamesA === null || gamesB === null || gamesA === gamesB) return null
   return gamesA > gamesB ? 'A' : 'B'
+}
+
+function pickAndAdvanceMode(
+  auto: boolean,
+  autoMode: FormationMode,
+  manualMode: FormationMode,
+  setAutoMode: (m: FormationMode) => void,
+): FormationMode {
+  const useMode = auto ? autoMode : manualMode
+  const nextBase = auto ? autoMode : manualMode
+  const nextMode = nextBase === FORMATION_MODES.MIXED ? FORMATION_MODES.HOMOGENEOUS : FORMATION_MODES.MIXED
+  setAutoMode(nextMode)
+  return useMode
 }
 
 export default MatchesTab
