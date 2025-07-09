@@ -253,7 +253,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
           <div className="flex gap-2 ml-auto">
             <DialogClose asChild>
-              <Button variant="outline">Cancelar</Button>
+              <Button variant="outline">{mode === 'edit' ? 'Cancelar' : 'Voltar'}</Button>
             </DialogClose>
             {mode === 'edit' ? (
               <DialogClose asChild>
