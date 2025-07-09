@@ -14,7 +14,7 @@ const WEIGHT = {
   SKILL_IMBALANCE: 80,
   WITHIN_TEAM_VARIATION: 70,
   PARTNER_COUNT: 50,
-  PREFERRED_PAIR: 40,
+  PREFERRED_PAIR: 35,
 } as const
 
 /* ────────────────────────────── Tipos Internos ───────────────────────────── */
