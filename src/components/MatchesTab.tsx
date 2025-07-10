@@ -186,9 +186,7 @@ const MatchesTab: FC = () => {
   }, [rounds])
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    scrollToFirstIncomplete()
   }, [])
 
   useEffect(() => {
