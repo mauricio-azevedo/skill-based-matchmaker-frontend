@@ -261,7 +261,7 @@ const MatchesTab: FC = () => {
                 key={round.id}
                 data-round-idx={idx} // ← índice “embutido”
                 style={{ scrollSnapStop: idx === firstIncompleteIndex ? 'always' : 'normal' }}
-                className="flex flex-col gap-2 snap-start"
+                className="flex flex-col gap-2 snap-start min-h-full"
                 layout="position"
                 variants={itemVariants}
                 initial="initial"
@@ -301,7 +301,7 @@ const MatchesTab: FC = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <ol className="flex flex-col gap-2 flex-1">
+                <ol className="flex flex-col gap-2">
                   {round.matches.map((m) => {
                     const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
 
