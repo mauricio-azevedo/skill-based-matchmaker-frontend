@@ -124,7 +124,7 @@ const MatchesTab: FC = () => {
     generateNewRound()
     setTimeout(() => {
       scrollToFirstIncomplete(true)
-    }, 100)
+    }, 300)
   }
 
   const doShuffle = (idx: number) => {
