@@ -3,7 +3,7 @@ import React, { type FC, useEffect, useLayoutEffect, useRef, useState } from 're
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
 import { generateSchedule } from '@/lib/algorithm'
-import type { Player, UnsavedRound } from '@/types/players'
+import type { Player, Round, UnsavedRound } from '@/types/players'
 
 // shadcn/ui
 import { Button } from '@/components/ui/button'
@@ -82,13 +82,23 @@ const MatchesTab: FC = () => {
 
   const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
 
-  const [confirmShuffle, setConfirmShuffle] = useState<{ open: boolean; roundIndex: number | null }>({
+  const [confirmShuffle, setConfirmShuffle] = useState<{
+    open: boolean
+    roundIndex: number | null
+    roundNumber: number | null
+  }>({
     open: false,
     roundIndex: null,
+    roundNumber: null,
   })
-  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; roundIndex: number | null }>({
+  const [confirmDelete, setConfirmDelete] = useState<{
+    open: boolean
+    roundIndex: number | null
+    roundNumber: number | null
+  }>({
     open: false,
     roundIndex: null,
+    roundNumber: null,
   })
 
   const hasScoresInRound = (idx: number | null) =>
@@ -228,11 +238,90 @@ const MatchesTab: FC = () => {
     }
   }, [firstIncompleteIndex, rounds.length])
 
+  const [currentVisibleRound, setCurrentVisibleRound] = useState<Round | null>(null)
+
+  useLayoutEffect(() => {
+    const root = listRef.current
+    if (!root || rounds.length === 0) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the entry most fully in view
+        const visibleEntries = entries
+          .filter((e) => e.intersectionRatio > 0.5)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+
+        const firstVisible = visibleEntries[0]
+        if (firstVisible) {
+          const idxStr = firstVisible.target.getAttribute('data-round-idx')
+          const idx = idxStr ? parseInt(idxStr, 10) : null
+          if (idx !== null && !isNaN(idx)) {
+            setCurrentVisibleRound(rounds[idx] ?? null)
+          }
+        }
+      },
+      {
+        root,
+        threshold: [0.5, 0.75, 1],
+      },
+    )
+
+    // Observe all round elements
+    const items = root.querySelectorAll('[data-round-idx]')
+    items.forEach((el) => observer.observe(el))
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [rounds])
+
   return (
     <React.Fragment>
-      <div className="flex w-full items-center justify-between h-8">
-        <div className="text-lg font-semibold">Partidas</div>
-      </div>
+      {currentVisibleRound &&
+        (() => {
+          const roundIndex: number = rounds.findIndex((round) => round.id === currentVisibleRound.id)
+          const roundNumber: number = currentVisibleRound.roundNumber
+
+          return (
+            <div className="flex w-full items-center justify-between">
+              <div className="flex flex-col">
+                <div className="text-lg font-semibold">
+                  Rodada {currentVisibleRound.roundNumber}
+                  <span className="text-muted-foreground text-sm font-medium">/{rounds.length}</span>
+                </div>
+                <p className="text-muted-foreground text-xs font-normal">
+                  {formatModeLabel(currentVisibleRound.formationMode)}
+                </p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="w-7 h-7">
+                    <MoreVertical className="!w-4 !h-4" aria-label="Mais opções" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (warnIfInsufficient()) return
+                      setConfirmShuffle({ open: true, roundIndex, roundNumber })
+                    }}
+                  >
+                    <Shuffle size={14} aria-hidden="true" /> Embaralhar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => {
+                      setConfirmDelete({ open: true, roundIndex, roundNumber })
+                    }}
+                  >
+                    <Trash size={14} aria-hidden="true" /> Apagar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )
+        })()}
+
       <div className="!gap-2 relative flex flex-col justify-between overflow-hidden flex-1 w-full">
         {/* Empty State */}
         <AnimatePresence initial={false}>
@@ -268,39 +357,6 @@ const MatchesTab: FC = () => {
                 animate="animate"
                 exit="exit"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-md font-semibold tracking-tight">
-                    Rodada {round.roundNumber}{' '}
-                    <span className="text-muted-foreground text-xs font-normal">
-                      {formatModeLabel(round.formationMode)}
-                    </span>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="w-7 h-7">
-                        <MoreVertical className="!w-4 !h-4" aria-label="Mais opções" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => {
-                          if (warnIfInsufficient()) return
-                          setConfirmShuffle({ open: true, roundIndex: idx })
-                        }}
-                      >
-                        <Shuffle size={14} aria-hidden="true" /> Embaralhar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => {
-                          setConfirmDelete({ open: true, roundIndex: idx })
-                        }}
-                      >
-                        <Trash size={14} aria-hidden="true" /> Apagar
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
                 <ol className="flex flex-col gap-2">
                   {round.matches.map((m) => {
                     const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
@@ -367,7 +423,9 @@ const MatchesTab: FC = () => {
         open={confirmShuffle.open}
         onOpenChange={(open) => setConfirmShuffle((p) => ({ ...p, open }))}
         title={
-          hasScoresInRound(confirmShuffle.roundIndex) ? 'Descartar resultados e embaralhar?' : 'Embaralhar esta rodada?'
+          hasScoresInRound(confirmShuffle.roundIndex)
+            ? `Descartar resultados e embaralhar rodada ${confirmShuffle.roundNumber}?`
+            : `Embaralhar rodada ${confirmShuffle.roundNumber}?`
         }
         description={
           hasScoresInRound(confirmShuffle.roundIndex)
@@ -377,7 +435,7 @@ const MatchesTab: FC = () => {
         onConfirm={() => {
           if (confirmShuffle.roundIndex !== null) {
             doShuffle(confirmShuffle.roundIndex)
-            setConfirmShuffle({ open: false, roundIndex: null })
+            setConfirmShuffle({ open: false, roundIndex: null, roundNumber: null })
           }
         }}
         confirmText="Sim, embaralhar"
@@ -388,7 +446,9 @@ const MatchesTab: FC = () => {
         open={confirmDelete.open}
         onOpenChange={(open) => setConfirmDelete((p) => ({ ...p, open }))}
         title={
-          hasScoresInRound(confirmDelete.roundIndex) ? 'Excluir rodada e descartar resultados?' : 'Excluir esta rodada?'
+          hasScoresInRound(confirmDelete.roundIndex)
+            ? `Descartar resultados e apagar rodada ${confirmDelete.roundNumber}?`
+            : `Apagar rodada ${confirmDelete.roundNumber}?`
         }
         description={
           hasScoresInRound(confirmDelete.roundIndex)
@@ -398,7 +458,7 @@ const MatchesTab: FC = () => {
         onConfirm={() => {
           if (confirmDelete.roundIndex !== null) {
             doDelete(confirmDelete.roundIndex)
-            setConfirmDelete({ open: false, roundIndex: null })
+            setConfirmDelete({ open: false, roundIndex: null, roundNumber: null })
           }
         }}
         confirmText="Sim, excluir"
