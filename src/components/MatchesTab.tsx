@@ -238,12 +238,12 @@ const MatchesTab: FC = () => {
 
     setIsAutoScrolling(true)
     let timeoutId: number
+    // limpa timeout pendente antes de criar o listener
+    const clearExisting = () => window.clearTimeout(timeoutId)
 
     const onScroll = () => {
-      // enquanto rola, continua em “auto-scrolling”
+      clearExisting()
       setIsAutoScrolling(true)
-      clearTimeout(timeoutId)
-      // aguarda 150ms sem novo evento scroll para considerar que “parou”
       timeoutId = window.setTimeout(() => {
         setIsAutoScrolling(false)
         container.removeEventListener('scroll', onScroll)
