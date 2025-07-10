@@ -236,27 +236,21 @@ const MatchesTab: FC = () => {
 
     el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-    // Scroll end detection
-    let lastScrollTop = container.scrollTop
-    let isScrolling = false
+    setIsAutoScrolling(true)
+    let timeoutId: number
 
-    const checkScrollEnd = () => {
-      if (lastScrollTop === container.scrollTop) {
-        if (isScrolling) {
-          isScrolling = false
-          // Scroll end logic here
-        }
-      } else {
-        lastScrollTop = container.scrollTop
-        if (!isScrolling) {
-          // isScrolling = true
-        }
-      }
-      setIsAutoScrolling(isScrolling)
-      requestAnimationFrame(checkScrollEnd)
+    const onScroll = () => {
+      // enquanto rola, continua em “auto-scrolling”
+      setIsAutoScrolling(true)
+      clearTimeout(timeoutId)
+      // aguarda 150ms sem novo evento scroll para considerar que “parou”
+      timeoutId = window.setTimeout(() => {
+        setIsAutoScrolling(false)
+        container.removeEventListener('scroll', onScroll)
+      }, 150)
     }
 
-    requestAnimationFrame(checkScrollEnd)
+    container.addEventListener('scroll', onScroll, { passive: true })
   }
 
   return (
