@@ -108,7 +108,6 @@ const MatchesTab: FC = () => {
   // Extracted generation logic
   const generateNewRound = () => {
     if (warnIfInsufficient()) return
-    // setDisableSnap(true)
     try {
       const currentMode = pickAndAdvanceMode()
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts, currentMode)
@@ -152,9 +151,6 @@ const MatchesTab: FC = () => {
   const doDelete = (idx: number) => {
     const roundToRemove = rounds[idx]
     if (!roundToRemove) return
-
-    // turn snap off immediately before removing
-    // setDisableSnap(true)
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
     singleToastSuccess(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
@@ -253,7 +249,7 @@ const MatchesTab: FC = () => {
       } else {
         lastScrollTop = container.scrollTop
         if (!isScrolling) {
-          isScrolling = true
+          // isScrolling = true
         }
       }
       setIsAutoScrolling(isScrolling)
