@@ -122,10 +122,12 @@ const MatchesTab: FC = () => {
 
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
-    if (listRef.current && listRef.current.scrollTop > 0) {
-      listRef.current.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    console.log('handleGenerate')
     generateNewRound()
+
+    setTimeout(() => {
+      scrollToFirstIncomplete(true)
+    }, 1000)
   }
 
   const doShuffle = (idx: number) => {
@@ -181,6 +183,8 @@ const MatchesTab: FC = () => {
   const roundRefs = useRef<(HTMLLIElement | null)[]>([])
   const scrollRef = useRef<HTMLLIElement>(null)
 
+  const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
+
   useEffect(() => {
     setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
   }, [rounds])
@@ -211,6 +215,7 @@ const MatchesTab: FC = () => {
       })
 
       if (closestIndex !== -1 && rounds[closestIndex]?.id !== currentVisibleRound?.id) {
+        console.log(rounds[closestIndex].roundNumber)
         setCurrentVisibleRound(rounds[closestIndex])
       }
     }
@@ -226,17 +231,48 @@ const MatchesTab: FC = () => {
   }, [rounds, currentVisibleRound])
 
   useEffect(() => {
-    setShowScrollToFirstIncomplete(earliestIncompleteRound?.id !== currentVisibleRound?.id)
-  }, [earliestIncompleteRound, currentVisibleRound])
+    setShowScrollToFirstIncomplete(earliestIncompleteRound?.id !== currentVisibleRound?.id && !isAutoScrolling)
+  }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling])
 
-  const scrollToFirstIncomplete = () => {
-    if (!earliestIncompleteRound) return
+  const scrollToFirstIncomplete = (scrollToTop = false) => {
+    if (!listRef.current) return
 
-    const idx = rounds.findIndex((r) => r.id === earliestIncompleteRound.id)
-    const el = roundRefs.current[idx]
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const container = listRef.current
+    let el: HTMLElement | null = null
+
+    if (scrollToTop) {
+      el = container.firstElementChild as HTMLElement
+    } else {
+      if (!earliestIncompleteRound) return
+
+      const idx = rounds.findIndex((r) => r.id === earliestIncompleteRound.id)
+      el = roundRefs.current[idx]
+      if (!el) return
     }
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+    // Scroll end detection
+    let lastScrollTop = container.scrollTop
+    let isScrolling = false
+
+    const checkScrollEnd = () => {
+      if (lastScrollTop === container.scrollTop) {
+        if (isScrolling) {
+          isScrolling = false
+          // Scroll end logic here
+        }
+      } else {
+        lastScrollTop = container.scrollTop
+        if (!isScrolling) {
+          isScrolling = true
+        }
+      }
+      setIsAutoScrolling(isScrolling)
+      requestAnimationFrame(checkScrollEnd)
+    }
+
+    requestAnimationFrame(checkScrollEnd)
   }
 
   return (
@@ -371,7 +407,9 @@ const MatchesTab: FC = () => {
             >
               <Button
                 size="sm"
-                onClick={scrollToFirstIncomplete}
+                onClick={() => {
+                  scrollToFirstIncomplete(false)
+                }}
                 aria-label="Ir para primeira rodada incompleta"
                 className="shadow-lg text-xs"
               >
