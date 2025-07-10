@@ -1,4 +1,4 @@
-import React, { type FC, useEffect, useRef, useState } from 'react'
+import React, { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -122,12 +122,8 @@ const MatchesTab: FC = () => {
 
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
-    console.log('handleGenerate')
     generateNewRound()
-
-    setTimeout(() => {
-      scrollToFirstIncomplete(true)
-    }, 1000)
+    scrollToFirstIncomplete(true)
   }
 
   const doShuffle = (idx: number) => {
@@ -180,7 +176,7 @@ const MatchesTab: FC = () => {
   const [earliestIncompleteRound, setEarliestIncompleteRound] = useState<Round | null>(
     findEarliestIncompleteRound(rounds),
   )
-  const roundRefs = useRef<(HTMLLIElement | null)[]>([])
+  const roundRefs = useRef<Record<string, HTMLLIElement | null>>({})
   const scrollRef = useRef<HTMLLIElement>(null)
 
   const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
@@ -193,41 +189,35 @@ const MatchesTab: FC = () => {
     scrollToFirstIncomplete()
   }, [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = listRef.current
     if (!container) return
 
     const handleScroll = () => {
-      const containerTop = container.getBoundingClientRect().top
+      const top = container.getBoundingClientRect().top
+      let closest: Round | null = null
+      let minOffset = Infinity
 
-      let closestIndex = -1
-      let smallestOffset = Infinity
+      // Em vez de rounds.forEach(...)
+      for (const r of rounds) {
+        const el = roundRefs.current[r.id]
+        if (!el) continue
 
-      roundRefs.current.forEach((el, idx) => {
-        if (!el) return
-        const rect = el.getBoundingClientRect()
-        const offset = Math.abs(rect.top - containerTop)
-
-        if (offset < smallestOffset) {
-          smallestOffset = offset
-          closestIndex = idx
+        const offset = Math.abs(el.getBoundingClientRect().top - top)
+        if (offset < minOffset) {
+          minOffset = offset
+          closest = r
         }
-      })
+      }
 
-      if (closestIndex !== -1 && rounds[closestIndex]?.id !== currentVisibleRound?.id) {
-        console.log(rounds[closestIndex].roundNumber)
-        setCurrentVisibleRound(rounds[closestIndex])
+      if (closest && closest.id !== currentVisibleRound?.id) {
+        setCurrentVisibleRound(closest)
       }
     }
 
     container.addEventListener('scroll', handleScroll, { passive: true })
-
-    // Trigger once on mount
     handleScroll()
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll)
-    }
+    return () => container.removeEventListener('scroll', handleScroll)
   }, [rounds, currentVisibleRound])
 
   useEffect(() => {
@@ -245,8 +235,7 @@ const MatchesTab: FC = () => {
     } else {
       if (!earliestIncompleteRound) return
 
-      const idx = rounds.findIndex((r) => r.id === earliestIncompleteRound.id)
-      el = roundRefs.current[idx]
+      el = roundRefs.current[earliestIncompleteRound.id] || null
       if (!el) return
     }
 
@@ -350,7 +339,8 @@ const MatchesTab: FC = () => {
                 key={round.id}
                 data-round-idx={idx}
                 ref={(el) => {
-                  roundRefs.current[idx] = el
+                  if (el) roundRefs.current[round.id] = el
+                  else delete roundRefs.current[round.id]
                   if (round.id === currentVisibleRound?.id) scrollRef.current = el
                 }}
                 style={{ scrollSnapStop: 'always' }}
