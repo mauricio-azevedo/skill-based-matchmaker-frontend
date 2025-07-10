@@ -452,7 +452,7 @@ const ScoreSelect: FC<{
       value={value != null ? String(value) : undefined}
       onValueChange={(val) => onChange(val != null ? Number(val) : null)}
     >
-      <SelectTrigger id={label} className="!w-8 !h-8 text-center justify-center text-xs [&>svg]:hidden">
+      <SelectTrigger id={label} className="!w-9 !h-9 text-center justify-center text-xs [&>svg]:hidden">
         {/* Renderiza manualmente o valor ou o placeholder */}
         {value != null ? String(value) : PLACEHOLDER}
       </SelectTrigger>
