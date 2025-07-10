@@ -197,7 +197,6 @@ const MatchesTab: FC = () => {
   useLayoutEffect(() => {
     const root = listRef.current
 
-    // Se não houver rodada incompleta **ou** só existir 1 rodada, nunca mostramos o botão
     if (!root || firstIncompleteIndex < 0 || rounds.length <= 1) {
       setShowScrollToFirstIncomplete(false)
       return
@@ -207,12 +206,26 @@ const MatchesTab: FC = () => {
     const target = root.querySelector<HTMLElement>(selector)
     if (!target) return
 
-    const obs = new IntersectionObserver(([entry]) => setShowScrollToFirstIncomplete(entry.intersectionRatio < 1), {
-      root,
-      threshold: [1],
-    })
+    let timeout: NodeJS.Timeout | null = null
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        const shouldShow = entry.intersectionRatio < 1
+
+        // debounce visibility update
+        if (timeout) clearTimeout(timeout)
+        timeout = setTimeout(() => {
+          setShowScrollToFirstIncomplete(shouldShow)
+        }, 300) // short debounce prevents flashing
+      },
+      { root, threshold: [1] },
+    )
+
     obs.observe(target)
-    return () => obs.disconnect()
+
+    return () => {
+      if (timeout) clearTimeout(timeout)
+      obs.disconnect()
+    }
   }, [firstIncompleteIndex, rounds.length])
 
   return (
