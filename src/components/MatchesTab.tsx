@@ -16,7 +16,7 @@ import { itemVariants } from '@/consts/animation'
 import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/singleToast'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 
 // -----------------------------------------------------------------------------
@@ -436,16 +436,12 @@ const ScoreSelect: FC<{
 
   return (
     <Select
-      // quando value for null, passamos undefined pra mostrar o placeholder
       value={value != null ? String(value) : undefined}
-      onValueChange={(val) =>
-        // como não há opção de “-” no dropdown, sempre virá um número
-        onChange(val ? Number(val) : null)
-      }
+      onValueChange={(val) => onChange(val != null ? Number(val) : null)}
     >
       <SelectTrigger id={label} className="!w-8 !h-8 text-center justify-center text-xs [&>svg]:hidden">
-        {/* Placeholder exibido quando não há value */}
-        <SelectValue placeholder={PLACEHOLDER} />
+        {/* Renderiza manualmente o valor ou o placeholder */}
+        {value != null ? String(value) : PLACEHOLDER}
       </SelectTrigger>
 
       <SelectContent align="center">
