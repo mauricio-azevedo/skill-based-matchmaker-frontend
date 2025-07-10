@@ -192,6 +192,8 @@ const MatchesTab: FC = () => {
     return -1
   })()
 
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true)
+
   function scrollToFirstIncomplete() {
     const root = listRef.current
     if (!root || firstIncompleteIndex < 0) return
@@ -201,8 +203,24 @@ const MatchesTab: FC = () => {
     const target = root.querySelector<HTMLElement>(selector)
     if (!target) return
 
+    setIsAutoScrolling(true)
     target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+
+  useEffect(() => {
+    const el = listRef.current
+    if (!el) return
+
+    const handleScrollEnd = () => {
+      setIsAutoScrolling(false)
+    }
+
+    el.addEventListener('scrollend', handleScrollEnd)
+
+    return () => {
+      el.removeEventListener('scrollend', handleScrollEnd)
+    }
+  }, [])
 
   useEffect(() => {
     scrollToFirstIncomplete()
@@ -223,13 +241,14 @@ const MatchesTab: FC = () => {
     let timeout: NodeJS.Timeout | null = null
     const obs = new IntersectionObserver(
       ([entry]) => {
-        const shouldShow = entry.intersectionRatio < 1
+        const shouldShow = entry.intersectionRatio < 1 && !isAutoScrolling
 
         // debounce visibility update
         if (timeout) clearTimeout(timeout)
+        const delay: number = shouldShow ? 500 : 0
         timeout = setTimeout(() => {
           setShowScrollToFirstIncomplete(shouldShow)
-        }, 300) // short debounce prevents flashing
+        }, delay) // short debounce prevents flashing
       },
       { root, threshold: [1] },
     )
@@ -240,7 +259,7 @@ const MatchesTab: FC = () => {
       if (timeout) clearTimeout(timeout)
       obs.disconnect()
     }
-  }, [firstIncompleteIndex, rounds.length])
+  }, [firstIncompleteIndex, isAutoScrolling, rounds.length])
 
   const [currentVisibleRound, setCurrentVisibleRound] = useState<Round | null>(null)
 
