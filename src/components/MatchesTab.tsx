@@ -1,4 +1,4 @@
-import React, { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { type FC, useEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -24,7 +24,6 @@ import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 // -----------------------------------------------------------------------------
 const PLAYERS_PER_MATCH = 4 as const
 const SCORE_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const
-const DISABLE_SNAP_TIMEOUT = 800 as const
 
 // -----------------------------------------------------------------------------
 // Utility helpers
@@ -78,7 +77,6 @@ const MatchesTab: FC = () => {
 
   // Ref for scroll container
   const listRef = useRef<HTMLUListElement>(null)
-  const [disableSnap, setDisableSnap] = useState(false)
 
   const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
 
@@ -110,7 +108,7 @@ const MatchesTab: FC = () => {
   // Extracted generation logic
   const generateNewRound = () => {
     if (warnIfInsufficient()) return
-    setDisableSnap(true)
+    // setDisableSnap(true)
     try {
       const currentMode = pickAndAdvanceMode()
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts, currentMode)
@@ -129,13 +127,6 @@ const MatchesTab: FC = () => {
     }
     generateNewRound()
   }
-
-  // Re-enable snap after rounds update
-  useEffect(() => {
-    if (!disableSnap) return
-    const timer = setTimeout(() => setDisableSnap(false), DISABLE_SNAP_TIMEOUT)
-    return () => clearTimeout(timer)
-  }, [rounds, disableSnap])
 
   const doShuffle = (idx: number) => {
     const oldRound = rounds[idx]
@@ -165,7 +156,7 @@ const MatchesTab: FC = () => {
     if (!roundToRemove) return
 
     // turn snap off immediately before removing
-    setDisableSnap(true)
+    // setDisableSnap(true)
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
     singleToastSuccess(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
@@ -183,120 +174,72 @@ const MatchesTab: FC = () => {
     return false
   }
 
-  const firstIncompleteIndex = (() => {
-    for (let i = rounds.length - 1; i >= 0; i--) {
-      if (rounds[i].matches.some((m) => m.gamesA === null || m.gamesB === null)) {
-        return i
+  const [currentVisibleRound, setCurrentVisibleRound] = useState<Round | null>(findEarliestIncompleteRound(rounds))
+  const [earliestIncompleteRound, setEarliestIncompleteRound] = useState<Round | null>(
+    findEarliestIncompleteRound(rounds),
+  )
+  const roundRefs = useRef<(HTMLLIElement | null)[]>([])
+  const scrollRef = useRef<HTMLLIElement>(null)
+
+  useEffect(() => {
+    setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
+  }, [rounds])
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [])
+
+  useEffect(() => {
+    const container = listRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      const containerTop = container.getBoundingClientRect().top
+
+      let closestIndex = -1
+      let smallestOffset = Infinity
+
+      roundRefs.current.forEach((el, idx) => {
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const offset = Math.abs(rect.top - containerTop)
+
+        if (offset < smallestOffset) {
+          smallestOffset = offset
+          closestIndex = idx
+        }
+      })
+
+      if (closestIndex !== -1 && rounds[closestIndex]?.id !== currentVisibleRound?.id) {
+        setCurrentVisibleRound(rounds[closestIndex])
       }
     }
-    return -1
-  })()
 
-  const [isAutoScrolling, setIsAutoScrolling] = useState(true)
+    container.addEventListener('scroll', handleScroll, { passive: true })
 
-  function scrollToFirstIncomplete() {
-    const root = listRef.current
-    if (!root || firstIncompleteIndex < 0) return
+    // Trigger once on mount
+    handleScroll()
 
-    // busca o <li> que tem o data-round-idx igual ao índice da primeira incompleta
-    const selector = `[data-round-idx="${firstIncompleteIndex}"]`
-    const target = root.querySelector<HTMLElement>(selector)
-    if (!target) return
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+    }
+  }, [rounds, currentVisibleRound])
 
-    setIsAutoScrolling(true)
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  useEffect(() => {
+    setShowScrollToFirstIncomplete(earliestIncompleteRound?.id !== currentVisibleRound?.id)
+  }, [earliestIncompleteRound, currentVisibleRound])
+
+  const scrollToFirstIncomplete = () => {
+    if (!earliestIncompleteRound) return
+
+    const idx = rounds.findIndex((r) => r.id === earliestIncompleteRound.id)
+    const el = roundRefs.current[idx]
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
-
-  useEffect(() => {
-    const el = listRef.current
-    if (!el) return
-
-    const handleScrollEnd = () => {
-      setIsAutoScrolling(false)
-    }
-
-    el.addEventListener('scrollend', handleScrollEnd)
-
-    return () => {
-      el.removeEventListener('scrollend', handleScrollEnd)
-    }
-  }, [])
-
-  useEffect(() => {
-    scrollToFirstIncomplete()
-  }, [])
-
-  useLayoutEffect(() => {
-    const root = listRef.current
-
-    if (!root || firstIncompleteIndex < 0 || rounds.length <= 1) {
-      setShowScrollToFirstIncomplete(false)
-      return
-    }
-
-    const selector = `[data-round-idx="${firstIncompleteIndex}"]`
-    const target = root.querySelector<HTMLElement>(selector)
-    if (!target) return
-
-    let timeout: NodeJS.Timeout | null = null
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        const shouldShow = entry.intersectionRatio < 1 && !isAutoScrolling
-
-        // debounce visibility update
-        if (timeout) clearTimeout(timeout)
-        const delay: number = shouldShow ? 500 : 0
-        timeout = setTimeout(() => {
-          setShowScrollToFirstIncomplete(shouldShow)
-        }, delay) // short debounce prevents flashing
-      },
-      { root, threshold: [1] },
-    )
-
-    obs.observe(target)
-
-    return () => {
-      if (timeout) clearTimeout(timeout)
-      obs.disconnect()
-    }
-  }, [firstIncompleteIndex, isAutoScrolling, rounds.length])
-
-  const [currentVisibleRound, setCurrentVisibleRound] = useState<Round | null>(null)
-
-  useLayoutEffect(() => {
-    const root = listRef.current
-    if (!root || rounds.length === 0) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Find the entry most fully in view
-        const visibleEntries = entries
-          .filter((e) => e.intersectionRatio > 0.5)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-
-        const firstVisible = visibleEntries[0]
-        if (firstVisible) {
-          const idxStr = firstVisible.target.getAttribute('data-round-idx')
-          const idx = idxStr ? parseInt(idxStr, 10) : null
-          if (idx !== null && !isNaN(idx)) {
-            setCurrentVisibleRound(rounds[idx] ?? null)
-          }
-        }
-      },
-      {
-        root,
-        threshold: [0.5, 0.75, 1],
-      },
-    )
-
-    // Observe all round elements
-    const items = root.querySelectorAll('[data-round-idx]')
-    items.forEach((el) => observer.observe(el))
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [rounds])
 
   return (
     <React.Fragment>
@@ -364,15 +307,19 @@ const MatchesTab: FC = () => {
         {/* Rounds List */}
         <ul
           ref={listRef}
-          className={cn('overflow-y-auto gap-12 flex flex-col', disableSnap ? 'snap-none' : 'snap-y snap-mandatory')}
+          className={cn('overflow-y-auto gap-12 flex flex-col', 'snap-y snap-mandatory')}
           style={{ scrollBehavior: 'smooth' }}
         >
           <AnimatePresence initial={false}>
             {rounds.map((round, idx) => (
               <motion.li
                 key={round.id}
-                data-round-idx={idx} // ← índice “embutido”
-                style={{ scrollSnapStop: idx === firstIncompleteIndex ? 'always' : 'normal' }}
+                data-round-idx={idx}
+                ref={(el) => {
+                  roundRefs.current[idx] = el
+                  if (round.id === currentVisibleRound?.id) scrollRef.current = el
+                }}
+                style={{ scrollSnapStop: 'always' }}
                 className="flex flex-col gap-2 snap-start min-h-full"
                 layout="position"
                 variants={itemVariants}
@@ -576,6 +523,14 @@ function getWinner(gamesA: number | null, gamesB: number | null): 'A' | 'B' | nu
 
 function formatModeLabel(mode: FormationMode): string {
   return mode === FORMATION_MODES.MIXED ? 'mista' : 'homogênea'
+}
+
+function findEarliestIncompleteRound(rounds: Round[]): Round | null {
+  const round: Round = rounds
+    .filter((round) => round.matches.some((match) => match.gamesA === null || match.gamesB === null))
+    .sort((a, b) => a.roundNumber - b.roundNumber)[0]
+
+  return round ? round : null
 }
 
 export default MatchesTab
