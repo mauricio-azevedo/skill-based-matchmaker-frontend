@@ -122,7 +122,9 @@ const MatchesTab: FC = () => {
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
     generateNewRound()
-    scrollToFirstIncomplete(true)
+    setTimeout(() => {
+      scrollToFirstIncomplete(true)
+    }, 100)
   }
 
   const doShuffle = (idx: number) => {
