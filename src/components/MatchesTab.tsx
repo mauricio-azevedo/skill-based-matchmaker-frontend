@@ -198,7 +198,6 @@ const MatchesTab: FC = () => {
       let closest: Round | null = null
       let minOffset = Infinity
 
-      // Em vez de rounds.forEach(...)
       for (const r of rounds) {
         const el = roundRefs.current[r.id]
         if (!el) continue
