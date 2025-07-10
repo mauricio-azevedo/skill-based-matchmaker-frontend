@@ -204,6 +204,10 @@ const MatchesTab: FC = () => {
     target.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  useEffect(() => {
+    scrollToFirstIncomplete()
+  }, [])
+
   useLayoutEffect(() => {
     const root = listRef.current
 
