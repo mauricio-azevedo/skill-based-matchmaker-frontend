@@ -155,7 +155,7 @@ const MatchesTab: FC = () => {
     const roundToRemove = rounds[idx]
     if (!roundToRemove) return
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
-    setIsAutoScrolling(true)
+    setIsDeleting(true)
     removeRound(idx)
   }
 
@@ -179,6 +179,7 @@ const MatchesTab: FC = () => {
   const scrollRef = useRef<HTMLLIElement>(null)
 
   const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
   const hasFinishedInitialAutoScroll = useRef(false)
 
   useEffect(() => {
@@ -348,14 +349,18 @@ const MatchesTab: FC = () => {
         <motion.ul
           layoutScroll
           ref={listRef}
-          className={cn('overflow-y-auto gap-12 flex flex-col', 'snap-y snap-mandatory')}
+          className={cn(
+            'overflow-y-auto gap-12 flex flex-col',
+            !isAutoScrolling && !isDeleting ? 'snap-y snap-mandatory' : '',
+          )}
           style={{ scrollBehavior: 'smooth' }}
         >
           <AnimatePresence
             onExitComplete={() => {
               setTimeout(() => {
-                setIsAutoScrolling(false)
+                setIsDeleting(false)
               }, 600)
+              setIsAutoScrolling(false)
             }}
             initial={false}
           >
