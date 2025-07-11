@@ -228,11 +228,9 @@ const MatchesTab: FC = () => {
   }, [currentVisibleRound, calcRoundInView])
 
   useEffect(() => {
-    const closest = calcRoundInView() // quem está realmente no topo agora
-    if (closest?.id !== currentVisibleRound?.id) {
-      setCurrentVisibleRound(closest)
-    }
-  }, [rounds, calcRoundInView])
+    if (currentVisibleRound && rounds.some((r) => r.id === currentVisibleRound.id)) return
+    setCurrentVisibleRound(calcRoundInView())
+  }, [rounds])
 
   useEffect(() => {
     // if (isAutoScrolling) return
