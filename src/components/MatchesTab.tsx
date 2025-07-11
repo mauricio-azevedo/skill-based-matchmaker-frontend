@@ -208,8 +208,6 @@ const MatchesTab: FC = () => {
         return Math.abs(el.getBoundingClientRect().top - containerTop) <= THRESHOLD
       })
 
-      console.log({ touching })
-
       // 2. Fallback: menor distância absoluta (lógica antiga)
       let candidate = touching ?? null
       if (!candidate) {
