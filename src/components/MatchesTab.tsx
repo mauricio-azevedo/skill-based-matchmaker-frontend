@@ -124,7 +124,7 @@ const MatchesTab: FC = () => {
     generateNewRound()
     setTimeout(() => {
       scrollToFirstIncomplete(true)
-    }, 300)
+    }, 400)
   }
 
   const doShuffle = (idx: number) => {
@@ -266,7 +266,7 @@ const MatchesTab: FC = () => {
       timeoutId = window.setTimeout(() => {
         setIsAutoScrolling(false)
         container.removeEventListener('scroll', onScroll)
-      }, 300)
+      }, 400)
     }
 
     container.addEventListener('scroll', onScroll, { passive: true })
