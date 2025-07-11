@@ -155,8 +155,6 @@ const MatchesTab: FC = () => {
     const roundToRemove = rounds[idx]
     if (!roundToRemove) return
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
-
-    setIsAutoScrolling(true)
     removeRound(idx)
   }
 
