@@ -179,6 +179,7 @@ const MatchesTab: FC = () => {
   const scrollRef = useRef<HTMLLIElement>(null)
 
   const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
+  const hasFinishedInitialAutoScroll = useRef(false)
 
   useEffect(() => {
     setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
@@ -223,6 +224,7 @@ const MatchesTab: FC = () => {
   useEffect(() => {
     // if (isAutoScrolling) return
     const shouldShow =
+      hasFinishedInitialAutoScroll.current && // só depois do 1.º auto-scroll
       earliestIncompleteRound !== null &&
       currentVisibleRound !== null &&
       earliestIncompleteRound.id !== currentVisibleRound.id
@@ -241,13 +243,14 @@ const MatchesTab: FC = () => {
     setIsAutoScrolling(true)
   }
 
-  useScrollEnd(
-    listRef,
-    () =>
-      // setTimeout(() => {
-      setIsAutoScrolling(false),
-    // }, 0)
-  )
+  useScrollEnd(listRef, () => {
+    setIsAutoScrolling(false)
+
+    // se ainda estávamos no 1.º auto-scroll, marque-o como concluído
+    if (!hasFinishedInitialAutoScroll.current) {
+      hasFinishedInitialAutoScroll.current = true
+    }
+  })
 
   return (
     <React.Fragment>
