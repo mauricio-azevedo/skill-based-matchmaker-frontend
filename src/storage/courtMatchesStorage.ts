@@ -1,6 +1,6 @@
 import type { UnsavedRound } from '@/types/players'
 
-const COURT_MATCHES = 'court_matches_v2'
+const COURT_MATCHES = 'court_matches'
 
 export type CourtMatchRow = {
   courtId: number
