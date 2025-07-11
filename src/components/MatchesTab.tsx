@@ -213,19 +213,22 @@ const MatchesTab: FC = () => {
     if (!container) return
 
     const handleScroll = () => {
-      const visible = calcRoundInView()
-      if (visible?.id !== currentVisibleRound?.id) {
-        setCurrentVisibleRound(visible)
+      const closest = calcRoundInView()
+      if (closest && closest.id !== currentVisibleRound?.id) {
+        setCurrentVisibleRound(closest)
       }
     }
 
     container.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // inicial
+    handleScroll()
     return () => container.removeEventListener('scroll', handleScroll)
   }, [currentVisibleRound, calcRoundInView])
 
   useEffect(() => {
-    setCurrentVisibleRound(calcRoundInView()) // sempre sincroniza
+    const closest = calcRoundInView() // quem está realmente no topo agora
+    if (closest?.id !== currentVisibleRound?.id) {
+      setCurrentVisibleRound(closest)
+    }
   }, [rounds, calcRoundInView])
 
   useEffect(() => {
