@@ -225,7 +225,12 @@ const MatchesTab: FC = () => {
       newShowScrollToFirstIncomplete = showScrollToFirstIncomplete
     } else {
       // else it's visible if the visible round is not the current round (earliest incomplete)
-      newShowScrollToFirstIncomplete = earliestIncompleteRound?.id !== currentVisibleRound?.id
+      const earliestIncompleteRoundExists = earliestIncompleteRound !== null
+      const currentVisibleRoundExists = currentVisibleRound !== null
+      const currentVisibleRoundIsEarliestIncomplete = currentVisibleRound?.id === earliestIncompleteRound?.id
+
+      newShowScrollToFirstIncomplete =
+        earliestIncompleteRoundExists && currentVisibleRoundExists && !currentVisibleRoundIsEarliestIncomplete
     }
 
     setShowScrollToFirstIncomplete(newShowScrollToFirstIncomplete)
