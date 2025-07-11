@@ -1,4 +1,4 @@
-import React, { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { type FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils'
 import { Crown, MoreVertical, Shuffle, Trash, X } from 'lucide-react'
 import { type FormationMode, useCourts } from '@/context/CourtsContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { itemVariants } from '@/consts/animation'
 import { singleToastError, singleToastSuccess, singleToastWarn } from '@/utils/singleToast'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -238,7 +238,7 @@ const MatchesTab: FC = () => {
       ? (container.firstElementChild as HTMLElement)
       : roundRefs.current[earliestIncompleteRound!.id]!
 
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
     setIsAutoScrolling(true)
   }
@@ -251,6 +251,30 @@ const MatchesTab: FC = () => {
       hasFinishedInitialAutoScroll.current = true
     }
   })
+
+  const isLatestRoundOnTop = useMemo(() => {
+    if (!currentVisibleRound) return false
+    const latest = rounds[1]
+    return currentVisibleRound.id === latest?.id
+  }, [currentVisibleRound, rounds])
+
+  useEffect(() => {
+    // console.log({ isLatestRoundOnTop })
+  }, [isLatestRoundOnTop])
+
+  const [teste, setTeste] = useState(currentVisibleRound?.id === rounds[0]?.id)
+
+  useEffect(() => {
+    console.log({ lastRound: rounds[1] })
+    console.log({ currentRound: currentVisibleRound })
+    setTeste(currentVisibleRound?.id === rounds[1]?.id)
+  }, [rounds])
+
+  useEffect(() => {
+    // console.log({ lastRound: rounds[0] })
+    // console.log({ currentRound: currentVisibleRound })
+    console.log(teste)
+  }, [teste])
 
   return (
     <React.Fragment>
@@ -324,58 +348,60 @@ const MatchesTab: FC = () => {
           )}
           style={{ scrollBehavior: 'smooth' }}
         >
-          <AnimatePresence initial={false}>
-            {rounds.map((round, idx) => (
-              <motion.li
-                key={round.id}
-                data-round-idx={idx}
-                ref={(el) => {
-                  if (el) roundRefs.current[round.id] = el
-                  else delete roundRefs.current[round.id]
-                  if (round.id === currentVisibleRound?.id) scrollRef.current = el
-                }}
-                style={{ scrollSnapStop: 'always' }}
-                className="flex flex-col gap-2 snap-start min-h-full"
-                layout="position"
-                variants={itemVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <ol className="flex flex-col gap-2">
-                  {round.matches.map((m) => {
-                    const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
+          <MotionConfig reducedMotion={teste ? 'never' : 'always'}>
+            <AnimatePresence initial={false}>
+              {rounds.map((round, idx) => (
+                <motion.li
+                  key={round.id}
+                  data-round-idx={idx}
+                  ref={(el) => {
+                    if (el) roundRefs.current[round.id] = el
+                    else delete roundRefs.current[round.id]
+                    if (round.id === currentVisibleRound?.id) scrollRef.current = el
+                  }}
+                  style={{ scrollSnapStop: 'always' }}
+                  className="flex flex-col gap-2 snap-start min-h-full"
+                  layout="position"
+                  variants={itemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <ol className="flex flex-col gap-2">
+                    {round.matches.map((m) => {
+                      const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
 
-                    return (
-                      <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
-                        <div className="flex flex-1 items-center justify-between">
-                          <TeamView players={m.teamA} team="A" />
-                          <div className="flex items-center gap-1">
-                            <ScoreBlock
-                              teamKey="A"
-                              games={m.gamesA}
-                              isWinner={winner === 'A'}
-                              matchId={m.id}
-                              onChange={(team, val) => setGames(idx, m.id, team, val)}
-                            />
-                            <X size={14} />
-                            <ScoreBlock
-                              teamKey="B"
-                              games={m.gamesB}
-                              isWinner={winner === 'B'}
-                              matchId={m.id}
-                              onChange={(team, val) => setGames(idx, m.id, team, val)}
-                            />
+                      return (
+                        <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
+                          <div className="flex flex-1 items-center justify-between">
+                            <TeamView players={m.teamA} team="A" />
+                            <div className="flex items-center gap-1">
+                              <ScoreBlock
+                                teamKey="A"
+                                games={m.gamesA}
+                                isWinner={winner === 'A'}
+                                matchId={m.id}
+                                onChange={(team, val) => setGames(idx, m.id, team, val)}
+                              />
+                              <X size={14} />
+                              <ScoreBlock
+                                teamKey="B"
+                                games={m.gamesB}
+                                isWinner={winner === 'B'}
+                                matchId={m.id}
+                                onChange={(team, val) => setGames(idx, m.id, team, val)}
+                              />
+                            </div>
+                            <TeamView players={m.teamB} team="B" />
                           </div>
-                          <TeamView players={m.teamB} team="B" />
-                        </div>
-                      </li>
-                    )
-                  })}
-                </ol>
-              </motion.li>
-            ))}
-          </AnimatePresence>
+                        </li>
+                      )
+                    })}
+                  </ol>
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </MotionConfig>
         </ul>
         <AnimatePresence initial={false}>
           {showScrollToFirstIncomplete && (
