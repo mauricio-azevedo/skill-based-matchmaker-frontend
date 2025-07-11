@@ -156,7 +156,6 @@ const MatchesTab: FC = () => {
     if (!roundToRemove) return
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     removeRound(idx)
-    singleToastSuccess(`Rodada #${roundToRemove.roundNumber} excluída!`, { duration: 3000 })
   }
 
   const warnIfInsufficient = (): boolean => {
