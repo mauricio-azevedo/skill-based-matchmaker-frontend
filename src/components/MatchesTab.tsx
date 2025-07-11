@@ -181,9 +181,21 @@ const MatchesTab: FC = () => {
   const hasFinishedInitialAutoScroll = useRef(false)
 
   useEffect(() => {
-    setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
+    // 1) mantém a mais antiga incompleta
+    const earliest = findEarliestIncompleteRound(rounds)
+    setEarliestIncompleteRound(earliest)
 
-    if (rounds.length <= 0) setCurrentVisibleRound(null)
+    // 2) se a rodada antes visível não existe mais, corrige
+    if (currentVisibleRound && !rounds.some((r) => r.id === currentVisibleRound.id)) {
+      // prioriza a que ficou no mesmo índice; se não houver, pega a 1ª
+      const fallback = rounds[0] ?? null
+      setCurrentVisibleRound(fallback)
+    }
+
+    // 3) se não há mais rodadas, zera normalmente
+    if (rounds.length === 0) {
+      setCurrentVisibleRound(null)
+    }
   }, [rounds])
 
   useEffect(() => {
