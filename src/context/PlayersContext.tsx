@@ -1,45 +1,33 @@
 // ============================================================================
-// src/context/PlayersContext.tsx – Estado global de jogadores
-// ----------------------------------------------------------------------------
-// Centraliza lista de jogadores e suas estatísticas (matchCount e partnerCounts),
-// persiste tudo em localStorage e expõe operações CRUD + estatísticas.
+// src/context/PlayersContext.tsx – Estado global de jogadores + estatísticas
 // ============================================================================
-
 import { createContext, type FC, type ReactNode, useContext, useEffect, useState } from 'react'
-import type { Player } from '@/types/players'
+import type { Match, Player } from '@/types/players'
 
-// ----------------------------------------------------------------------------
-// Helper: retorna o menor matchCount entre um conjunto de players
-// ----------------------------------------------------------------------------
+/* ───────── helpers ───────── */
 function getMinMatchCount(players: Player[]): number {
-  if (players.length === 0) return 0
-  // começa com o matchCount do primeiro e vai achando o mínimo
-  return players.reduce((min, p) => Math.min(min, p.matchCount), players[0].matchCount)
+  return players.length ? players.reduce((m, p) => Math.min(m, p.matchCount), players[0].matchCount) : 0
 }
 
-// Interface pública do contexto
+/* ───────── interface do contexto ───────── */
 type Ctx = {
   players: Player[]
   add: (name: string, level: number, preferredPairs?: string[]) => void
   remove: (id: string) => void
   toggleActive: (id: string) => void
-  /** Atualiza múltiplos players de uma vez (usado para incrementar estatísticas) */
-  updatePlayers: (updater: (players: Player[]) => Player[]) => void
+  updatePlayers: (fn: (p: Player[]) => Player[]) => void
+  /** Registra estatísticas de uma partida recém-finalizada */
+  registerMatch: (match: Match) => void
 }
 
-// Criamos contexto com undefined para forçar checagem de Provider
 const PlayersContext = createContext<Ctx | undefined>(undefined)
 
-// ---------------------------------------------------------------------------
-// Provider: envolve toda a aplicação e mantém estado de players
-// ---------------------------------------------------------------------------
+/* ───────── Provider ───────── */
 export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  // Inicializa do localStorage na primeira renderização
   const [players, setPlayers] = useState<Player[]>(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem('sbm_players') || '[]') as Player[]
-      // Garante que cada player tenha active, matchCount e partnerCounts
-      return stored.map((p) => ({
+      const raw = JSON.parse(localStorage.getItem('sbm_players') || '[]') as Player[]
+      return raw.map((p) => ({
         ...p,
         active: p.active !== false,
         matchCount: p.matchCount ?? 0,
@@ -51,26 +39,22 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
     }
   })
 
-  // Sempre que players muda, grava em localStorage
+  /* persistência */
   useEffect(() => {
     localStorage.setItem('sbm_players', JSON.stringify(players))
   }, [players])
 
-  // -----------------------------------------------------------------------------
-  // Função add:
-  // - Quando um novo jogador entra TARDIO, damos a ele o matchCount mínimo atual.
-  // - Assim ele não sai na frente na hora de gerar próximas rodadas.
-  // -----------------------------------------------------------------------------
+  /* ───── CRUD ───── */
   const add = (name: string, level: number, preferredPairs: string[] = []) =>
     setPlayers((prev) => {
-      const minCount = getMinMatchCount(prev.filter((pl) => pl.active))
+      const min = getMinMatchCount(prev.filter((pl) => pl.active))
       return [
         {
           id: crypto.randomUUID(),
           name,
           level,
           active: true,
-          matchCount: minCount,
+          matchCount: min,
           partnerCounts: {},
           preferredPairs,
         },
@@ -78,53 +62,50 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
       ]
     })
 
-  // -----------------------------------------------------------------------------
-  // Função remove:
-  // - Remove um jogador pelo id (descarta seu histórico).
-  // -----------------------------------------------------------------------------
   const remove = (id: string) => setPlayers((p) => p.filter((pl) => pl.id !== id))
 
-  // -----------------------------------------------------------------------------
-  // Função toggleActive:
-  // - Inativa ou reativa um jogador.
-  // - Ao reativar, iguala seu matchCount ao menor entre os ativos,
-  //   garantindo que ele não seja priorizado antes de "recuperar" partidas.
-  // -----------------------------------------------------------------------------
   const toggleActive = (id: string) =>
-    setPlayers((prev) => {
-      // Localiza jogador alvo
-      const target = prev.find((pl) => pl.id === id)
-      if (!target) return prev
+    setPlayers((prev) =>
+      prev.map((pl) => {
+        if (pl.id !== id) return pl
+        const willActivate = !pl.active
+        const minActive = getMinMatchCount(prev.filter((p) => p.active))
+        return {
+          ...pl,
+          active: willActivate,
+          matchCount: willActivate ? Math.max(pl.matchCount, minActive) : pl.matchCount,
+        }
+      }),
+    )
 
-      const willActivate = !target.active
-      let newMatchCount = target.matchCount
+  const updatePlayers = (fn: (p: Player[]) => Player[]) => setPlayers(fn)
 
-      if (willActivate) {
-        // Computa o menor matchCount entre quem já está ativo
-        const activePlayers = prev.filter((pl) => pl.active)
-        const minMatchCount = getMinMatchCount(activePlayers)
-        newMatchCount = minMatchCount > target.matchCount ? minMatchCount : target.matchCount
-      }
+  /* ───── Estatísticas de partida ───── */
+  const registerMatch = (match: Match) =>
+    setPlayers((prev) =>
+      prev.map((pl) => {
+        if (![...match.teamA, ...match.teamB].some((m) => m.id === pl.id)) return pl
 
-      // Atualiza somente o player em questão
-      return prev.map((pl) => (pl.id === id ? { ...pl, active: willActivate, matchCount: newMatchCount } : pl))
-    })
+        const inTeamA = match.teamA.some((m) => m.id === pl.id)
+        const mateId = inTeamA
+          ? match.teamA.find((m) => m.id !== pl.id)!.id
+          : match.teamB.find((m) => m.id !== pl.id)!.id
 
-  // -----------------------------------------------------------------------------
-  // Função updatePlayers:
-  // - Expõe capacidade de atualizar qualquer campo de todos players,
-  //   usada para incrementar matchCount e partnerCounts após gerar rodada.
-  // -----------------------------------------------------------------------------
-  const updatePlayers = (updater: (players: Player[]) => Player[]) => setPlayers(updater)
+        return {
+          ...pl,
+          matchCount: pl.matchCount + 1,
+          partnerCounts: { ...pl.partnerCounts, [mateId]: (pl.partnerCounts[mateId] ?? 0) + 1 },
+        }
+      }),
+    )
 
   return (
-    <PlayersContext.Provider value={{ players, add, remove, toggleActive, updatePlayers }}>
+    <PlayersContext.Provider value={{ players, add, remove, toggleActive, updatePlayers, registerMatch }}>
       {children}
     </PlayersContext.Provider>
   )
 }
 
-// Hook auxiliar: garante Consumer sempre dentro do Provider
 export const usePlayers = () => {
   const ctx = useContext(PlayersContext)
   if (!ctx) throw new Error('usePlayers must be inside PlayersProvider')
