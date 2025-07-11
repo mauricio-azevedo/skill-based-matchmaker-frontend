@@ -276,6 +276,43 @@ const MatchesTab: FC = () => {
     }
   }, [isAutoScrolling])
 
+  // -----------------------------------------------------------------------------
+  // Keep `currentVisibleRound` in sync with the list
+  // -----------------------------------------------------------------------------
+  useEffect(() => {
+    if (rounds.length === 0) {
+      setCurrentVisibleRound(null)
+      return
+    }
+
+    // If the round we were tracking was removed, pick the one that is now closest
+    // to the top of the scroll container (same criterion used in the scroll
+    // handler) so the header always reflects what the user sees.
+    if (currentVisibleRound && !rounds.some((r) => r.id === currentVisibleRound.id)) {
+      const container = listRef.current
+      if (!container) {
+        setCurrentVisibleRound(rounds[0])
+        return
+      }
+
+      const containerTop = container.getBoundingClientRect().top
+      let closest: Round | null = null
+      let minOffset = Infinity
+
+      for (const r of rounds) {
+        const el = roundRefs.current[r.id]
+        if (!el) continue
+        const offset = Math.abs(el.getBoundingClientRect().top - containerTop)
+        if (offset < minOffset) {
+          minOffset = offset
+          closest = r
+        }
+      }
+
+      setCurrentVisibleRound(closest ?? rounds[0])
+    }
+  }, [rounds, currentVisibleRound])
+
   return (
     <React.Fragment>
       {currentVisibleRound &&
