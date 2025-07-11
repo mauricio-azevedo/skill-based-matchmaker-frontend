@@ -247,7 +247,9 @@ const MatchesTab: FC = () => {
     const container = listRef.current
     const el = scrollToTop
       ? (container.firstElementChild as HTMLElement)
-      : roundRefs.current[earliestIncompleteRound?.id ?? 0]!
+      : earliestIncompleteRound
+        ? roundRefs.current[earliestIncompleteRound.id]
+        : null
 
     setIsAutoScrolling(true)
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
