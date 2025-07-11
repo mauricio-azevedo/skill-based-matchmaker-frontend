@@ -109,27 +109,35 @@ function applyMiniSg(rows: PlayerLBRow[], pair: Pair): PlayerLBRow[] {
 }
 
 /* tooltip helpers ------------------------------------------------------- */
-const svTip = (p: PlayerLBRow, all: PlayerLBRow[]) => {
-  if (!p.oppMini?.length || (p.miniSV ?? 0) === 0) return ''
-  const sign = p.miniSV > 0 ? '+' : ''
-  const vWord = p.miniW === 1 ? 'vitória' : 'vitórias'
-  const lWord = p.miniL === 1 ? 'derrota' : 'derrotas'
-  const txt = `teve ${p.miniW} ${vWord} e ${p.miniL} ${lWord} (saldo ${sign}${p.miniSV}).`
-  if (p.oppMini.length === 1) {
-    const opp = all.find((x) => x.id === p.oppMini[0])?.name ?? 'adversário'
-    return `Contra ${opp}, você ${txt}`
+const svTip = (p: PlayerLBRow, all: PlayerLBRow[]): string => {
+  const miniSV = p.miniSV ?? 0
+  const oppMini = p.oppMini ?? []
+  if (!oppMini.length || miniSV === 0) return ''
+
+  const sign = miniSV > 0 ? '+' : ''
+  const vWord = (p.miniW ?? 0) === 1 ? 'vitória' : 'vitórias'
+  const lWord = (p.miniL ?? 0) === 1 ? 'derrota' : 'derrotas'
+  const txt = `teve ${p.miniW ?? 0} ${vWord} e ${p.miniL ?? 0} ${lWord} (saldo ${sign}${miniSV}).`
+
+  if (oppMini.length === 1) {
+    const oppName = all.find((x) => x.id === oppMini[0])?.name ?? 'adversário'
+    return `Contra ${oppName}, você ${txt}`
   }
   return `Na mini-liga, você ${txt}`
 }
 
-const sgTip = (p: PlayerLBRow, all: PlayerLBRow[]) => {
-  if (!p.oppMini?.length || (p.miniSG ?? 0) === 0) return ''
-  const sign = p.miniSG > 0 ? '+' : ''
-  const gWord = p.GPmini === 1 ? 'game' : 'games'
-  const txt = `ganhou ${p.GPmini} ${gWord} e perdeu ${p.GCmini} (saldo ${sign}${p.miniSG}).`
-  if (p.oppMini.length === 1) {
-    const opp = all.find((x) => x.id === p.oppMini[0])?.name ?? 'adversário'
-    return `Contra ${opp}, você ${txt}`
+const sgTip = (p: PlayerLBRow, all: PlayerLBRow[]): string => {
+  const miniSG = p.miniSG ?? 0
+  const oppMini = p.oppMini ?? []
+  if (!oppMini.length || miniSG === 0) return ''
+
+  const sign = miniSG > 0 ? '+' : ''
+  const gWord = (p.GPmini ?? 0) === 1 ? 'game' : 'games'
+  const txt = `ganhou ${p.GPmini ?? 0} ${gWord} e perdeu ${p.GCmini ?? 0} (saldo ${sign}${miniSG}).`
+
+  if (oppMini.length === 1) {
+    const oppName = all.find((x) => x.id === oppMini[0])?.name ?? 'adversário'
+    return `Contra ${oppName}, você ${txt}`
   }
   return `Na mini-liga, você ${txt}`
 }
