@@ -14,7 +14,7 @@ import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import SetupTab from '@/components/SetupTab'
-import { PlayTab } from '@/components/PlayTab'
+import { PlayTab } from '@/features/playTab/PlayTab'
 
 export default function App() {
   // -----------------------------------------------------------

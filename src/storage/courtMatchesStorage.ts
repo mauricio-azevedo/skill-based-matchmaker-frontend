@@ -1,52 +1,50 @@
 import type { UnsavedRound } from '@/types/players'
 
-/** Chave única no localStorage */
-export const COURT_MATCHES = 'court_matches'
+const COURT_MATCHES = 'court_matches_v2'
 
-/** Estrutura de cada registro persistido */
 export type CourtMatchRow = {
   courtId: number
-  round: UnsavedRound
+  rounds: UnsavedRound[]
   updatedAt: string
 }
 
-/* ─────────── helpers internos ─────────── */
-
-function indexTable(): Record<number, CourtMatchRow> {
+/* helpers */
+function readTable(): Record<number, CourtMatchRow> {
   try {
     return JSON.parse(localStorage.getItem(COURT_MATCHES) || '{}')
   } catch {
     return {}
   }
 }
-
-function saveTable(table: Record<number, CourtMatchRow>) {
-  localStorage.setItem(COURT_MATCHES, JSON.stringify(table))
+function saveTable(t: Record<number, CourtMatchRow>) {
+  localStorage.setItem(COURT_MATCHES, JSON.stringify(t))
 }
 
-/* ─────────── API pública ─────────── */
-
-/** Lê todas as partidas persistidas (courtId → UnsavedRound). */
-export function readAllCourtMatches(): Record<number, UnsavedRound> {
-  const table = indexTable()
-  return Object.fromEntries(Object.values(table).map(({ courtId, round }) => [courtId, round]))
+/* API */
+export function readAllCourtMatches(): Record<number, UnsavedRound[]> {
+  const t = readTable()
+  return Object.fromEntries(Object.values(t).map(({ courtId, rounds }) => [courtId, rounds]))
 }
 
-/** Salva (ou atualiza) a partida de uma quadra. */
-export function upsertCourtMatch(courtId: number, round: UnsavedRound) {
-  const table = indexTable()
-  table[courtId] = { courtId, round, updatedAt: new Date().toISOString() }
-  saveTable(table)
+export function appendCourtMatch(courtId: number, round: UnsavedRound) {
+  const t = readTable()
+  const list = t[courtId]?.rounds ?? []
+  t[courtId] = {
+    courtId,
+    rounds: [...list, round],
+    updatedAt: new Date().toISOString(),
+  }
+  saveTable(t)
 }
 
-/** Remove partidas de quadras que deixaram de existir. */
-export function purgeMatchesBeyond(maxCourtId: number) {
-  const table = indexTable()
+export function purgeMatchesBeyond(maxId: number) {
+  const table = readTable()
   let changed = false
 
   for (const key of Object.keys(table)) {
     const id = Number(key)
-    if (id > maxCourtId) {
+
+    if (id > maxId) {
       delete table[id]
       changed = true
     }

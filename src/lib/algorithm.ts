@@ -5,7 +5,7 @@ import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 
 /* ─────────────────────────────── Constantes ──────────────────────────────── */
 
-const MIN_PLAYERS = 4 as const
+export const MIN_PLAYERS = 4 as const
 
 /** Pesos já na mesma ordem de grandeza dos fatores normalizados */
 const WEIGHT = {
