@@ -321,7 +321,7 @@ const MatchesTab: FC = () => {
           className={cn(
             'overflow-y-auto gap-12 flex flex-col',
             !isAutoScrolling && 'snap-y snap-mandatory', // só liga o snap quando NÃO estamos em auto-scroll
-            isAutoScrolling && 'pointer-events-none', // impede que o usuário arraste enquanto auto-scroll acontece
+            isAutoScrolling && 'pointer-events-none', // só liga o snap quando NÃO estamos em auto-scroll
           )}
           style={{ scrollBehavior: 'smooth' }}
         >
