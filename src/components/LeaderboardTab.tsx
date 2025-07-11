@@ -290,9 +290,12 @@ const LeaderboardTab: FC = () => {
         {rows.length > 0 && (
           <div className="flex flex-col text-xs text-muted-foreground mt-2">
             <p>
-              <b>P</b> = Pontos (3 por vitória) &nbsp; | &nbsp;
-              <b>V-D</b> = Vitórias-Derrotas &nbsp; | &nbsp;
-              <b>SV</b> = Saldo de Vitórias &nbsp; | &nbsp;
+              <b>P</b> = Pontos (3 por vitória)
+              <br />
+              <b>V-D</b> = Vitórias-Derrotas
+              <br />
+              <b>SV</b> = Saldo de Vitórias
+              <br />
               <b>SG</b> = Saldo de Games
             </p>
           </div>
