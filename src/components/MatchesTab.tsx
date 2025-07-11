@@ -1,4 +1,4 @@
-import React, { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { type FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -25,9 +25,6 @@ import { useScrollEnd } from '@/hooks/UseScrollEnd'
 // -----------------------------------------------------------------------------
 const PLAYERS_PER_MATCH = 4 as const
 const SCORE_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const
-
-// Amount of pixels we still consider "at the very top". Adjust if needed.
-const TOP_SCROLL_TOLERANCE = 10
 
 // -----------------------------------------------------------------------------
 // Utility helpers
@@ -109,21 +106,6 @@ const MatchesTab: FC = () => {
   const hasEnoughForCourts = (plist: Player[], courts: number) =>
     plist.filter((p) => p.active).length >= courts * PLAYERS_PER_MATCH
 
-  // --------------------- NEW: ANIMATION CONTROL -----------------------------
-  /**
-   * We only animate the newly generated round *if* the user was viewing the
-   * very top of the list when they clicked "Nova rodada".  We remember this
-   * with `animateNextRound` which is reset to `false` immediately after the
-   * list renders with the new round.
-   */
-  const [animateNextRound, setAnimateNextRound] = useState(false)
-
-  const isAtTop = (): boolean => {
-    const el = listRef.current
-    return !!el && el.scrollTop <= TOP_SCROLL_TOLERANCE
-  }
-  // --------------------------------------------------------------------------
-
   // Extracted generation logic
   const generateNewRound = () => {
     if (warnIfInsufficient()) return
@@ -132,17 +114,18 @@ const MatchesTab: FC = () => {
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts, currentMode)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
+      // singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
     } catch (error) {
       singleToastError((error as Error).message, { duration: 6000 })
     }
   }
 
-  // Handle generate click: decide if we should animate based on scroll position
+  // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
-    // Remember whether we were at the top *before* mutating state
-    setAnimateNextRound(isAtTop())
     generateNewRound()
+    // setTimeout(() => {
     scrollToFirstIncomplete(true)
+    // })
   }
 
   const doShuffle = (idx: number) => {
@@ -202,12 +185,6 @@ const MatchesTab: FC = () => {
     setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
 
     if (rounds.length <= 0) setCurrentVisibleRound(null)
-    // As soon as the list updates with the new round, we can clear the flag so
-    // that subsequent layout changes are free to animate again when needed.
-    if (animateNextRound) {
-      // Allow one frame so Framer Motion can consume the flag.
-      requestAnimationFrame(() => setAnimateNextRound(false))
-    }
   }, [rounds])
 
   useEffect(() => {
@@ -274,6 +251,30 @@ const MatchesTab: FC = () => {
       hasFinishedInitialAutoScroll.current = true
     }
   })
+
+  const isLatestRoundOnTop = useMemo(() => {
+    if (!currentVisibleRound) return false
+    const latest = rounds[1]
+    return currentVisibleRound.id === latest?.id
+  }, [currentVisibleRound, rounds])
+
+  useEffect(() => {
+    // console.log({ isLatestRoundOnTop })
+  }, [isLatestRoundOnTop])
+
+  const [teste, setTeste] = useState(currentVisibleRound?.id === rounds[0]?.id)
+
+  useEffect(() => {
+    console.log({ lastRound: rounds[1] })
+    console.log({ currentRound: currentVisibleRound })
+    setTeste(currentVisibleRound?.id === rounds[1]?.id)
+  }, [rounds])
+
+  useEffect(() => {
+    // console.log({ lastRound: rounds[0] })
+    // console.log({ currentRound: currentVisibleRound })
+    console.log(teste)
+  }, [teste])
 
   return (
     <React.Fragment>
@@ -347,66 +348,58 @@ const MatchesTab: FC = () => {
           )}
           style={{ scrollBehavior: 'smooth' }}
         >
-          {/* We propagate whether to animate via `animateNextRound` using the `custom` prop */}
-          <MotionConfig>
+          <MotionConfig reducedMotion={teste ? 'never' : 'always'}>
             <AnimatePresence initial={false}>
-              {rounds.map((round, idx) => {
-                const isNewest = idx === rounds.length - 1
-                return (
-                  <motion.li
-                    key={round.id}
-                    data-round-idx={idx}
-                    ref={(el) => {
-                      if (el) roundRefs.current[round.id] = el
-                      else delete roundRefs.current[round.id]
-                      if (round.id === currentVisibleRound?.id) scrollRef.current = el
-                    }}
-                    style={{ scrollSnapStop: 'always' }}
-                    className="flex flex-col gap-2 snap-start min-h-full"
-                    /**
-                     * Only animate if this is the newest round *and* the flag was set.
-                     * Passing `false` disables both the initial and the animate states.
-                     */
-                    initial={animateNextRound && isNewest ? 'initial' : false}
-                    animate={animateNextRound && isNewest ? 'animate' : false}
-                    exit="exit"
-                    variants={itemVariants}
-                    layout="position"
-                  >
-                    <ol className="flex flex-col gap-2">
-                      {round.matches.map((m) => {
-                        const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
+              {rounds.map((round, idx) => (
+                <motion.li
+                  key={round.id}
+                  data-round-idx={idx}
+                  ref={(el) => {
+                    if (el) roundRefs.current[round.id] = el
+                    else delete roundRefs.current[round.id]
+                    if (round.id === currentVisibleRound?.id) scrollRef.current = el
+                  }}
+                  style={{ scrollSnapStop: 'always' }}
+                  className="flex flex-col gap-2 snap-start min-h-full"
+                  layout="position"
+                  variants={itemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <ol className="flex flex-col gap-2">
+                    {round.matches.map((m) => {
+                      const winner: 'A' | 'B' | null = getWinner(m.gamesA, m.gamesB)
 
-                        return (
-                          <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
-                            <div className="flex flex-1 items-center justify-between">
-                              <TeamView players={m.teamA} team="A" />
-                              <div className="flex items-center gap-1">
-                                <ScoreBlock
-                                  teamKey="A"
-                                  games={m.gamesA}
-                                  isWinner={winner === 'A'}
-                                  matchId={m.id}
-                                  onChange={(team, val) => setGames(idx, m.id, team, val)}
-                                />
-                                <X size={14} />
-                                <ScoreBlock
-                                  teamKey="B"
-                                  games={m.gamesB}
-                                  isWinner={winner === 'B'}
-                                  matchId={m.id}
-                                  onChange={(team, val) => setGames(idx, m.id, team, val)}
-                                />
-                              </div>
-                              <TeamView players={m.teamB} team="B" />
+                      return (
+                        <li key={m.id} className="rounded-2xl border bg-muted px-3 py-4 shadow-sm flex-1 relative">
+                          <div className="flex flex-1 items-center justify-between">
+                            <TeamView players={m.teamA} team="A" />
+                            <div className="flex items-center gap-1">
+                              <ScoreBlock
+                                teamKey="A"
+                                games={m.gamesA}
+                                isWinner={winner === 'A'}
+                                matchId={m.id}
+                                onChange={(team, val) => setGames(idx, m.id, team, val)}
+                              />
+                              <X size={14} />
+                              <ScoreBlock
+                                teamKey="B"
+                                games={m.gamesB}
+                                isWinner={winner === 'B'}
+                                matchId={m.id}
+                                onChange={(team, val) => setGames(idx, m.id, team, val)}
+                              />
                             </div>
-                          </li>
-                        )
-                      })}
-                    </ol>
-                  </motion.li>
-                )
-              })}
+                            <TeamView players={m.teamB} team="B" />
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ol>
+                </motion.li>
+              ))}
             </AnimatePresence>
           </MotionConfig>
         </ul>
