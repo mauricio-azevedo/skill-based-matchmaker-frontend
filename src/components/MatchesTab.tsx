@@ -296,10 +296,6 @@ const MatchesTab: FC = () => {
     }
   }, [isAutoScrolling])
 
-  useEffect(() => {
-    console.log({ isAutoScrolling, isDeleting })
-  }, [isAutoScrolling, isDeleting])
-
   return (
     <React.Fragment>
       {currentVisibleRound &&
