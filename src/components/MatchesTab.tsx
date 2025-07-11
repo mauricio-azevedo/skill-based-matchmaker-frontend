@@ -367,7 +367,7 @@ const MatchesTab: FC = () => {
           layoutScroll
           ref={listRef}
           className={cn(
-            'overflow-y-auto gap-12 flex flex-col',
+            'overflow-y-auto flex flex-col',
             !isAutoScrolling && !isDeleting ? 'snap-y snap-mandatory' : '',
           )}
           style={{ scrollBehavior: 'smooth' }}
@@ -391,7 +391,7 @@ const MatchesTab: FC = () => {
                   if (round.id === currentVisibleRound?.id) scrollRef.current = el
                 }}
                 style={{ scrollSnapStop: 'always' }}
-                className="flex flex-col gap-2 snap-start min-h-full"
+                className="flex flex-col gap-2 snap-start min-h-full "
                 layout="position"
                 variants={itemVariants}
                 initial="initial"
