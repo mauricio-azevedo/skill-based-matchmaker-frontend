@@ -70,6 +70,8 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
 // Main component
 // -----------------------------------------------------------------------------
 const MatchesTab: FC = () => {
+  const [shouldAnimateNextRound, setShouldAnimateNextRound] = useState(true)
+
   const { players, updatePlayers } = usePlayers()
   const { rounds, addRound, setGames, replaceRound, removeRound } = useRounds()
   const { courts, formationMode, autoAlternate, autoAlternateMode, setAutoAlternateMode } = useCourts()
@@ -122,11 +124,19 @@ const MatchesTab: FC = () => {
 
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
+    const atTop = !listRef.current /* lista vazia */ || Math.abs(listRef.current.scrollTop) < 2 // Safari iOS pode ficar levemente negativo
+
+    setShouldAnimateNextRound(atTop) // <-- chave da solução
     generateNewRound()
-    // setTimeout(() => {
     scrollToFirstIncomplete(true)
-    // })
   }
+
+  useLayoutEffect(() => {
+    if (!shouldAnimateNextRound) {
+      const id = requestAnimationFrame(() => setShouldAnimateNextRound(true))
+      return () => cancelAnimationFrame(id)
+    }
+  }, [shouldAnimateNextRound])
 
   const doShuffle = (idx: number) => {
     const oldRound = rounds[idx]
@@ -324,7 +334,7 @@ const MatchesTab: FC = () => {
           )}
           style={{ scrollBehavior: 'smooth' }}
         >
-          <AnimatePresence initial={false}>
+          <AnimatePresence initial={shouldAnimateNextRound}>
             {rounds.map((round, idx) => (
               <motion.li
                 key={round.id}
@@ -336,11 +346,11 @@ const MatchesTab: FC = () => {
                 }}
                 style={{ scrollSnapStop: 'always' }}
                 className="flex flex-col gap-2 snap-start min-h-full"
-                layout="position"
                 variants={itemVariants}
-                initial="initial"
-                animate="animate"
+                initial={shouldAnimateNextRound ? 'initial' : false}
+                animate={shouldAnimateNextRound ? 'animate' : false}
                 exit="exit"
+                layout="position"
               >
                 <ol className="flex flex-col gap-2">
                   {round.matches.map((m) => {
