@@ -207,6 +207,8 @@ const MatchesTab: FC = () => {
         return Math.abs(el.getBoundingClientRect().top - containerTop) <= THRESHOLD
       })
 
+      console.log({ touching })
+
       // 2. Fallback: menor distância absoluta (lógica antiga)
       let candidate = touching ?? null
       if (!candidate) {
@@ -293,6 +295,10 @@ const MatchesTab: FC = () => {
     }
   }, [isAutoScrolling])
 
+  useEffect(() => {
+    console.log({ isAutoScrolling, isDeleting })
+  }, [isAutoScrolling, isDeleting])
+
   return (
     <React.Fragment>
       {currentVisibleRound &&
@@ -370,7 +376,7 @@ const MatchesTab: FC = () => {
             onExitComplete={() => {
               setTimeout(() => {
                 setIsDeleting(false)
-              }, 600)
+              }, 800)
               setIsAutoScrolling(false)
             }}
             initial={false}
