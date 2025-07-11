@@ -225,7 +225,7 @@ const MatchesTab: FC = () => {
     container.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
     return () => container.removeEventListener('scroll', handleScroll)
-  }, [currentVisibleRound, calcRoundInView])
+  }, [rounds, currentVisibleRound, calcRoundInView])
 
   useEffect(() => {
     if (currentVisibleRound && rounds.some((r) => r.id === currentVisibleRound.id)) return
