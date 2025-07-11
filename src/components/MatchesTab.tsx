@@ -333,13 +333,13 @@ const MatchesTab: FC = () => {
                   else delete roundRefs.current[round.id]
                   if (round.id === currentVisibleRound?.id) scrollRef.current = el
                 }}
-                style={{ scrollSnapStop: 'always' }}
                 className="flex flex-col gap-2 snap-start min-h-full"
                 layout="position"
                 variants={itemVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
+                /* --------- 👇  aqui está o truque ------------ */
+                initial={false} // não anima na inserção
+                animate="animate" // continua animando reposicionamento
+                exit="exit" // continua animando remoção
               >
                 <ol className="flex flex-col gap-2">
                   {round.matches.map((m) => {
