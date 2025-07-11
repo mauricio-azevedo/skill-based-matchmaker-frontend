@@ -12,9 +12,9 @@ export interface CourtCardProps {
   selected: number
   onGenerate: () => void
   onSelect: (index: number) => void
+  onSaveScore: (gamesA: number, gamesB: number) => void
   canGenerate: boolean
   loading: boolean
-  onSaveScore: (gamesA: number, gamesB: number) => void
 }
 
 export const CourtCard = memo(function CourtCard({
@@ -23,38 +23,42 @@ export const CourtCard = memo(function CourtCard({
   selected,
   onGenerate,
   onSelect,
+  onSaveScore,
   canGenerate,
   loading,
-  onSaveScore,
 }: CourtCardProps) {
   const match: Match | undefined = selected >= 0 ? rounds[selected].matches[0] : undefined
 
   return (
-    <Card aria-label={`Quadra ${courtId}`}>
-      <CardHeader className="flex flex-row items-center justify-between gap-4">
-        <CardTitle>Quadra {courtId}</CardTitle>
-        <Button size="sm" onClick={onGenerate} disabled={!canGenerate || loading} className="gap-1">
-          {loading && <Loader2 size={14} className="animate-spin" />}
-          Gerar nova partida
-        </Button>
-      </CardHeader>
+    <Card aria-label={`Quadra ${courtId}`} className="w-full">
+      <CardHeader className="flex flex-col gap-3 p-3">
+        <div className="flex w-full items-center justify-between">
+          <CardTitle className="text-base">Quadra {courtId}</CardTitle>
 
-      <CardContent className="flex flex-col gap-4">
+          <Button size="sm" className="gap-1" onClick={onGenerate} disabled={!canGenerate || loading}>
+            {loading && <Loader2 size={14} className="animate-spin" />}
+            Gerar partida
+          </Button>
+        </div>
+
+        {/* seletor de partidas, se houver mais de uma */}
         {rounds.length > 1 && (
           <Select value={String(selected)} onValueChange={(v) => onSelect(+v)}>
-            <SelectTrigger className="w-44">
+            <SelectTrigger className="w-full h-8">
               <SelectValue placeholder="Escolher partida" />
             </SelectTrigger>
             <SelectContent>
               {rounds.map((_, idx) => (
-                <SelectItem key={idx} value={String(idx)}>
+                <SelectItem key={idx} value={String(idx)} className="text-sm">
                   Partida {idx + 1}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         )}
+      </CardHeader>
 
+      <CardContent className="p-3">
         <MatchCard match={match} onSave={onSaveScore} />
       </CardContent>
     </Card>
