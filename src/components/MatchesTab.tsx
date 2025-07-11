@@ -197,23 +197,34 @@ const MatchesTab: FC = () => {
     if (!container) return
 
     const handleScroll = () => {
-      const top = container.getBoundingClientRect().top
-      let closest: Round | null = null
-      let minOffset = Infinity
+      const containerTop = container.getBoundingClientRect().top
+      const THRESHOLD = 1 // px
 
-      for (const r of rounds) {
+      // 1. Qualquer rodada cujo topo esteja “encostado” ao topo do contêiner
+      const touching = rounds.find((r) => {
         const el = roundRefs.current[r.id]
-        if (!el) continue
+        if (!el) return false
+        return Math.abs(el.getBoundingClientRect().top - containerTop) <= THRESHOLD
+      })
 
-        const offset = Math.abs(el.getBoundingClientRect().top - top)
-        if (offset < minOffset) {
-          minOffset = offset
-          closest = r
+      // 2. Fallback: menor distância absoluta (lógica antiga)
+      let candidate = touching ?? null
+      if (!candidate) {
+        let minOffset = Infinity
+        for (const r of rounds) {
+          const el = roundRefs.current[r.id]
+          if (!el) continue
+          const offset = Math.abs(el.getBoundingClientRect().top - containerTop)
+          if (offset < minOffset) {
+            minOffset = offset
+            candidate = r
+          }
         }
       }
 
-      if (closest && closest.id !== currentVisibleRound?.id) {
-        setCurrentVisibleRound(closest)
+      // 3. Atualiza o estado somente se necessário
+      if (candidate && candidate.id !== currentVisibleRound?.id) {
+        setCurrentVisibleRound(candidate)
       }
     }
 
