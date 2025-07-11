@@ -321,7 +321,7 @@ const MatchesTab: FC = () => {
           className={cn('overflow-y-auto gap-12 flex flex-col', 'snap-y snap-mandatory')}
           style={{ scrollBehavior: 'smooth' }}
         >
-          <AnimatePresence initial={false}>
+          <AnimatePresence mode="wait" initial={false}>
             {rounds.map((round, idx) => (
               <motion.li
                 key={round.id}
