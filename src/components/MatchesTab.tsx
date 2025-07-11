@@ -218,8 +218,18 @@ const MatchesTab: FC = () => {
   }, [rounds, currentVisibleRound])
 
   useEffect(() => {
-    setShowScrollToFirstIncomplete(earliestIncompleteRound?.id !== currentVisibleRound?.id && !isAutoScrolling)
-  }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling])
+    let newShowScrollToFirstIncomplete: boolean
+
+    if (isAutoScrolling) {
+      // maintains same value if is auto scrolling
+      newShowScrollToFirstIncomplete = showScrollToFirstIncomplete
+    } else {
+      // else it's visible if the visible round is not the current round (earliest incomplete)
+      newShowScrollToFirstIncomplete = earliestIncompleteRound?.id !== currentVisibleRound?.id
+    }
+
+    setShowScrollToFirstIncomplete(newShowScrollToFirstIncomplete)
+  }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling, showScrollToFirstIncomplete])
 
   const scrollToFirstIncomplete = (scrollToTop = false) => {
     if (!listRef.current) return
