@@ -18,7 +18,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { FORMATION_MODES } from '@/context/FORMATION_MODES'
-import { useScrollEnd } from '@/components/UseScrollEnd'
+import { useScrollEnd } from '@/hooks/UseScrollEnd'
 
 // -----------------------------------------------------------------------------
 // Constants
