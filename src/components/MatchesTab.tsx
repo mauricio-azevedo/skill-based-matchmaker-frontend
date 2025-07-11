@@ -318,10 +318,7 @@ const MatchesTab: FC = () => {
         <motion.ul
           layoutScroll
           ref={listRef}
-          className={cn(
-            'overflow-y-auto gap-12 flex flex-col',
-            !isAutoScrolling && 'snap-y snap-mandatory', // só liga o snap quando NÃO estamos em auto-scroll
-          )}
+          className={cn('overflow-y-auto gap-12 flex flex-col', 'snap-y snap-mandatory')}
           style={{ scrollBehavior: 'smooth' }}
         >
           <AnimatePresence initial={false}>
