@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Crown } from 'lucide-react'
 import type { Match } from '@/types/players'
 
 /* ------------------------------------------------------------------------
- * Utils
+ * Helpers
  * --------------------------------------------------------------------- */
-const SCORE_OPTIONS = [...Array(6)].map((_, i) => String(i + 1)) // ['1','2',..,'6']
-
+const SCORE_OPTIONS = [...Array(6)].map((_, i) => String(i + 1))
 const avatarUrl = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
 
-/* jogador + avatar (reutilizável) ------------------------------------- */
 const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolean }) => (
   <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-right'}`}>
     <Avatar className="w-6 h-6 shrink-0">
@@ -27,29 +26,35 @@ const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolea
   </div>
 )
 
-/* select 1-6 ----------------------------------------------------------- */
+/* select 1-6 + coroa opcional ----------------------------------------- */
 const ScoreSelect = ({
   value,
   onChange,
   label,
+  isWinner,
 }: {
   value: number | ''
   onChange: (v: number | '') => void
   label: string
+  isWinner?: boolean
 }) => (
-  <Select value={value === '' ? '' : String(value)} onValueChange={(v) => onChange(v === '' ? '' : +v)}>
-    <SelectTrigger aria-label={label} className="w-10 h-10 justify-center text-center [&>svg]:hidden">
-      <SelectValue placeholder="-" />
-    </SelectTrigger>
+  <div className="relative flex flex-col items-center">
+    {isWinner && <Crown className="w-4 h-4 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
 
-    <SelectContent side="bottom">
-      {SCORE_OPTIONS.map((opt) => (
-        <SelectItem key={opt} value={opt} className="text-sm text-center">
-          {opt}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
+    <Select value={value === '' ? '' : String(value)} onValueChange={(v) => onChange(v === '' ? '' : +v)}>
+      <SelectTrigger aria-label={label} className="w-10 h-10 justify-center text-center [&>svg]:hidden">
+        <SelectValue placeholder="-" />
+      </SelectTrigger>
+
+      <SelectContent side="bottom">
+        {SCORE_OPTIONS.map((opt) => (
+          <SelectItem key={opt} value={opt} className="text-sm text-center">
+            {opt}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
 )
 
 /* ------------------------------------------------------------------------
@@ -57,16 +62,14 @@ const ScoreSelect = ({
  * --------------------------------------------------------------------- */
 interface Props {
   match?: Match
-  /** dispara automaticamente assim que ambos os placares válidos forem definidos */
   onSave?: (gamesA: number, gamesB: number) => void
 }
 
 export function MatchCard({ match, onSave }: Props) {
-  /* placares locais */
   const [gamesA, setGamesA] = useState<number | ''>('')
   const [gamesB, setGamesB] = useState<number | ''>('')
 
-  /* reseta quando muda a partida */
+  /* reseta ao trocar de partida */
   useEffect(() => {
     setGamesA(match?.gamesA ?? '')
     setGamesB(match?.gamesB ?? '')
@@ -80,35 +83,28 @@ export function MatchCard({ match, onSave }: Props) {
     if (match && bothFilled && dirty) onSave?.(+gamesA, +gamesB)
   }, [bothFilled, dirty, gamesA, gamesB, match, onSave])
 
-  /* fallback */
   if (!match) return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
 
-  const { teamA, teamB } = match
+  const { teamA, teamB, winner } = match
 
   return (
     <div className="flex items-center justify-between gap-4">
-      {/* equipe A */}
+      {/* Equipe A */}
       <div className="flex flex-col gap-2">
         <PlayerEntry name={teamA[0].name} />
         <PlayerEntry name={teamA[1].name} />
       </div>
 
-      {/* seletor central */}
+      {/* Placar central */}
       <div className="flex flex-col items-center gap-1">
         <div className="flex items-center gap-1">
-          <ScoreSelect value={gamesA} onChange={setGamesA} label="Games equipe A" />
+          <ScoreSelect value={gamesA} onChange={setGamesA} label="Games equipe A" isWinner={winner === 'A'} />
           <span className="text-muted-foreground">x</span>
-          <ScoreSelect value={gamesB} onChange={setGamesB} label="Games equipe B" />
+          <ScoreSelect value={gamesB} onChange={setGamesB} label="Games equipe B" isWinner={winner === 'B'} />
         </div>
-
-        {match.winner && (
-          <span className="text-xs italic text-muted-foreground">
-            {match.winner === 'A' ? 'Vitória A' : 'Vitória B'}
-          </span>
-        )}
       </div>
 
-      {/* equipe B (espelhada) */}
+      {/* Equipe B */}
       <div className="flex flex-col gap-2">
         <PlayerEntry name={teamB[0].name} reverse />
         <PlayerEntry name={teamB[1].name} reverse />
