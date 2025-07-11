@@ -1,5 +1,3 @@
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { CourtCard } from '@/components/CourtCard'
 import { usePlayTabLogic } from './usePlayTabLogic'
 
@@ -9,26 +7,11 @@ import { usePlayTabLogic } from './usePlayTabLogic'
  * • cards em stack, ocupando 100 % da largura
  */
 export function PlayTab() {
-  const {
-    rows,
-    state,
-    courtFinished,
-    canGenerateGlobal,
-    handleAddCourt,
-    handleGenerate,
-    handleSelect,
-    handleSaveScore,
-  } = usePlayTabLogic()
+  const { rows, state, courtFinished, canGenerateGlobal, handleGenerate, handleSelect, handleSaveScore } =
+    usePlayTabLogic()
 
   return (
     <div className="flex flex-col gap-3 px-2 py-3 w-full max-w-sm mx-auto overflow-hidden">
-      {/* barra de ações */}
-      <div className="flex justify-end">
-        <Button size="sm" variant="outline" className="gap-1" onClick={handleAddCourt}>
-          <Plus size={14} /> Adicionar
-        </Button>
-      </div>
-
       {/* quadras */}
       <div className="flex flex-col gap-3 overflow-y-auto">
         {rows.map(({ id }) => {
