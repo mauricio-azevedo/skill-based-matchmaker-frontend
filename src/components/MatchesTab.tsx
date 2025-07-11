@@ -124,7 +124,7 @@ const MatchesTab: FC = () => {
     generateNewRound()
     setTimeout(() => {
       scrollToFirstIncomplete(true)
-    }, 400)
+    }, 200)
   }
 
   const doShuffle = (idx: number) => {
@@ -237,7 +237,7 @@ const MatchesTab: FC = () => {
       }
 
       setShowScrollToFirstIncomplete(newShowScrollToFirstIncomplete)
-    }, 1000)
+    }, 400)
   }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling, showScrollToFirstIncomplete])
 
   const scrollToFirstIncomplete = (scrollToTop = false) => {
@@ -268,7 +268,7 @@ const MatchesTab: FC = () => {
       timeoutId = window.setTimeout(() => {
         setIsAutoScrolling(false)
         container.removeEventListener('scroll', onScroll)
-      }, 800)
+      }, 300)
     }
 
     container.addEventListener('scroll', onScroll, { passive: true })
