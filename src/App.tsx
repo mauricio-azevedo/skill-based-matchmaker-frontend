@@ -154,7 +154,7 @@ export default function App() {
       />
 
       {/* --------- Tabs --------- */}
-      <Tabs defaultValue="matches" className="flex flex-col flex-grow overflow-hidden gap-2">
+      <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
         {/* Conteúdo */}
         <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center gap-2">
           <TabsContent value="players" asChild>
@@ -175,7 +175,6 @@ export default function App() {
         <TabsList className="self-center">
           <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="players">Jogadores</TabsTrigger>
-          <TabsTrigger value="matches">Partidas</TabsTrigger>
           <TabsTrigger value="play">PLAY!</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
