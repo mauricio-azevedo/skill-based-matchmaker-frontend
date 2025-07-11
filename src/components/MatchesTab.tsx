@@ -220,53 +220,37 @@ const MatchesTab: FC = () => {
   }, [rounds, currentVisibleRound])
 
   useEffect(() => {
-    let newShowScrollToFirstIncomplete: boolean
-
-    if (isAutoScrolling) {
-      // maintains same value if is auto scrolling
-      newShowScrollToFirstIncomplete = showScrollToFirstIncomplete
-    } else {
-      // else it's visible if the visible round is not the current round (earliest incomplete)
-      const earliestIncompleteRoundExists = earliestIncompleteRound !== null
-      const currentVisibleRoundExists = currentVisibleRound !== null
-      const currentVisibleRoundIsEarliestIncomplete = currentVisibleRound?.id === earliestIncompleteRound?.id
-
-      newShowScrollToFirstIncomplete =
-        earliestIncompleteRoundExists && currentVisibleRoundExists && !currentVisibleRoundIsEarliestIncomplete
-    }
-
-    setShowScrollToFirstIncomplete(newShowScrollToFirstIncomplete)
-  }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling, showScrollToFirstIncomplete])
+    if (isAutoScrolling) return
+    const shouldShow =
+      earliestIncompleteRound !== null &&
+      currentVisibleRound !== null &&
+      earliestIncompleteRound.id !== currentVisibleRound.id
+    setShowScrollToFirstIncomplete(shouldShow)
+  }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling])
 
   const scrollToFirstIncomplete = (scrollToTop = false) => {
     if (!listRef.current) return
-
     const container = listRef.current
-    let el: HTMLElement | null = null
-
-    if (scrollToTop) {
-      el = container.firstElementChild as HTMLElement
-    } else {
-      if (!earliestIncompleteRound) return
-
-      el = roundRefs.current[earliestIncompleteRound.id] || null
-      if (!el) return
-    }
+    const el = scrollToTop
+      ? (container.firstElementChild as HTMLElement)
+      : roundRefs.current[earliestIncompleteRound!.id]!
 
     el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
     setIsAutoScrolling(true)
-    let timeoutId: number
-    // limpa timeout pendente antes de criar o listener
-    const clearExisting = () => window.clearTimeout(timeoutId)
+
+    // ❶ Timeout de reserva
+    let timeoutId = window.setTimeout(() => {
+      setIsAutoScrolling(false)
+      container.removeEventListener('scroll', onScroll)
+    }, 800)
 
     const onScroll = () => {
-      clearExisting()
-      setIsAutoScrolling(true)
+      clearTimeout(timeoutId) // reinicia se o usuário ou a inércia gerar eventos
       timeoutId = window.setTimeout(() => {
         setIsAutoScrolling(false)
         container.removeEventListener('scroll', onScroll)
-      }, 1200)
+      }, 800)
     }
 
     container.addEventListener('scroll', onScroll, { passive: true })
