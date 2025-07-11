@@ -70,8 +70,6 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
 // Main component
 // -----------------------------------------------------------------------------
 const MatchesTab: FC = () => {
-  const [animateNextRound, setAnimateNextRound] = useState(true)
-
   const { players, updatePlayers } = usePlayers()
   const { rounds, addRound, setGames, replaceRound, removeRound } = useRounds()
   const { courts, formationMode, autoAlternate, autoAlternateMode, setAutoAlternateMode } = useCourts()
@@ -124,12 +122,10 @@ const MatchesTab: FC = () => {
 
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
-    // 0 ou 1 px de tolerância por causa de sub-pixel / iOS
-    const atTop = listRef.current ? listRef.current.scrollTop <= 1 : true
-    setAnimateNextRound(atTop)
-
     generateNewRound()
+    // setTimeout(() => {
     scrollToFirstIncomplete(true)
+    // })
   }
 
   const doShuffle = (idx: number) => {
@@ -256,11 +252,6 @@ const MatchesTab: FC = () => {
     }
   })
 
-  useEffect(() => {
-    // volta a animar na próxima geração
-    if (!animateNextRound) setAnimateNextRound(true)
-  }, [rounds.length])
-
   return (
     <React.Fragment>
       {currentVisibleRound &&
@@ -347,7 +338,7 @@ const MatchesTab: FC = () => {
                 className="flex flex-col gap-2 snap-start min-h-full"
                 layout="position"
                 variants={itemVariants}
-                initial={animateNextRound ? 'initial' : false}
+                initial="initial"
                 animate="animate"
                 exit="exit"
               >
