@@ -70,6 +70,8 @@ function applyRoundStats(players: Player[], round: ReturnType<typeof generateSch
 // Main component
 // -----------------------------------------------------------------------------
 const MatchesTab: FC = () => {
+  const [animateNextRound, setAnimateNextRound] = useState(true)
+
   const { players, updatePlayers } = usePlayers()
   const { rounds, addRound, setGames, replaceRound, removeRound } = useRounds()
   const { courts, formationMode, autoAlternate, autoAlternateMode, setAutoAlternateMode } = useCourts()
@@ -122,10 +124,14 @@ const MatchesTab: FC = () => {
 
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
+    // testa se a UL está no topo (≤1 px de tolerância)
+    const shouldAnimate = (listRef.current?.scrollTop ?? 0) <= 1
+
+    setAnimateNextRound(shouldAnimate) // guarda a decisão
     generateNewRound()
-    // setTimeout(() => {
-    scrollToFirstIncomplete(true)
-    // })
+
+    // só faz o auto-scroll se realmente vamos animar
+    if (shouldAnimate) scrollToFirstIncomplete(true)
   }
 
   const doShuffle = (idx: number) => {
@@ -252,6 +258,10 @@ const MatchesTab: FC = () => {
     }
   })
 
+  useEffect(() => {
+    setAnimateNextRound(true)
+  }, [rounds.length])
+
   return (
     <React.Fragment>
       {currentVisibleRound &&
@@ -336,11 +346,11 @@ const MatchesTab: FC = () => {
                 }}
                 style={{ scrollSnapStop: 'always' }}
                 className="flex flex-col gap-2 snap-start min-h-full"
-                layout="position"
-                variants={itemVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
+                layout={animateNextRound ? 'position' : false}
+                variants={animateNextRound ? itemVariants : undefined}
+                initial={animateNextRound ? 'initial' : false}
+                animate={animateNextRound ? 'animate' : undefined}
+                exit={animateNextRound ? 'exit' : undefined}
               >
                 <ol className="flex flex-col gap-2">
                   {round.matches.map((m) => {
