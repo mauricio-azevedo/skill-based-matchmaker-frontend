@@ -184,16 +184,15 @@ const MatchesTab: FC = () => {
   const calcRoundInView = useCallback((): Round | null => {
     const container = listRef.current
     if (!container) return null
+    const containerTop = container.getBoundingClientRect().top
 
-    const scrollTop = container.scrollTop
     let closest: Round | null = null
     let min = Infinity
 
     for (const r of rounds) {
       const el = roundRefs.current[r.id]
       if (!el) continue
-      // distância do topo do elemento ao topo do container, desconsiderando scroll da janela
-      const offset = Math.abs(el.offsetTop - scrollTop)
+      const offset = Math.abs(el.getBoundingClientRect().top - containerTop)
       if (offset < min) {
         min = offset
         closest = r
