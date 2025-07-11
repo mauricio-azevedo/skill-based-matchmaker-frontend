@@ -181,6 +181,8 @@ const MatchesTab: FC = () => {
 
   useEffect(() => {
     setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
+
+    if (rounds.length <= 0) setCurrentVisibleRound(null)
   }, [rounds])
 
   useEffect(() => {
