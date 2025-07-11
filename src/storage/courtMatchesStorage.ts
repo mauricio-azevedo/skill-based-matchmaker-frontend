@@ -52,3 +52,19 @@ export function purgeMatchesBeyond(maxId: number) {
 
   if (changed) saveTable(table)
 }
+
+export function updateMatchScore(courtId: number, roundIdx: number, gamesA: number, gamesB: number) {
+  const t = readTable()
+  const rounds = t[courtId]?.rounds ?? []
+  const round = rounds[roundIdx]
+  if (!round) return
+
+  const match = round.matches[0]
+  match.gamesA = gamesA
+  match.gamesB = gamesB
+  match.winner = gamesA === gamesB ? null : gamesA > gamesB ? 'A' : 'B'
+
+  rounds[roundIdx] = { ...round, matches: [{ ...match }] }
+  t[courtId] = { ...t[courtId], rounds, updatedAt: new Date().toISOString() }
+  saveTable(t)
+}

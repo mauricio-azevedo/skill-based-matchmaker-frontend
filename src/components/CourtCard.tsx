@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MatchCard } from '@/components/MatchCard'
-import type { UnsavedRound } from '@/types/players'
+import type { Match, UnsavedRound } from '@/types/players'
 
 export interface CourtCardProps {
   courtId: number
@@ -14,6 +14,7 @@ export interface CourtCardProps {
   onSelect: (index: number) => void
   canGenerate: boolean
   loading: boolean
+  onSaveScore: (gamesA: number, gamesB: number) => void
 }
 
 export const CourtCard = memo(function CourtCard({
@@ -24,8 +25,9 @@ export const CourtCard = memo(function CourtCard({
   onSelect,
   canGenerate,
   loading,
+  onSaveScore,
 }: CourtCardProps) {
-  const match = selected >= 0 ? rounds[selected].matches[0] : undefined
+  const match: Match | undefined = selected >= 0 ? rounds[selected].matches[0] : undefined
 
   return (
     <Card aria-label={`Quadra ${courtId}`}>
@@ -53,7 +55,7 @@ export const CourtCard = memo(function CourtCard({
           </Select>
         )}
 
-        <MatchCard match={match} />
+        <MatchCard match={match} onSave={onSaveScore} />
       </CardContent>
     </Card>
   )

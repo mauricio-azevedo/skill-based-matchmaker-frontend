@@ -1,7 +1,7 @@
 import type { Reducer } from 'react'
 import type { UnsavedRound } from '@/types/players'
 
-/* ─────────── Types ─────────── */
+/* ───────── Types ───────── */
 export type CourtId = number
 export type RoundsMap = Record<CourtId, UnsavedRound[]>
 export type SelectedMap = Record<CourtId, number>
@@ -16,10 +16,11 @@ export interface State {
 export type Action =
   | { type: 'addRound'; courtId: CourtId; round: UnsavedRound }
   | { type: 'select'; courtId: CourtId; index: number }
+  | { type: 'updateScore'; courtId: CourtId; roundIdx: number; gamesA: number; gamesB: number }
   | { type: 'syncCourts'; ids: CourtId[] }
   | { type: 'loading'; courtId: CourtId; value: boolean }
 
-/* ─────────── Reducer ─────────── */
+/* ───────── Reducer ───────── */
 export const playTabReducer: Reducer<State, Action> = (state, action) => {
   switch (action.type) {
     case 'addRound': {
@@ -31,11 +32,32 @@ export const playTabReducer: Reducer<State, Action> = (state, action) => {
         loading: { ...state.loading, [action.courtId]: false },
       }
     }
+
     case 'select':
       return {
         ...state,
         selected: { ...state.selected, [action.courtId]: action.index },
       }
+
+    case 'updateScore': {
+      const rounds = state.rounds[action.courtId] ?? []
+      const round = rounds[action.roundIdx]
+
+      if (!round) return state // nada para atualizar
+
+      const match = round.matches[0]
+      match.gamesA = action.gamesA
+      match.gamesB = action.gamesB
+      match.winner = action.gamesA === action.gamesB ? null : action.gamesA > action.gamesB ? 'A' : 'B'
+
+      const newRounds = [...rounds]
+      newRounds[action.roundIdx] = { ...round, matches: [{ ...match }] }
+
+      return {
+        ...state,
+        rounds: { ...state.rounds, [action.courtId]: newRounds },
+      }
+    }
 
     case 'loading':
       return {

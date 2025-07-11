@@ -6,7 +6,12 @@ import { useCourts } from '@/context/CourtsContext'
 import { usePlayers } from '@/context/PlayersContext'
 
 import { ensureCourtsTable, readAllCourts } from '@/storage/courtsStorage'
-import { appendCourtMatch, purgeMatchesBeyond, readAllCourtMatches } from '@/storage/courtMatchesStorage'
+import {
+  appendCourtMatch,
+  purgeMatchesBeyond,
+  readAllCourtMatches,
+  updateMatchScore,
+} from '@/storage/courtMatchesStorage'
 
 import { toast } from 'sonner'
 
@@ -36,6 +41,18 @@ export function usePlayTabLogic() {
     setRows(fresh)
     dispatch({ type: 'syncCourts', ids: fresh.map((r) => r.id) })
   }, [courts])
+
+  /* salvar placar */
+  const handleSaveScore = useCallback(
+    (courtId: CourtId, gamesA: number, gamesB: number) => {
+      const roundIdx = state.selected[courtId] ?? -1
+      if (roundIdx < 0) return
+
+      dispatch({ type: 'updateScore', courtId, roundIdx, gamesA, gamesB })
+      updateMatchScore(courtId, roundIdx, gamesA, gamesB)
+    },
+    [state.selected],
+  )
 
   /* ───────── handlers ───────── */
   const handleAddCourt = useCallback(() => setCourts((p) => p + 1), [setCourts])
@@ -69,5 +86,6 @@ export function usePlayTabLogic() {
     handleAddCourt,
     handleGenerate,
     handleSelect,
+    handleSaveScore,
   }
 }

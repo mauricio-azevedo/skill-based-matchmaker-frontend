@@ -5,7 +5,7 @@ import { CourtCard } from '@/components/CourtCard'
 import { usePlayTabLogic } from './usePlayTabLogic'
 
 export function PlayTab() {
-  const { rows, state, canGenerate, handleAddCourt, handleGenerate, handleSelect } = usePlayTabLogic()
+  const { rows, state, canGenerate, handleAddCourt, handleGenerate, handleSelect, handleSaveScore } = usePlayTabLogic()
 
   return (
     <div className="flex flex-col gap-4">
@@ -26,6 +26,7 @@ export function PlayTab() {
           selected={state.selected[id] ?? -1}
           onGenerate={() => handleGenerate(id)}
           onSelect={(i) => handleSelect(id, i)}
+          onSaveScore={(a, b) => handleSaveScore(id, a, b)}
           canGenerate={canGenerate}
           loading={state.loading[id] ?? false}
         />
