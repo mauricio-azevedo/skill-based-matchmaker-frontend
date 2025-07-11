@@ -248,7 +248,7 @@ const MatchesTab: FC = () => {
       ? (container.firstElementChild as HTMLElement)
       : roundRefs.current[earliestIncompleteRound?.id ?? 0]!
 
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
     setIsAutoScrolling(true)
   }
