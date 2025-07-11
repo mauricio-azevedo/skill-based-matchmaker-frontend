@@ -21,7 +21,7 @@ export function PlayTab() {
   } = usePlayTabLogic()
 
   return (
-    <div className="flex flex-col gap-3 px-2 py-3 w-full max-w-sm mx-auto">
+    <div className="flex flex-col gap-3 px-2 py-3 w-full max-w-sm mx-auto overflow-hidden">
       {/* barra de ações */}
       <div className="flex justify-end">
         <Button size="sm" variant="outline" className="gap-1" onClick={handleAddCourt}>
@@ -30,22 +30,24 @@ export function PlayTab() {
       </div>
 
       {/* quadras */}
-      {rows.map(({ id }) => {
-        const canGenerate = canGenerateGlobal && courtFinished(id)
-        return (
-          <CourtCard
-            key={id}
-            courtId={id}
-            rounds={state.rounds[id] ?? []}
-            selected={state.selected[id] ?? -1}
-            onGenerate={() => canGenerate && handleGenerate(id)}
-            onSelect={(i) => handleSelect(id, i)}
-            onSaveScore={(a, b) => handleSaveScore(id, a, b)}
-            canGenerate={canGenerate}
-            loading={state.loading[id] ?? false}
-          />
-        )
-      })}
+      <div className="flex flex-col gap-3 overflow-y-auto">
+        {rows.map(({ id }) => {
+          const canGenerate = canGenerateGlobal && courtFinished(id)
+          return (
+            <CourtCard
+              key={id}
+              courtId={id}
+              rounds={state.rounds[id] ?? []}
+              selected={state.selected[id] ?? -1}
+              onGenerate={() => canGenerate && handleGenerate(id)}
+              onSelect={(i) => handleSelect(id, i)}
+              onSaveScore={(a, b) => handleSaveScore(id, a, b)}
+              canGenerate={canGenerate}
+              loading={state.loading[id] ?? false}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }
