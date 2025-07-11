@@ -27,7 +27,7 @@ const PLAYERS_PER_MATCH = 4 as const
 const SCORE_OPTIONS = [0, 1, 2, 3, 4, 5, 6] as const
 
 // Amount of pixels we still consider "at the very top". Adjust if needed.
-const TOP_SCROLL_TOLERANCE = 10
+const TOP_SCROLL_TOLERANCE = 0
 
 // -----------------------------------------------------------------------------
 // Utility helpers
