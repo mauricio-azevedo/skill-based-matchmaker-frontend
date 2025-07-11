@@ -81,6 +81,8 @@ const MatchesTab: FC = () => {
 
   const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
 
+  const handleScrollRef = useRef<() => void>(() => {})
+
   const [confirmShuffle, setConfirmShuffle] = useState<{
     open: boolean
     roundIndex: number | null
@@ -181,6 +183,26 @@ const MatchesTab: FC = () => {
   const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
   const hasFinishedInitialAutoScroll = useRef(false)
 
+  const calcRoundInView = (): Round | null => {
+    const container = listRef.current
+    if (!container) return null
+    const containerTop = container.getBoundingClientRect().top
+
+    let closest: Round | null = null
+    let min = Infinity
+
+    for (const r of rounds) {
+      const el = roundRefs.current[r.id]
+      if (!el) continue
+      const offset = Math.abs(el.getBoundingClientRect().top - containerTop)
+      if (offset < min) {
+        min = offset
+        closest = r
+      }
+    }
+    return closest
+  }
+
   useEffect(() => {
     setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
 
@@ -196,30 +218,24 @@ const MatchesTab: FC = () => {
     if (!container) return
 
     const handleScroll = () => {
-      const top = container.getBoundingClientRect().top
-      let closest: Round | null = null
-      let minOffset = Infinity
-
-      for (const r of rounds) {
-        const el = roundRefs.current[r.id]
-        if (!el) continue
-
-        const offset = Math.abs(el.getBoundingClientRect().top - top)
-        if (offset < minOffset) {
-          minOffset = offset
-          closest = r
-        }
-      }
-
+      const closest = calcRoundInView()
       if (closest && closest.id !== currentVisibleRound?.id) {
         setCurrentVisibleRound(closest)
       }
     }
 
+    // guarda referência para poder reutilizar em outros lugares, se quiser
+    handleScrollRef.current = handleScroll
+
     container.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
     return () => container.removeEventListener('scroll', handleScroll)
-  }, [rounds, currentVisibleRound])
+  }, [rounds, currentVisibleRound, calcRoundInView])
+
+  useEffect(() => {
+    if (currentVisibleRound && rounds.some((r) => r.id === currentVisibleRound.id)) return
+    setCurrentVisibleRound(calcRoundInView())
+  }, [rounds])
 
   useEffect(() => {
     // if (isAutoScrolling) return
