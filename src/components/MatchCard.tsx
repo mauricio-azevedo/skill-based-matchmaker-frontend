@@ -1,40 +1,37 @@
 import { useEffect, useState } from 'react'
-import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Match } from '@/types/players'
 
 interface Props {
   match?: Match
-  /** callback disparado automaticamente quando ambos os placares forem preenchidos */
+  /** callback dispara quando os dois placares (1-6) forem selecionados */
   onSave?: (gamesA: number, gamesB: number) => void
 }
 
 /**
- * Cartão de partida (mobile-first) – sem botão “Salvar”.
- * Assim que os dois campos recebem valores válidos, `onSave` é disparado
- * automaticamente (apenas se o placar mudou).
+ * Cartão de partida (mobile-first).
+ * Inputs de placar foram trocados por `<Select>` com opções 1-6.
  */
 export function MatchCard({ match, onSave }: Props) {
-  /* estado local */
+  /* placares locais ('' | 1-6) */
   const [a, setA] = useState<number | ''>('')
   const [b, setB] = useState<number | ''>('')
 
-  /* reseta placares ao trocar de partida */
+  /* reseta ao trocar de match */
   useEffect(() => {
     setA(match?.gamesA ?? '')
     setB(match?.gamesB ?? '')
   }, [match])
 
-  const bothFilled = a !== '' && b !== ''
+  const filled = a !== '' && b !== ''
   const dirty = match !== undefined && ((match.gamesA ?? '') !== a || (match.gamesB ?? '') !== b)
 
-  /* dispara callback assim que ambos os campos estiverem preenchidos e houve mudança */
+  /* salva automaticamente quando válido e alterado */
   useEffect(() => {
-    if (match && bothFilled && dirty) {
-      onSave?.(+a, +b)
-    }
-  }, [bothFilled, dirty, a, b, match, onSave])
+    if (match && filled && dirty) onSave?.(+a, +b)
+  }, [filled, dirty, a, b, match, onSave])
 
-  /* placeholder – nenhuma partida */
+  /* placeholder */
   if (!match) return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
 
   return (
@@ -50,35 +47,39 @@ export function MatchCard({ match, onSave }: Props) {
         </span>
       </div>
 
-      {/* inputs do placar */}
+      {/* selects de placar */}
       <div className="flex items-center justify-center gap-2">
-        <Input
-          type="number"
-          min={0}
-          value={a}
-          onChange={(e) => setA(e.target.value === '' ? '' : +e.target.value)}
-          className="w-14 text-center"
-          inputMode="numeric"
-          pattern="[0-9]*"
-        />
+        <ScoreSelect value={a} onChange={setA} />
         <span className="text-muted-foreground">x</span>
-        <Input
-          type="number"
-          min={0}
-          value={b}
-          onChange={(e) => setB(e.target.value === '' ? '' : +e.target.value)}
-          className="w-14 text-center"
-          inputMode="numeric"
-          pattern="[0-9]*"
-        />
+        <ScoreSelect value={b} onChange={setB} />
       </div>
 
-      {/* vencedor */}
+      {/* vencedor (se já definido) */}
       {match.winner && (
         <span className="text-xs italic text-muted-foreground text-center">
           Vencedor: {match.winner === 'A' ? 'Equipe A' : 'Equipe B'}
         </span>
       )}
     </div>
+  )
+}
+
+/* -----------------------------------------------------------------------
+ * Componente auxiliar: Select 1-6 (placeholder '-')
+ * --------------------------------------------------------------------- */
+function ScoreSelect({ value, onChange }: { value: number | ''; onChange: (v: number | '') => void }) {
+  return (
+    <Select value={value === '' ? '' : String(value)} onValueChange={(v) => onChange(v === '' ? '' : +v)}>
+      <SelectTrigger className="w-16 h-8 text-center">
+        <SelectValue placeholder="-" />
+      </SelectTrigger>
+      <SelectContent side="bottom">
+        {Array.from({ length: 6 }, (_, i) => i + 1).map((n) => (
+          <SelectItem key={n} value={String(n)} className="text-sm text-center">
+            {n}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
