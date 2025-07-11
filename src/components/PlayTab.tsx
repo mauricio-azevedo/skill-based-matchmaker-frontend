@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 
 import { useCourts } from '@/context/CourtsContext'
-import { usePlayers } from '@/context/PlayersContext' // ← players
-import { type CourtRow, ensureCourtsTable, readAllCourts } from '@/storage/courtsStorage'
+import { usePlayers } from '@/context/PlayersContext'
 
-// shadcn/ui
+import { type CourtRow, ensureCourtsTable, readAllCourts } from '@/storage/courtsStorage'
+import { purgeMatchesBeyond, readAllCourtMatches, upsertCourtMatch } from '@/storage/courtMatchesStorage'
+
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
@@ -15,17 +16,18 @@ import { MatchCard } from '@/components/MatchCard'
 
 export function PlayTab() {
   /* ─────────────────────────── estado/contexto ────────────────────────── */
-  const { courts, setCourts } = useCourts()
+  const { courts, setCourts, formationMode } = useCourts()
   const { players } = usePlayers()
-  const { formationMode } = useCourts()
 
   const [rows, setRows] = useState<CourtRow[]>(() => readAllCourts())
-  const [schedules, setSchedules] = useState<Record<number, UnsavedRound>>({})
+  const [schedules, setSchedules] = useState<Record<number, UnsavedRound>>(() => readAllCourtMatches())
 
-  /* Sincroniza a “tabela” de quadras persistida */
+  /* Sincroniza a “tabela” de quadras e as partidas persistidas */
   useEffect(() => {
     ensureCourtsTable(courts)
+    purgeMatchesBeyond(courts) // remove partidas de quadras inexistentes
     setRows(readAllCourts())
+    setSchedules(readAllCourtMatches()) // recarrega partidas válidas
   }, [courts])
 
   /* Adiciona nova quadra */
@@ -36,11 +38,13 @@ export function PlayTab() {
     try {
       const schedule = generateSchedule(players, formationMode)
       setSchedules((prev) => ({ ...prev, [courtId]: schedule }))
+      upsertCourtMatch(courtId, schedule) // persiste no localStorage
     } catch (err) {
       toast.error(String(err))
     }
   }
 
+  /* ─────────────────────────── render ────────────────────────── */
   return (
     <div className="flex flex-col gap-4">
       {/* Barra de ações */}
