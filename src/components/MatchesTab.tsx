@@ -155,6 +155,7 @@ const MatchesTab: FC = () => {
     const roundToRemove = rounds[idx]
     if (!roundToRemove) return
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
+    setIsAutoScrolling(true)
     removeRound(idx)
   }
 
@@ -258,7 +259,11 @@ const MatchesTab: FC = () => {
     const container = listRef.current
     if (!container) return
 
-    const cancelAutoScroll = () => setIsAutoScrolling(false)
+    const cancelAutoScroll = () => {
+      setTimeout(() => {
+        setIsAutoScrolling(false)
+      }, 100)
+    }
 
     // Toda interação do usuário que normalmente “mata” o smooth-scroll
     container.addEventListener('touchstart', cancelAutoScroll, { passive: true })
@@ -348,7 +353,9 @@ const MatchesTab: FC = () => {
         >
           <AnimatePresence
             onExitComplete={() => {
-              setIsAutoScrolling(false)
+              setTimeout(() => {
+                setIsAutoScrolling(false)
+              }, 600)
             }}
             initial={false}
           >
