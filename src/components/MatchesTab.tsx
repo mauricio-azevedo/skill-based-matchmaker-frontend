@@ -114,7 +114,6 @@ const MatchesTab: FC = () => {
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts, currentMode)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-      // singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
     } catch (error) {
       singleToastError((error as Error).message, { duration: 6000 })
     }
@@ -122,10 +121,10 @@ const MatchesTab: FC = () => {
 
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
-    generateNewRound()
-    // setTimeout(() => {
     scrollToFirstIncomplete(true)
-    // })
+    setTimeout(() => {
+      generateNewRound()
+    }, 100)
   }
 
   const doShuffle = (idx: number) => {
@@ -156,7 +155,9 @@ const MatchesTab: FC = () => {
     if (!roundToRemove) return
     updatePlayers((prev) => applyRoundStats(prev, roundToRemove, -1))
     setIsDeleting(true)
-    removeRound(idx)
+    setTimeout(() => {
+      removeRound(idx)
+    }, 100)
   }
 
   const warnIfInsufficient = (): boolean => {
