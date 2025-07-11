@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import PlayersTab from './components/PlayersTab'
-import MatchesTab from './components/MatchesTab'
 import LeaderboardTab from './components/LeaderboardTab'
 import { Moon, Settings, Sun } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -15,6 +14,7 @@ import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import SetupTab from '@/components/SetupTab'
+import { PlayTab } from '@/components/PlayTab'
 
 export default function App() {
   // -----------------------------------------------------------
@@ -75,7 +75,7 @@ export default function App() {
     <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
       {/* ---------- Header ---------- */}
       <header className="flex items-center border-b px-2 py-2">
-        <h1 className="text-xl font-semibold tracking-tight">Aplicativo</h1>
+        <h1 className="text-xl font-semibold tracking-tight">PLAY!</h1>
         <div className="ml-auto flex items-center gap-4">
           {/* Tema */}
           <div className="flex items-center gap-2">
@@ -163,8 +163,8 @@ export default function App() {
           <TabsContent value="setup" asChild>
             <SetupTab />
           </TabsContent>
-          <TabsContent value="matches" asChild>
-            <MatchesTab />
+          <TabsContent value="play" asChild>
+            <PlayTab />
           </TabsContent>
           <TabsContent value="leaderboard" asChild>
             <LeaderboardTab />
@@ -176,6 +176,7 @@ export default function App() {
           <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="players">Jogadores</TabsTrigger>
           <TabsTrigger value="matches">Partidas</TabsTrigger>
+          <TabsTrigger value="play">PLAY!</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
       </Tabs>
