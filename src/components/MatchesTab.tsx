@@ -100,6 +100,17 @@ const MatchesTab: FC = () => {
     roundNumber: null,
   })
 
+  const [currentVisibleRound, setCurrentVisibleRound] = useState<Round | null>(findEarliestIncompleteRound(rounds))
+  const [earliestIncompleteRound, setEarliestIncompleteRound] = useState<Round | null>(
+    findEarliestIncompleteRound(rounds),
+  )
+  const roundRefs = useRef<Record<string, HTMLLIElement | null>>({})
+  const scrollRef = useRef<HTMLLIElement>(null)
+
+  const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const hasFinishedInitialAutoScroll = useRef(false)
+
   const hasScoresInRound = (idx: number | null) =>
     idx !== null && rounds[idx]?.matches.some((m) => m.gamesA !== null || m.gamesB !== null)
 
@@ -172,16 +183,18 @@ const MatchesTab: FC = () => {
     return false
   }
 
-  const [currentVisibleRound, setCurrentVisibleRound] = useState<Round | null>(findEarliestIncompleteRound(rounds))
-  const [earliestIncompleteRound, setEarliestIncompleteRound] = useState<Round | null>(
-    findEarliestIncompleteRound(rounds),
-  )
-  const roundRefs = useRef<Record<string, HTMLLIElement | null>>({})
-  const scrollRef = useRef<HTMLLIElement>(null)
+  const scrollToFirstIncomplete = (scrollToTop = false) => {
+    if (!listRef.current) return
+    const container = listRef.current
+    const el = scrollToTop
+      ? (container.firstElementChild as HTMLElement)
+      : earliestIncompleteRound
+        ? roundRefs.current[earliestIncompleteRound.id]
+        : null
 
-  const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
-  const [isDeleting, setIsDeleting] = useState<boolean>(false)
-  const hasFinishedInitialAutoScroll = useRef(false)
+    setIsAutoScrolling(true)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   useEffect(() => {
     setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
@@ -235,7 +248,6 @@ const MatchesTab: FC = () => {
   }, [rounds, currentVisibleRound])
 
   useEffect(() => {
-    // if (isAutoScrolling) return
     const shouldShow =
       hasFinishedInitialAutoScroll.current && // só depois do 1.º auto-scroll
       earliestIncompleteRound !== null &&
@@ -243,19 +255,6 @@ const MatchesTab: FC = () => {
       earliestIncompleteRound.id !== currentVisibleRound.id
     setShowScrollToFirstIncomplete(shouldShow)
   }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling])
-
-  const scrollToFirstIncomplete = (scrollToTop = false) => {
-    if (!listRef.current) return
-    const container = listRef.current
-    const el = scrollToTop
-      ? (container.firstElementChild as HTMLElement)
-      : earliestIncompleteRound
-        ? roundRefs.current[earliestIncompleteRound.id]
-        : null
-
-    setIsAutoScrolling(true)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   useScrollEnd(listRef, () => {
     setIsAutoScrolling(false)
