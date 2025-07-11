@@ -76,9 +76,6 @@ const MatchesTab: FC = () => {
 
   const activePlayers = players.filter((p) => p.active)
 
-  const isAtTop = (el: HTMLElement | null) => !el || el.scrollTop <= 2
-  const [allowRoundAnim, setAllowRoundAnim] = useState(true)
-
   // Ref for scroll container
   const listRef = useRef<HTMLUListElement>(null)
 
@@ -125,14 +122,10 @@ const MatchesTab: FC = () => {
 
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
-    // 1️⃣ Capture BEFORE you add the new round
-    const shouldAnimate = isAtTop(listRef.current)
-    setAllowRoundAnim(shouldAnimate)
-
     generateNewRound()
-
-    // 2️⃣ Optional: keep your existing “scroll to top” logic
-    if (!shouldAnimate) scrollToFirstIncomplete(true)
+    // setTimeout(() => {
+    scrollToFirstIncomplete(true)
+    // })
   }
 
   const doShuffle = (idx: number) => {
@@ -331,7 +324,7 @@ const MatchesTab: FC = () => {
           )}
           style={{ scrollBehavior: 'smooth' }}
         >
-          <AnimatePresence initial={allowRoundAnim}>
+          <AnimatePresence initial={false}>
             {rounds.map((round, idx) => (
               <motion.li
                 key={round.id}
@@ -343,13 +336,11 @@ const MatchesTab: FC = () => {
                 }}
                 style={{ scrollSnapStop: 'always' }}
                 className="flex flex-col gap-2 snap-start min-h-full"
-                /* 👇 Only run enter / exit variants when allowed */
-                initial={allowRoundAnim ? 'initial' : false}
-                animate={allowRoundAnim ? 'animate' : false}
-                exit="exit"
-                /* 👇 Turn layout-flip off when you said “no animation” */
-                layout={allowRoundAnim ? 'position' : false}
+                layout="position"
                 variants={itemVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
               >
                 <ol className="flex flex-col gap-2">
                   {round.matches.map((m) => {
