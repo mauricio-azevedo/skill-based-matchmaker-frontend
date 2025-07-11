@@ -193,27 +193,19 @@ const MatchesTab: FC = () => {
     scrollToFirstIncomplete()
   }, [])
 
-  const TOUCH_ZONE = 0.25 // 25 % da altura da li
-  const SNAP_MARGIN = 8 // px extra para tolerar sub-pixel
-
-  const isTouchingTop = (el: HTMLElement, containerTop: number) => {
-    const rect = el.getBoundingClientRect()
-    const diff = rect.top - containerTop
-    return Math.abs(diff) <= SNAP_MARGIN || (diff >= 0 && diff < rect.height * TOUCH_ZONE)
-  }
-
   useLayoutEffect(() => {
     const container = listRef.current
     if (!container) return
 
     const handleScroll = () => {
       const containerTop = container.getBoundingClientRect().top
+      const THRESHOLD = 1 // px
 
       // 1. Qualquer rodada cujo topo esteja “encostado” ao topo do contêiner
       const touching = rounds.find((r) => {
         const el = roundRefs.current[r.id]
         if (!el) return false
-        return isTouchingTop(el, containerTop)
+        return Math.abs(el.getBoundingClientRect().top - containerTop) <= THRESHOLD
       })
 
       // 2. Fallback: menor distância absoluta (lógica antiga)
