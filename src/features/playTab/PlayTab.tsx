@@ -1,7 +1,7 @@
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { CourtCard } from '@/components/CourtCard'
 import { usePlayTabLogic } from './usePlayTabLogic'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 export function PlayTab() {
   const {
@@ -16,7 +16,7 @@ export function PlayTab() {
   } = usePlayTabLogic()
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2 w-full">
       <div className="flex justify-end">
         <Button variant="outline" className="gap-2" onClick={handleAddCourt}>
           <Plus size={16} /> Adicionar quadra
