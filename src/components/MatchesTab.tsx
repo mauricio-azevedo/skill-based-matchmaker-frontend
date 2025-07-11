@@ -243,14 +243,26 @@ const MatchesTab: FC = () => {
 
     const container = listRef.current
     let el: HTMLElement | null = null
+    let targetRound: Round | null = null
 
     if (scrollToTop) {
       el = container.firstElementChild as HTMLElement
+      if (el) {
+        const idx = Number(el.getAttribute('data-round-idx'))
+        targetRound = rounds[idx] ?? null
+      }
     } else {
       if (!earliestIncompleteRound) return
 
       el = roundRefs.current[earliestIncompleteRound.id] || null
-      if (!el) return
+      targetRound = earliestIncompleteRound
+    }
+
+    if (!el) return
+
+    // Safari mobile (e outros) podem não disparar "scroll":
+    if (targetRound && targetRound.id !== currentVisibleRound?.id) {
+      setCurrentVisibleRound(targetRound)
     }
 
     el.scrollIntoView({ behavior: 'smooth', block: 'start' })
