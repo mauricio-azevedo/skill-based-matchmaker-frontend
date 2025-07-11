@@ -1,85 +1,118 @@
 import { useEffect, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { Match } from '@/types/players'
 
+/* ------------------------------------------------------------------------
+ * Utils
+ * --------------------------------------------------------------------- */
+const SCORE_OPTIONS = [...Array(6)].map((_, i) => String(i + 1)) // ['1','2',..,'6']
+
+const avatarUrl = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
+
+/* jogador + avatar (reutilizável) ------------------------------------- */
+const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolean }) => (
+  <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-right'}`}>
+    <Avatar className="w-6 h-6 shrink-0">
+      <AvatarImage src={avatarUrl(name)} alt={name} />
+      <AvatarFallback>
+        {name
+          .split(' ')
+          .slice(0, 2)
+          .map((w) => w[0]?.toUpperCase())
+          .join('')}
+      </AvatarFallback>
+    </Avatar>
+    <p className="truncate max-w-[90px]">{name}</p>
+  </div>
+)
+
+/* select 1-6 ----------------------------------------------------------- */
+const ScoreSelect = ({
+  value,
+  onChange,
+  label,
+}: {
+  value: number | ''
+  onChange: (v: number | '') => void
+  label: string
+}) => (
+  <Select value={value === '' ? '' : String(value)} onValueChange={(v) => onChange(v === '' ? '' : +v)}>
+    <SelectTrigger aria-label={label} className="w-10 h-10 justify-center text-center [&>svg]:hidden">
+      <SelectValue placeholder="-" />
+    </SelectTrigger>
+
+    <SelectContent side="bottom">
+      {SCORE_OPTIONS.map((opt) => (
+        <SelectItem key={opt} value={opt} className="text-sm text-center">
+          {opt}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+)
+
+/* ------------------------------------------------------------------------
+ * MatchCard
+ * --------------------------------------------------------------------- */
 interface Props {
   match?: Match
-  /** callback dispara quando os dois placares (1-6) forem selecionados */
+  /** dispara automaticamente assim que ambos os placares válidos forem definidos */
   onSave?: (gamesA: number, gamesB: number) => void
 }
 
-/**
- * Cartão de partida (mobile-first).
- * Inputs de placar foram trocados por `<Select>` com opções 1-6.
- */
 export function MatchCard({ match, onSave }: Props) {
-  /* placares locais ('' | 1-6) */
-  const [a, setA] = useState<number | ''>('')
-  const [b, setB] = useState<number | ''>('')
+  /* placares locais */
+  const [gamesA, setGamesA] = useState<number | ''>('')
+  const [gamesB, setGamesB] = useState<number | ''>('')
 
-  /* reseta ao trocar de match */
+  /* reseta quando muda a partida */
   useEffect(() => {
-    setA(match?.gamesA ?? '')
-    setB(match?.gamesB ?? '')
+    setGamesA(match?.gamesA ?? '')
+    setGamesB(match?.gamesB ?? '')
   }, [match])
 
-  const filled = a !== '' && b !== ''
-  const dirty = match !== undefined && ((match.gamesA ?? '') !== a || (match.gamesB ?? '') !== b)
+  const bothFilled = gamesA !== '' && gamesB !== ''
+  const dirty = match && ((match.gamesA ?? '') !== gamesA || (match.gamesB ?? '') !== gamesB)
 
-  /* salva automaticamente quando válido e alterado */
+  /* salva automaticamente */
   useEffect(() => {
-    if (match && filled && dirty) onSave?.(+a, +b)
-  }, [filled, dirty, a, b, match, onSave])
+    if (match && bothFilled && dirty) onSave?.(+gamesA, +gamesB)
+  }, [bothFilled, dirty, gamesA, gamesB, match, onSave])
 
-  /* placeholder */
+  /* fallback */
   if (!match) return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
 
+  const { teamA, teamB } = match
+
   return (
-    <div className="flex flex-col gap-3">
-      {/* jogadores */}
-      <div className="flex flex-col text-center text-sm leading-tight">
-        <span className="font-medium break-words">
-          {match.teamA[0].name} & {match.teamA[1].name}
-        </span>
-        <span className="text-xs text-muted-foreground">vs.</span>
-        <span className="font-medium break-words">
-          {match.teamB[0].name} & {match.teamB[1].name}
-        </span>
+    <div className="flex items-center justify-between gap-4">
+      {/* equipe A */}
+      <div className="flex flex-col gap-2">
+        <PlayerEntry name={teamA[0].name} />
+        <PlayerEntry name={teamA[1].name} />
       </div>
 
-      {/* selects de placar */}
-      <div className="flex items-center justify-center gap-2">
-        <ScoreSelect value={a} onChange={setA} />
-        <span className="text-muted-foreground">x</span>
-        <ScoreSelect value={b} onChange={setB} />
+      {/* seletor central */}
+      <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center gap-1">
+          <ScoreSelect value={gamesA} onChange={setGamesA} label="Games equipe A" />
+          <span className="text-muted-foreground">x</span>
+          <ScoreSelect value={gamesB} onChange={setGamesB} label="Games equipe B" />
+        </div>
+
+        {match.winner && (
+          <span className="text-xs italic text-muted-foreground">
+            {match.winner === 'A' ? 'Vitória A' : 'Vitória B'}
+          </span>
+        )}
       </div>
 
-      {/* vencedor (se já definido) */}
-      {match.winner && (
-        <span className="text-xs italic text-muted-foreground text-center">
-          Vencedor: {match.winner === 'A' ? 'Equipe A' : 'Equipe B'}
-        </span>
-      )}
+      {/* equipe B (espelhada) */}
+      <div className="flex flex-col gap-2">
+        <PlayerEntry name={teamB[0].name} reverse />
+        <PlayerEntry name={teamB[1].name} reverse />
+      </div>
     </div>
-  )
-}
-
-/* -----------------------------------------------------------------------
- * Componente auxiliar: Select 1-6 (placeholder '-')
- * --------------------------------------------------------------------- */
-function ScoreSelect({ value, onChange }: { value: number | ''; onChange: (v: number | '') => void }) {
-  return (
-    <Select value={value === '' ? '' : String(value)} onValueChange={(v) => onChange(v === '' ? '' : +v)}>
-      <SelectTrigger className="w-16 h-8 text-center">
-        <SelectValue placeholder="-" />
-      </SelectTrigger>
-      <SelectContent side="bottom">
-        {Array.from({ length: 6 }, (_, i) => i + 1).map((n) => (
-          <SelectItem key={n} value={String(n)} className="text-sm text-center">
-            {n}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   )
 }
