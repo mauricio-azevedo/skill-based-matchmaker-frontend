@@ -387,7 +387,7 @@ const MatchesTab: FC = () => {
                 }}
                 style={{ scrollSnapStop: 'always' }}
                 className="flex flex-col gap-2 snap-start min-h-full"
-                layout={false}
+                layout="position"
                 variants={itemVariants}
                 initial="initial"
                 animate="animate"
