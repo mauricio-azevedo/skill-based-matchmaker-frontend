@@ -18,6 +18,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { FORMATION_MODES } from '@/context/FORMATION_MODES'
+import { useScrollEnd } from '@/components/UseScrollEnd'
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -122,9 +123,9 @@ const MatchesTab: FC = () => {
   // Handle generate click: scroll to top if needed
   const handleGenerate = () => {
     generateNewRound()
-    setTimeout(() => {
-      scrollToFirstIncomplete(true)
-    }, 300)
+    // setTimeout(() => {
+    scrollToFirstIncomplete(true)
+    // })
   }
 
   const doShuffle = (idx: number) => {
@@ -220,7 +221,7 @@ const MatchesTab: FC = () => {
   }, [rounds, currentVisibleRound])
 
   useEffect(() => {
-    if (isAutoScrolling) return
+    // if (isAutoScrolling) return
     const shouldShow =
       earliestIncompleteRound !== null &&
       currentVisibleRound !== null &&
@@ -238,23 +239,15 @@ const MatchesTab: FC = () => {
     el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
     setIsAutoScrolling(true)
-
-    // ❶ Timeout de reserva
-    let timeoutId = window.setTimeout(() => {
-      setIsAutoScrolling(false)
-      container.removeEventListener('scroll', onScroll)
-    }, 400)
-
-    const onScroll = () => {
-      clearTimeout(timeoutId) // reinicia se o usuário ou a inércia gerar eventos
-      timeoutId = window.setTimeout(() => {
-        setIsAutoScrolling(false)
-        container.removeEventListener('scroll', onScroll)
-      }, 400)
-    }
-
-    container.addEventListener('scroll', onScroll, { passive: true })
   }
+
+  useScrollEnd(
+    listRef,
+    () =>
+      // setTimeout(() => {
+      setIsAutoScrolling(false),
+    // }, 0)
+  )
 
   return (
     <React.Fragment>
@@ -322,7 +315,10 @@ const MatchesTab: FC = () => {
         {/* Rounds List */}
         <ul
           ref={listRef}
-          className={cn('overflow-y-auto gap-12 flex flex-col', 'snap-y snap-mandatory')}
+          className={cn(
+            'overflow-y-auto gap-12 flex flex-col',
+            !isAutoScrolling && 'snap-y snap-mandatory', // só liga o snap quando NÃO estamos em auto-scroll
+          )}
           style={{ scrollBehavior: 'smooth' }}
         >
           <AnimatePresence initial={false}>
