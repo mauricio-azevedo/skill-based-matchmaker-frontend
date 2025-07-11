@@ -315,7 +315,8 @@ const MatchesTab: FC = () => {
         </AnimatePresence>
 
         {/* Rounds List */}
-        <ul
+        <motion.ul
+          layoutScroll
           ref={listRef}
           className={cn(
             'overflow-y-auto gap-12 flex flex-col',
@@ -375,7 +376,7 @@ const MatchesTab: FC = () => {
               </motion.li>
             ))}
           </AnimatePresence>
-        </ul>
+        </motion.ul>
         <AnimatePresence initial={false}>
           {showScrollToFirstIncomplete && (
             <motion.div
