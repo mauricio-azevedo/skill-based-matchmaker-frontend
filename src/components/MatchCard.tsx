@@ -22,7 +22,7 @@ const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolea
           .join('')}
       </AvatarFallback>
     </Avatar>
-    <p className="truncate max-w-[90px]">{name}</p>
+    <p className="truncate max-w-[90px] text-sm">{name}</p>
   </div>
 )
 
