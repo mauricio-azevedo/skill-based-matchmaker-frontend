@@ -113,7 +113,7 @@ const MatchesTab: FC = () => {
       const newRound: UnsavedRound = generateSchedule(activePlayers, courts, currentMode)
       addRound(newRound)
       updatePlayers((prev) => applyRoundStats(prev, newRound, 1))
-      singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
+      // singleToastSuccess(`Rodada #${rounds.length + 1} gerada!`, { duration: 3000 })
     } catch (error) {
       singleToastError((error as Error).message, { duration: 6000 })
     }
