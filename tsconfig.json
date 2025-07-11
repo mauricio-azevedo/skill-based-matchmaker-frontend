@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-//    "moduleResolution": "node",
+    //    "moduleResolution": "node",
     "module": "esnext",
     // lookup packages like Node does
     "resolveJsonModule": true,
@@ -11,15 +11,22 @@
       "node"
     ],
     // pull in Node’s built-ins
-    "baseUrl": ".",              // ← novo
-    "paths": {                   // ← novo
-      "@/*": ["src/*"]
+    "baseUrl": ".",
+    // ← novo
+    "paths": {
+      // ← novo
+      "@/*": [
+        "src/*"
+      ]
     },
-//    "allowSyntheticDefaultImports": true,
+    //    "allowSyntheticDefaultImports": true,
     "jsx": "react",
-    "moduleResolution": "bundler", // evita o erro do @tailwindcss/vite
-    "verbatimModuleSyntax": true,  // mantenha, mas conserte os imports (passo 2)
-    "allowSyntheticDefaultImports": true, // destrava o import de 'path'
+    "moduleResolution": "bundler",
+    // evita o erro do @tailwindcss/vite
+    "verbatimModuleSyntax": true,
+    // mantenha, mas conserte os imports (passo 2)
+    "allowSyntheticDefaultImports": true
+    // destrava o import de 'path'
   },
   "include": [
     "src/**/*",
