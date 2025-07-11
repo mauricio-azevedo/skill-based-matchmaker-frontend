@@ -2,7 +2,6 @@ import { memo } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MatchCard } from '@/components/MatchCard'
 import type { Match, UnsavedRound } from '@/types/players'
 
@@ -22,7 +21,6 @@ export const CourtCard = memo(function CourtCard({
   rounds,
   selected,
   onGenerate,
-  onSelect,
   onSaveScore,
   canGenerate,
   loading,
@@ -40,22 +38,6 @@ export const CourtCard = memo(function CourtCard({
             Gerar partida
           </Button>
         </div>
-
-        {/* seletor de partidas, se houver mais de uma */}
-        {rounds.length > 1 && (
-          <Select value={String(selected)} onValueChange={(v) => onSelect(+v)}>
-            <SelectTrigger className="w-full h-8">
-              <SelectValue placeholder="Escolher partida" />
-            </SelectTrigger>
-            <SelectContent>
-              {rounds.map((_, idx) => (
-                <SelectItem key={idx} value={String(idx)} className="text-sm">
-                  Partida {idx + 1}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
       </CardHeader>
 
       <CardContent className="p-3 !min-h-[unset]">
