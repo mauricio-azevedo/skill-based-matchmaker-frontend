@@ -1,37 +1,45 @@
 import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import type { Match } from '@/types/players'
 
 interface Props {
   match?: Match
+  /** callback disparado automaticamente quando ambos os placares forem preenchidos */
   onSave?: (gamesA: number, gamesB: number) => void
 }
 
 /**
- * Cartão de uma partida (mobile-first).
- * • Inputs numéricos pequenos + botão 100 % largura, fáceis de tocar.
- * • Atualiza placar a cada troca de partida.
+ * Cartão de partida (mobile-first) – sem botão “Salvar”.
+ * Assim que os dois campos recebem valores válidos, `onSave` é disparado
+ * automaticamente (apenas se o placar mudou).
  */
 export function MatchCard({ match, onSave }: Props) {
-  /* estado local (placar em edição) */
+  /* estado local */
   const [a, setA] = useState<number | ''>('')
   const [b, setB] = useState<number | ''>('')
 
-  /* sincroniza quando o usuário muda de partida */
+  /* reseta placares ao trocar de partida */
   useEffect(() => {
     setA(match?.gamesA ?? '')
     setB(match?.gamesB ?? '')
   }, [match])
 
+  const bothFilled = a !== '' && b !== ''
   const dirty = match !== undefined && ((match.gamesA ?? '') !== a || (match.gamesB ?? '') !== b)
+
+  /* dispara callback assim que ambos os campos estiverem preenchidos e houve mudança */
+  useEffect(() => {
+    if (match && bothFilled && dirty) {
+      onSave?.(+a, +b)
+    }
+  }, [bothFilled, dirty, a, b, match, onSave])
 
   /* placeholder – nenhuma partida */
   if (!match) return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
 
   return (
     <div className="flex flex-col gap-3">
-      {/* nomes dos jogadores */}
+      {/* jogadores */}
       <div className="flex flex-col text-center text-sm leading-tight">
         <span className="font-medium break-words">
           {match.teamA[0].name} & {match.teamA[1].name}
@@ -42,7 +50,7 @@ export function MatchCard({ match, onSave }: Props) {
         </span>
       </div>
 
-      {/* placar + botão */}
+      {/* inputs do placar */}
       <div className="flex items-center justify-center gap-2">
         <Input
           type="number"
@@ -65,11 +73,7 @@ export function MatchCard({ match, onSave }: Props) {
         />
       </div>
 
-      <Button size="sm" className="w-full" disabled={!dirty || a === '' || b === ''} onClick={() => onSave?.(+a, +b)}>
-        Salvar placar
-      </Button>
-
-      {/* vencedor, se já definido */}
+      {/* vencedor */}
       {match.winner && (
         <span className="text-xs italic text-muted-foreground text-center">
           Vencedor: {match.winner === 'A' ? 'Equipe A' : 'Equipe B'}
