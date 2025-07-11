@@ -1,4 +1,4 @@
-import React, { type FC, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { type FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useRounds } from '@/context/RoundsContext'
@@ -80,8 +80,6 @@ const MatchesTab: FC = () => {
   const listRef = useRef<HTMLUListElement>(null)
 
   const [showScrollToFirstIncomplete, setShowScrollToFirstIncomplete] = useState(false)
-
-  const handleScrollRef = useRef<() => void>(() => {})
 
   const [confirmShuffle, setConfirmShuffle] = useState<{
     open: boolean
@@ -183,7 +181,7 @@ const MatchesTab: FC = () => {
   const [isAutoScrolling, setIsAutoScrolling] = useState<boolean>(true)
   const hasFinishedInitialAutoScroll = useRef(false)
 
-  const calcRoundInView = (): Round | null => {
+  const calcRoundInView = useCallback((): Round | null => {
     const container = listRef.current
     if (!container) return null
     const containerTop = container.getBoundingClientRect().top
@@ -201,7 +199,7 @@ const MatchesTab: FC = () => {
       }
     }
     return closest
-  }
+  }, [rounds])
 
   useEffect(() => {
     setEarliestIncompleteRound(findEarliestIncompleteRound(rounds))
@@ -223,9 +221,6 @@ const MatchesTab: FC = () => {
         setCurrentVisibleRound(closest)
       }
     }
-
-    // guarda referência para poder reutilizar em outros lugares, se quiser
-    handleScrollRef.current = handleScroll
 
     container.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
