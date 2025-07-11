@@ -345,11 +345,12 @@ const MatchesTab: FC = () => {
                 }}
                 style={{ scrollSnapStop: 'always' }}
                 className="flex flex-col gap-2 snap-start min-h-full"
-                layout="position"
+                layout={animateNextRound ? 'position' : false} // FLIP só quando permitido
                 variants={itemVariants}
-                initial={animateNextRound ? 'initial' : false}
-                animate="animate"
-                exit="exit"
+                initial={animateNextRound ? 'initial' : false} // evita fade/slide de presença
+                animate={animateNextRound ? 'animate' : false}
+                exit={animateNextRound ? 'exit' : undefined}
+                transition={animateNextRound ? undefined : { duration: 0 }} // garante zero ms quando off
               >
                 <ol className="flex flex-col gap-2">
                   {round.matches.map((m) => {
