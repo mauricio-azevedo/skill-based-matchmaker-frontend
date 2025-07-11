@@ -10,7 +10,6 @@ export interface CourtCardProps {
   rounds: UnsavedRound[]
   selected: number
   onGenerate: () => void
-  onSelect: (index: number) => void
   onSaveScore: (gamesA: number, gamesB: number) => void
   canGenerate: boolean
   loading: boolean
@@ -33,10 +32,11 @@ export const CourtCard = memo(function CourtCard({
         <CardTitle className="text-base">Quadra {courtId}</CardTitle>
       </CardHeader>
 
-      <CardContent className="p-3 !min-h-[unset]">
-        <MatchCard match={match} onSave={onSaveScore} />
+      <CardContent className="p-3 !min-h-[unset] flex flex-col gap-3">
+        {/* key força remontagem quando muda a partida */}
+        <MatchCard key={match?.id ?? 'no-match'} match={match} onSave={onSaveScore} />
 
-        <Button size="sm" className="gap-1" onClick={onGenerate} disabled={!canGenerate || loading}>
+        <Button size="sm" className="gap-1 self-center" onClick={onGenerate} disabled={!canGenerate || loading}>
           {loading && <Loader2 size={14} className="animate-spin" />}
           Gerar partida
         </Button>

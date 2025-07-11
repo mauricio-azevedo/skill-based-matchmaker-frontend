@@ -4,10 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown } from 'lucide-react'
 import type { Match } from '@/types/players'
 
-/* ------------------------------------------------------------------------
- * Helpers
- * --------------------------------------------------------------------- */
-const SCORE_OPTIONS = [...Array(6)].map((_, i) => String(i + 1))
+/* Helpers ---------------------------------------------------------------- */
+const SCORES = ['1', '2', '3', '4', '5', '6'] as const
 const avatarUrl = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
 
 const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolean }) => (
@@ -26,7 +24,6 @@ const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolea
   </div>
 )
 
-/* select 1-6 + coroa opcional ----------------------------------------- */
 const ScoreSelect = ({
   value,
   onChange,
@@ -47,9 +44,9 @@ const ScoreSelect = ({
       </SelectTrigger>
 
       <SelectContent side="bottom">
-        {SCORE_OPTIONS.map((opt) => (
-          <SelectItem key={opt} value={opt} className="text-sm text-center">
-            {opt}
+        {SCORES.map((s) => (
+          <SelectItem key={s} value={s} className="text-sm text-center">
+            {s}
           </SelectItem>
         ))}
       </SelectContent>
@@ -57,9 +54,7 @@ const ScoreSelect = ({
   </div>
 )
 
-/* ------------------------------------------------------------------------
- * MatchCard
- * --------------------------------------------------------------------- */
+/* MatchCard -------------------------------------------------------------- */
 interface Props {
   match?: Match
   onSave?: (gamesA: number, gamesB: number) => void
@@ -75,13 +70,13 @@ export function MatchCard({ match, onSave }: Props) {
     setGamesB(match?.gamesB ?? '')
   }, [match])
 
-  const bothFilled = gamesA !== '' && gamesB !== ''
+  const filled = gamesA !== '' && gamesB !== ''
   const dirty = match && ((match.gamesA ?? '') !== gamesA || (match.gamesB ?? '') !== gamesB)
 
   /* salva automaticamente */
   useEffect(() => {
-    if (match && bothFilled && dirty) onSave?.(+gamesA, +gamesB)
-  }, [bothFilled, dirty, gamesA, gamesB, match, onSave])
+    if (match && filled && dirty) onSave?.(+gamesA, +gamesB)
+  }, [filled, dirty, gamesA, gamesB, match, onSave])
 
   if (!match) return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
 
@@ -95,7 +90,7 @@ export function MatchCard({ match, onSave }: Props) {
         <PlayerEntry name={teamA[1].name} />
       </div>
 
-      {/* Placar central */}
+      {/* Placar */}
       <div className="flex flex-col items-center gap-1">
         <div className="flex items-center gap-1">
           <ScoreSelect value={gamesA} onChange={setGamesA} label="Games equipe A" isWinner={winner === 'A'} />
