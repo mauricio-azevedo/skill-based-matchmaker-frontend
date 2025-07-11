@@ -30,7 +30,7 @@ export const CourtCard = memo(function CourtCard({
   const match: Match | undefined = selected >= 0 ? rounds[selected].matches[0] : undefined
 
   return (
-    <Card aria-label={`Quadra ${courtId}`} className="w-full">
+    <Card aria-label={`Quadra ${courtId}`} className="!min-h-[unset]">
       <CardHeader className="flex flex-col gap-3 p-3">
         <div className="flex w-full items-center justify-between">
           <CardTitle className="text-base">Quadra {courtId}</CardTitle>
@@ -58,7 +58,7 @@ export const CourtCard = memo(function CourtCard({
         )}
       </CardHeader>
 
-      <CardContent className="p-3">
+      <CardContent className="p-3 !min-h-[unset]">
         <MatchCard match={match} onSave={onSaveScore} />
       </CardContent>
     </Card>
