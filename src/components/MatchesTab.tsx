@@ -391,7 +391,7 @@ const MatchesTab: FC = () => {
                   if (round.id === currentVisibleRound?.id) scrollRef.current = el
                 }}
                 style={{ scrollSnapStop: 'always' }}
-                className="flex flex-col gap-2 snap-start min-h-full "
+                className="flex flex-col gap-2 snap-start min-h-full"
                 layout="position"
                 variants={itemVariants}
                 initial="initial"
