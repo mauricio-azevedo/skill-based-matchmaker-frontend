@@ -251,6 +251,30 @@ const MatchesTab: FC = () => {
     }
   })
 
+  useEffect(() => {
+    if (!isAutoScrolling) return
+
+    const container = listRef.current
+    if (!container) return
+
+    const cancelAutoScroll = () => setIsAutoScrolling(false)
+
+    // Toda interação do usuário que normalmente “mata” o smooth-scroll
+    container.addEventListener('touchstart', cancelAutoScroll, { passive: true })
+    container.addEventListener('pointerdown', cancelAutoScroll, { passive: true })
+    container.addEventListener('wheel', cancelAutoScroll, { passive: true })
+
+    // Se quiser cobrir cliques em desktop
+    container.addEventListener('mousedown', cancelAutoScroll, { passive: true })
+
+    return () => {
+      container.removeEventListener('touchstart', cancelAutoScroll)
+      container.removeEventListener('pointerdown', cancelAutoScroll)
+      container.removeEventListener('wheel', cancelAutoScroll)
+      container.removeEventListener('mousedown', cancelAutoScroll)
+    }
+  }, [isAutoScrolling])
+
   return (
     <React.Fragment>
       {currentVisibleRound &&
