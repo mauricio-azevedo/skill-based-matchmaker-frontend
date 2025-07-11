@@ -243,14 +243,14 @@ const MatchesTab: FC = () => {
     let timeoutId = window.setTimeout(() => {
       setIsAutoScrolling(false)
       container.removeEventListener('scroll', onScroll)
-    }, 800)
+    }, 500)
 
     const onScroll = () => {
       clearTimeout(timeoutId) // reinicia se o usuário ou a inércia gerar eventos
       timeoutId = window.setTimeout(() => {
         setIsAutoScrolling(false)
         container.removeEventListener('scroll', onScroll)
-      }, 800)
+      }, 500)
     }
 
     container.addEventListener('scroll', onScroll, { passive: true })
