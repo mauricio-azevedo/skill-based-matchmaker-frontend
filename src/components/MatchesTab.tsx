@@ -220,24 +220,22 @@ const MatchesTab: FC = () => {
   }, [rounds, currentVisibleRound])
 
   useEffect(() => {
-    setTimeout(() => {
-      let newShowScrollToFirstIncomplete: boolean
+    let newShowScrollToFirstIncomplete: boolean
 
-      if (isAutoScrolling) {
-        // maintains same value if is auto scrolling
-        newShowScrollToFirstIncomplete = showScrollToFirstIncomplete
-      } else {
-        // else it's visible if the visible round is not the current round (earliest incomplete)
-        const earliestIncompleteRoundExists = earliestIncompleteRound !== null
-        const currentVisibleRoundExists = currentVisibleRound !== null
-        const currentVisibleRoundIsEarliestIncomplete = currentVisibleRound?.id === earliestIncompleteRound?.id
+    if (isAutoScrolling) {
+      // maintains same value if is auto scrolling
+      newShowScrollToFirstIncomplete = showScrollToFirstIncomplete
+    } else {
+      // else it's visible if the visible round is not the current round (earliest incomplete)
+      const earliestIncompleteRoundExists = earliestIncompleteRound !== null
+      const currentVisibleRoundExists = currentVisibleRound !== null
+      const currentVisibleRoundIsEarliestIncomplete = currentVisibleRound?.id === earliestIncompleteRound?.id
 
-        newShowScrollToFirstIncomplete =
-          earliestIncompleteRoundExists && currentVisibleRoundExists && !currentVisibleRoundIsEarliestIncomplete
-      }
+      newShowScrollToFirstIncomplete =
+        earliestIncompleteRoundExists && currentVisibleRoundExists && !currentVisibleRoundIsEarliestIncomplete
+    }
 
-      setShowScrollToFirstIncomplete(newShowScrollToFirstIncomplete)
-    }, 1000)
+    setShowScrollToFirstIncomplete(newShowScrollToFirstIncomplete)
   }, [earliestIncompleteRound, currentVisibleRound, isAutoScrolling, showScrollToFirstIncomplete])
 
   const scrollToFirstIncomplete = (scrollToTop = false) => {
