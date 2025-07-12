@@ -11,36 +11,28 @@ import { singleToastSuccess } from '@/utils/singleToast'
 import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { PlayTab } from '@/features/playTab/PlayTab'
 import { MatchesTab } from '@/components/MatchesTab'
 
-// Importando o modal do Shadcn
-import SetupTab from './components/SetupTab'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { SetupTab } from '@/components/SetupTab'
+import { PlayTab } from '@/features/playTab/PlayTab'
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [warning, setWarning] = useState<null | 'rounds' | 'all' | 'seed'>(null)
-  const [isSetupOpen, setIsSetupOpen] = useState(false) // Estado para controle do modal "Setup"
+  const [isSetupOpen, setIsSetupOpen] = useState(false)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
   const { rounds, clear: clearRounds } = useRounds()
-  const { players, updatePlayers } = usePlayers()
+  const { players, updatePlayers, add } = usePlayers()
 
   const isSeedLoaded = useMemo(() => {
     if (players.length !== seedPlayers.length) return false
-    const seedSet = new Set(seedPlayers.map(({ id, name, level }) => `${id}-${name}-${level}`))
-    return players.every(({ id, name, level }) => seedSet.has(`${id}-${name}-${level}`))
+    const seedSet = new Set(seedPlayers.map(({ name, level }) => `${name}-${level}`))
+    return players.every(({ name, level }) => seedSet.has(`${name}-${level}`))
   }, [players])
 
   const hasRounds = rounds.length > 0
@@ -66,14 +58,23 @@ export default function App() {
   }
 
   const handleLoadSeed = () => {
-    shuffle(seedPlayers)
+    // Limpa partidas e lista de jogadores
     clearRounds()
-    updatePlayers(() => seedPlayers)
+    updatePlayers(() => [])
+
+    // Embaralha e adiciona cada jogador via contexto
+    const seeds = [...seedPlayers]
+    shuffle(seeds)
+    seeds.forEach(({ name, level, preferredPairs = [] }) => {
+      add(name, level, preferredPairs)
+    })
+
+    singleToastSuccess('Jogadores inicializados a partir do seed!', { duration: 3000 })
   }
 
   return (
     <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
-      {/* ---------- Header ---------- */}
+      {/* Header */}
       <header className="flex items-center border-b px-2 py-2">
         <h1 className="text-xl font-semibold tracking-tight">PLAY!</h1>
         <div className="ml-auto flex items-center gap-4">
@@ -107,10 +108,9 @@ export default function App() {
               >
                 Limpar partidas
               </DropdownMenuItem>
-              <DropdownMenuItem disabled={noData} className="text-destructive " onSelect={() => setWarning('all')}>
+              <DropdownMenuItem disabled={noData} className="text-destructive" onSelect={() => setWarning('all')}>
                 Limpar tudo
               </DropdownMenuItem>
-              {/* Nova opção Setup */}
               <DropdownMenuItem onSelect={() => setIsSetupOpen(true)}>Setup</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -160,8 +160,6 @@ export default function App() {
       <Dialog open={isSetupOpen} onOpenChange={setIsSetupOpen}>
         <DialogTrigger />
         <DialogContent>
-          <DialogTitle>Configurações de Setup</DialogTitle>
-          <DialogDescription>Configure as opções de quadras e formação de duplas abaixo.</DialogDescription>
           <SetupTab />
           <DialogClose asChild>
             <button className="btn btn-primary">Fechar</button>
@@ -169,9 +167,8 @@ export default function App() {
         </DialogContent>
       </Dialog>
 
-      {/* --------- Tabs --------- */}
+      {/* Tabs */}
       <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
-        {/* Conteúdo */}
         <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center gap-2">
           <TabsContent value="players" asChild>
             <PlayersTab />
@@ -187,7 +184,6 @@ export default function App() {
           </TabsContent>
         </main>
 
-        {/* Barra de triggers */}
         <TabsList className="self-center">
           <TabsTrigger value="players">Jogadores</TabsTrigger>
           <TabsTrigger value="play">PLAY!</TabsTrigger>
