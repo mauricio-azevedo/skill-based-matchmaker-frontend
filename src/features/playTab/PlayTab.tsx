@@ -4,13 +4,14 @@ import { MatchCard } from '@/components/MatchCard'
 import { useCourts } from '@/context/CourtsContext'
 import { useMatches } from '@/context/MatchesContext'
 import { usePlayers } from '@/context/PlayersContext'
-import { FORMATION_MODES } from '@/types/types'
+import { useFormationMode } from '@/context/FormationModeContext'
 import { generateMatch } from '@/lib/algorithm'
 
 export function PlayTab() {
   const { courts, updateCourt } = useCourts()
-  const { matches, getById, addMatch } = useMatches() // agora também extraímos `matches`
+  const { matches, getById, addMatch } = useMatches()
   const { players } = usePlayers()
+  const { formationMode, autoAlternate, autoAlternateMode } = useFormationMode()
 
   const handleGenerateMatch = (courtId: string) => {
     try {
@@ -26,11 +27,13 @@ export function PlayTab() {
         throw new Error('Não há jogadores suficientes disponíveis para gerar partida.')
       }
 
-      const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(
-        availablePlayers,
-        FORMATION_MODES.MIXED,
-      )
+      let modeToUse = formationMode
+      if (autoAlternate) {
+        const pastMatchesCount = matches.filter((m) => m.courtId === courtId).length
+        modeToUse = pastMatchesCount % 2 === 0 ? formationMode : autoAlternateMode
+      }
 
+      const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(availablePlayers, modeToUse)
       const now = new Date().toISOString()
       const newMatchId = addMatch({
         courtId,
@@ -44,7 +47,7 @@ export function PlayTab() {
         gamesA: null,
         gamesB: null,
         winner: null,
-        formationMode: FORMATION_MODES.MIXED,
+        formationMode: modeToUse,
       })
 
       updateCourt(courtId, { ongoingMatchId: newMatchId })
