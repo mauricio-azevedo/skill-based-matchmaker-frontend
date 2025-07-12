@@ -9,21 +9,28 @@ import { generateMatch } from '@/lib/algorithm'
 
 export function PlayTab() {
   const { courts, updateCourt } = useCourts()
-  const { getById, addMatch } = useMatches()
+  const { matches, getById, addMatch } = useMatches() // agora também extraímos `matches`
   const { players } = usePlayers()
 
   const handleGenerateMatch = (courtId: string) => {
     try {
-      // Filtra apenas jogadores ativos
       const activePlayers = players.filter((p) => p.active)
+      const ongoingIds = new Set(
+        matches
+          .filter((m) => m.status === 'ongoing')
+          .flatMap((m) => [m.teamAPlayer1, m.teamAPlayer2, m.teamBPlayer1, m.teamBPlayer2]),
+      )
+      const availablePlayers = activePlayers.filter((p) => !ongoingIds.has(p.id))
 
-      // Gera a combinação de equipes
+      if (availablePlayers.length < 4) {
+        throw new Error('Não há jogadores suficientes disponíveis para gerar partida.')
+      }
+
       const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(
-        activePlayers,
+        availablePlayers,
         FORMATION_MODES.MIXED,
       )
 
-      // Monta dados iniciais da partida
       const now = new Date().toISOString()
       const newMatchId = addMatch({
         courtId,
