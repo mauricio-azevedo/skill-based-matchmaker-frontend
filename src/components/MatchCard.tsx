@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown } from 'lucide-react'
+import { usePlayers } from '@/context/PlayersContext'
 import type { Match } from '@/types/types'
 
 /* Helpers ---------------------------------------------------------------- */
@@ -37,12 +38,10 @@ const ScoreSelect = ({
 }) => (
   <div className="relative flex flex-col items-center">
     {isWinner && <Crown className="w-4 h-4 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
-
     <Select value={value === '' ? '' : String(value)} onValueChange={(v) => onChange(v === '' ? '' : +v)}>
       <SelectTrigger aria-label={label} className="w-10 h-10 justify-center text-center [&>svg]:hidden">
         <SelectValue placeholder="-" />
       </SelectTrigger>
-
       <SelectContent side="bottom">
         {SCORES.map((s) => (
           <SelectItem key={s} value={s} className="text-sm text-center">
@@ -63,31 +62,41 @@ interface Props {
 export function MatchCard({ match, onSave }: Props) {
   const [gamesA, setGamesA] = useState<number | ''>('')
   const [gamesB, setGamesB] = useState<number | ''>('')
+  const { getById } = usePlayers()
 
-  /* reseta ao trocar de partida */
+  // Reseta ao trocar de partida
   useEffect(() => {
     setGamesA(match?.gamesA ?? '')
     setGamesB(match?.gamesB ?? '')
   }, [match])
 
   const filled = gamesA !== '' && gamesB !== ''
-  const dirty = match && ((match.gamesA ?? '') !== gamesA || (match.gamesB ?? '') !== gamesB)
+  const dirty = !!match && (match.gamesA ?? '') !== gamesA && (match.gamesB ?? '') !== gamesB
 
-  /* salva automaticamente */
+  // Salva automaticamente quando mudar o placar
   useEffect(() => {
-    if (match && filled && dirty) onSave?.(+gamesA, +gamesB)
+    if (match && filled && dirty) {
+      onSave?.(gamesA as number, gamesB as number)
+    }
   }, [filled, dirty, gamesA, gamesB, match, onSave])
 
-  if (!match) return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
+  if (!match) {
+    return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
+  }
 
-  const { teamA, teamB, winner } = match
+  const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2, winner } = match
+
+  const playerA1 = getById(teamAPlayer1)
+  const playerA2 = getById(teamAPlayer2)
+  const playerB1 = getById(teamBPlayer1)
+  const playerB2 = getById(teamBPlayer2)
 
   return (
     <div className="flex items-center justify-between gap-4">
       {/* Equipe A */}
-      <div className="flex flex-col gap-2">
-        {teamA && teamA[0] && <PlayerEntry name={teamA[0].name} />}
-        {teamA && teamA[1] && <PlayerEntry name={teamA[1].name} />}
+      <div className="flex flex-col gap-2 text-right">
+        {playerA1 && <PlayerEntry name={playerA1.name} />}
+        {playerA2 && <PlayerEntry name={playerA2.name} />}
       </div>
 
       {/* Placar */}
@@ -100,9 +109,9 @@ export function MatchCard({ match, onSave }: Props) {
       </div>
 
       {/* Equipe B */}
-      <div className="flex flex-col gap-2">
-        {teamB && teamB[0] && <PlayerEntry name={teamB[0].name} reverse />}
-        {teamB && teamB[1] && <PlayerEntry name={teamB[1].name} reverse />}
+      <div className="flex flex-col gap-2 text-left">
+        {playerB1 && <PlayerEntry name={playerB1.name} reverse />}
+        {playerB2 && <PlayerEntry name={playerB2.name} reverse />}
       </div>
     </div>
   )
