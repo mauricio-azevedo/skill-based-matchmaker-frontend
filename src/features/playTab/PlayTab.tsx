@@ -7,8 +7,7 @@ import { usePlayTabLogic } from './usePlayTabLogic'
  * • cards em stack, ocupando 100 % da largura
  */
 export function PlayTab() {
-  const { rows, state, courtFinished, canGenerateGlobal, handleGenerate, handleSelect, handleSaveScore } =
-    usePlayTabLogic()
+  const { rows, state, courtFinished, canGenerateGlobal, handleGenerate, handleSaveScore } = usePlayTabLogic()
 
   return (
     <div className="flex flex-col gap-3 px-2 py-3 w-full max-w-sm mx-auto overflow-hidden">
@@ -23,7 +22,6 @@ export function PlayTab() {
               rounds={state.rounds[id] ?? []}
               selected={state.selected[id] ?? -1}
               onGenerate={() => canGenerate && handleGenerate(id)}
-              onSelect={(i) => handleSelect(id, i)}
               onSaveScore={(a, b) => handleSaveScore(id, a, b)}
               canGenerate={canGenerate}
               loading={state.loading[id] ?? false}
