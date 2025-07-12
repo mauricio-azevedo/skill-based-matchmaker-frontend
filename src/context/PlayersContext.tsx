@@ -1,7 +1,4 @@
-// ============================================================================
-// src/context/PlayersContext.tsx – Estado global de jogadores + estatísticas
-// ============================================================================
-import { createContext, type FC, type ReactNode, useContext, useEffect, useState } from 'react'
+import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import type { Match, Player } from '@/types/types'
 
 /* ───────── helpers ───────── */
@@ -12,11 +9,11 @@ function getMinMatchCount(players: Player[]): number {
 /* ───────── interface do contexto ───────── */
 type Ctx = {
   players: Player[]
+  getById: (id: string) => Player | undefined
   add: (name: string, level: number, preferredPairs?: string[]) => void
   remove: (id: string) => void
   toggleActive: (id: string) => void
   updatePlayers: (fn: (p: Player[]) => Player[]) => void
-  /** Registra estatísticas de uma partida recém-finalizada */
   registerMatch: (match: Match) => void
 }
 
@@ -98,7 +95,6 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
       const now = new Date().toISOString()
 
       return prev.map((pl) => {
-        // jogador não participou desta partida
         if (!teamAIds.includes(pl.id) && !teamBIds.includes(pl.id)) {
           return pl
         }
@@ -118,10 +114,17 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
       })
     })
 
+  // Mapa derivado para lookup rápido por ID
+  const playersById = useMemo(
+    () => players.reduce((acc, pl) => ({ ...acc, [pl.id]: pl }), {} as Record<string, Player>),
+    [players],
+  )
+
   return (
     <PlayersContext.Provider
       value={{
         players,
+        getById: (id: string) => playersById[id],
         add,
         remove,
         toggleActive,
