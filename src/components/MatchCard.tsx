@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
+import { useMatches } from '@/context/MatchesContext'
 import type { Match } from '@/types/types'
 
 /* Helpers ---------------------------------------------------------------- */
@@ -56,13 +57,13 @@ const ScoreSelect = ({
 /* MatchCard -------------------------------------------------------------- */
 interface Props {
   match: Match | null
-  onSave?: (gamesA: number, gamesB: number) => void
 }
 
-export function MatchCard({ match, onSave }: Props) {
+export function MatchCard({ match }: Props) {
   const [gamesA, setGamesA] = useState<number | ''>('')
   const [gamesB, setGamesB] = useState<number | ''>('')
   const { getById } = usePlayers()
+  const { updateMatch } = useMatches()
 
   // Reseta ao trocar de partida
   useEffect(() => {
@@ -71,14 +72,22 @@ export function MatchCard({ match, onSave }: Props) {
   }, [match])
 
   const filled = gamesA !== '' && gamesB !== ''
-  const dirty = !!match && (match.gamesA ?? '') !== gamesA && (match.gamesB ?? '') !== gamesB
+  const dirty = !!match && ((match.gamesA ?? '') !== gamesA || (match.gamesB ?? '') !== gamesB)
 
-  // Salva automaticamente quando mudar o placar
+  // Salva automaticamente quando mudar o placar e definir vencedor
   useEffect(() => {
-    if (match && filled && dirty) {
-      onSave?.(gamesA as number, gamesB as number)
+    if (match && filled && dirty && gamesA !== gamesB) {
+      const winnerValue = gamesA > gamesB ? 'A' : 'B'
+      const now = new Date().toISOString()
+      updateMatch(match.id, {
+        gamesA: gamesA as number,
+        gamesB: gamesB as number,
+        winner: winnerValue,
+        status: 'completed',
+        endTime: now,
+      })
     }
-  }, [filled, dirty, gamesA, gamesB, match, onSave])
+  }, [filled, dirty, gamesA, gamesB, match, updateMatch])
 
   if (!match) {
     return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
