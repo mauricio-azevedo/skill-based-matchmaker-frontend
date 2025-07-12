@@ -1,49 +1,37 @@
-import { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { readAllCourtMatches } from '@/storage/courtMatchesStorage'
-import type { Match } from '@/types/types'
+import type { Player } from '@/types/types'
+import { useMatches } from '@/context/MatchesContext'
+import { usePlayers } from '@/context/PlayersContext'
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                            */
 /* ------------------------------------------------------------------ */
-const formatTeam = (team: Match['teamA']) => {
-  if (team && team.length >= 2) {
-    return `${team[0].name} & ${team[1].name}`
+const formatTeam = (
+  player1Id: string | null,
+  player2Id: string | null,
+  getPlayer: (id: string) => Player | undefined,
+): string => {
+  if (player1Id && player2Id) {
+    const p1 = getPlayer(player1Id)
+    const p2 = getPlayer(player2Id)
+    if (p1 && p2) {
+      return `${p1.name} & ${p2.name}`
+    }
   }
   return 'Equipe incompleta'
 }
 
-/* Helpers */
-const loadFinishedMatches = (): Match[] => {
-  const courts = readAllCourtMatches()
-
-  // Filtra os matches para incluir apenas os finalizados
-  return Object.values(courts)
-    .map((court) => court.match) // Acessando o match diretamente
-    .filter((match) => match && match.gamesA !== null && match.gamesB !== null) // Verificando se o placar está finalizado
-    .sort((a, b) => {
-      const updatedAtA = Number(a.updatedAt)
-      const updatedAtB = Number(b.updatedAt)
-      return (updatedAtB || 0) - (updatedAtA || 0) // Se for NaN, usa 0
-    })
-}
-
 /* Component */
 export function MatchesTab() {
-  const [matches, setMatches] = useState<Match[]>(loadFinishedMatches)
-
-  useEffect(() => {
-    const refresh = () => setMatches(loadFinishedMatches())
-    window.addEventListener('storage', refresh)
-    return () => window.removeEventListener('storage', refresh)
-  }, [])
+  const { matches } = useMatches()
+  const { getById: getPlayer } = usePlayers()
 
   return (
     <div className="flex flex-col w-full overflow-hidden">
       <h2 className="text-lg font-semibold mb-2">Jogos</h2>
 
       {matches.length === 0 ? (
-        <p className="italic text-muted-foreground p-4 text-sm">Nenhuma partida concluída até o momento.</p>
+        <p className="italic text-muted-foreground p-4 text-sm">Nenhuma partida registrada até o momento.</p>
       ) : (
         <Table>
           <TableHeader className="sticky top-0 bg-background z-10 shadow-md">
@@ -55,23 +43,23 @@ export function MatchesTab() {
           </TableHeader>
 
           <TableBody>
-            {matches.map((m) => (
-              <TableRow key={m.id}>
-                <TableCell className="truncate">
-                  {/* Verificação adicional para garantir que o time seja válido */}
-                  {m.teamA && m.teamB ? (
-                    <>
-                      {formatTeam(m.teamA)} vs. {formatTeam(m.teamB)}
-                    </>
-                  ) : (
-                    <span className="italic text-muted-foreground">Equipe incompleta</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  {m.gamesA}&nbsp;:&nbsp;{m.gamesB}
-                </TableCell>
-              </TableRow>
-            ))}
+            {matches.map((m) => {
+              const teamA = formatTeam(m.teamAPlayer1, m.teamAPlayer2, getPlayer)
+              const teamB = formatTeam(m.teamBPlayer1, m.teamBPlayer2, getPlayer)
+              const score =
+                m.status === 'completed' && m.gamesA != null && m.gamesB != null
+                  ? `${m.gamesA} : ${m.gamesB}`
+                  : 'Em andamento'
+
+              return (
+                <TableRow key={m.id}>
+                  <TableCell className="truncate">
+                    {teamA} vs. {teamB}
+                  </TableCell>
+                  <TableCell className="text-right">{score}</TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       )}
