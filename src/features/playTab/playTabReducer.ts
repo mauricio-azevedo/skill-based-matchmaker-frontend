@@ -1,9 +1,7 @@
 import type { Reducer } from 'react'
-import type { Match } from '@/types/players'
-import type { CourtMatchRow } from '@/storage/courtMatchesStorage'
+import type { CourtMatchRow, Match } from '@/types/types'
 
 export type CourtId = number
-export type MatchesMap = Record<CourtId, Match | null> // Um match por court
 export type SelectedMap = Record<CourtId, boolean>
 export type LoadingMap = Record<CourtId, boolean>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { readAllCourtMatches } from '@/storage/courtMatchesStorage'
-import type { Match } from '@/types/players'
+import type { Match } from '@/types/types'
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                            */

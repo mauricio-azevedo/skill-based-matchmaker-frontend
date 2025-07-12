@@ -2,7 +2,7 @@
 // src/context/PlayersContext.tsx – Estado global de jogadores + estatísticas
 // ============================================================================
 import { createContext, type FC, type ReactNode, useContext, useEffect, useState } from 'react'
-import type { Match, Player } from '@/types/players'
+import type { Match, Player } from '@/types/types'
 
 /* ───────── helpers ───────── */
 function getMinMatchCount(players: Player[]): number {

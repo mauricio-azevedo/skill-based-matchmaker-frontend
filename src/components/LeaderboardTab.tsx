@@ -3,7 +3,7 @@ import { Info } from 'lucide-react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { readAllCourtMatches } from '@/storage/courtMatchesStorage'
-import type { PlayerLBRow, UnsavedRound } from '@/types/players'
+import type { PlayerLBRow, UnsavedRound } from '@/types/types'
 
 // shadcn/ui
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

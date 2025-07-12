@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import type { Round, UnsavedRound } from '@/types/players'
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import type { Round, UnsavedRound } from '@/types/types'
 
 export const STORAGE_KEY_ROUNDS = 'match_rounds'
 

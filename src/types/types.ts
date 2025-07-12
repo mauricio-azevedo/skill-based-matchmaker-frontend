@@ -32,6 +32,12 @@ export interface Match {
   updatedAt: string
 }
 
+export interface CourtMatchRow {
+  courtId: number
+  match: Match // A propriedade 'match' já é do tipo 'Match'
+  updatedAt: string
+}
+
 /** Conjunto de partidas que podem acontecer simultaneamente. */
 export interface UnsavedRound {
   id: string

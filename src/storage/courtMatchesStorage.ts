@@ -1,12 +1,6 @@
-import type { Match } from '@/types/players'
+import type { CourtMatchRow, Match } from '@/types/types'
 
 const COURT_MATCHES = 'court_matches'
-
-export type CourtMatchRow = {
-  courtId: number
-  match: Match // A propriedade 'match' já é do tipo 'Match'
-  updatedAt: string
-}
 
 /* helpers */
 function readTable(): Record<number, CourtMatchRow> {

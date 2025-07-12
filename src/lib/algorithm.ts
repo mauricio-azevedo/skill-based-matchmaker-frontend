@@ -1,5 +1,5 @@
 // src/lib/algorithm.ts
-import type { Match, Player } from '@/types/players'
+import type { Match, Player } from '@/types/types'
 import type { FormationMode } from '@/context/CourtsContext'
 import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 

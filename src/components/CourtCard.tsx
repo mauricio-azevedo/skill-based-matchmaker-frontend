@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MatchCard } from '@/components/MatchCard'
-import type { Match } from '@/types/players'
+import type { Match } from '@/types/types'
 
 export interface CourtCardProps {
   courtId: number

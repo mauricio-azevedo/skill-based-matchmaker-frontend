@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown } from 'lucide-react'
-import type { Match } from '@/types/players'
+import type { Match } from '@/types/types'
 
 /* Helpers ---------------------------------------------------------------- */
 const SCORES = ['1', '2', '3', '4', '5', '6'] as const
