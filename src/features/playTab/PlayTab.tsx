@@ -22,15 +22,15 @@ export function PlayTab() {
         {rows.map(({ id }) => {
           // Verificando a condição de habilitação de canGenerate
 
-          const canGenerate = canGenerateGlobal && (state.matches[id]?.match == null || courtFinished(id))
+          const canGenerate = canGenerateGlobal && (state.courtMatches[id]?.match == null || courtFinished(id))
 
-          console.log(`Quadra ${id} - match: ${state.matches[id]?.match}, canGenerate =`, canGenerate)
+          console.log(`Quadra ${id} - match: ${state.courtMatches[id]?.match}, canGenerate =`, canGenerate)
 
           return (
             <CourtCard
               key={id}
               courtId={id}
-              match={state.matches[id]?.match ?? null}
+              match={state.courtMatches[id]?.match ?? null}
               onGenerate={() => canGenerate && handleGenerate(id)}
               onSaveScore={(a, b) => handleSaveScore(id, a, b)}
               canGenerate={canGenerate}

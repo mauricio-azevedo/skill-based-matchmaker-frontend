@@ -6,7 +6,7 @@ export type SelectedMap = Record<CourtId, boolean>
 export type LoadingMap = Record<CourtId, boolean>
 
 export interface State {
-  matches: Record<CourtId, CourtMatchRow>
+  courtMatches: Record<CourtId, CourtMatchRow>
   selected: SelectedMap
   loading: LoadingMap
 }
@@ -23,8 +23,8 @@ export const playTabReducer: Reducer<State, Action> = (state, action) => {
     case 'addMatch': {
       return {
         ...state,
-        matches: {
-          ...state.matches,
+        courtMatches: {
+          ...state.courtMatches,
           [action.courtId]: {
             courtId: action.courtId, // Adicionando courtId
             match: action.match, // Adicionando match
@@ -37,7 +37,7 @@ export const playTabReducer: Reducer<State, Action> = (state, action) => {
     }
 
     case 'updateScore': {
-      const court = state.matches[action.courtId]
+      const court = state.courtMatches[action.courtId]
       if (!court) return state
 
       // Atualizando o match no CourtMatchRow
@@ -48,8 +48,8 @@ export const playTabReducer: Reducer<State, Action> = (state, action) => {
 
       return {
         ...state,
-        matches: {
-          ...state.matches,
+        courtMatches: {
+          ...state.courtMatches,
           [action.courtId]: {
             ...court,
             match: { ...match },
@@ -72,11 +72,11 @@ export const playTabReducer: Reducer<State, Action> = (state, action) => {
       const loading: LoadingMap = {}
 
       for (const id of action.ids) {
-        matches[id] = state.matches[id] ?? { courtId: id, match: {} as Match, updatedAt: '' }
+        matches[id] = state.courtMatches[id] ?? { courtId: id, match: {} as Match, updatedAt: '' }
         selected[id] = false
         loading[id] = false
       }
-      return { matches, selected, loading }
+      return { courtMatches: matches, selected, loading }
     }
 
     default:

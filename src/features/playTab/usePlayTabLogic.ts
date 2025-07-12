@@ -17,7 +17,7 @@ export function usePlayTabLogic() {
   const { players } = usePlayers()
 
   const [state, dispatch] = useReducer(playTabReducer, {
-    matches: readAllCourtMatches(),
+    courtMatches: readAllCourtMatches(),
     selected: {},
     loading: {},
   } as State)
@@ -35,14 +35,14 @@ export function usePlayTabLogic() {
 
   const unavailableIds = useMemo(() => {
     const s = new Set<string>()
-    Object.values(state.matches).forEach((courtMatchRow) => {
+    Object.values(state.courtMatches).forEach((courtMatchRow) => {
       const match = courtMatchRow?.match
       if (match && (match.gamesA == null || match.gamesB == null)) {
         ;[...match.teamA, ...match.teamB].forEach((p) => s.add(p.id))
       }
     })
     return s
-  }, [state.matches])
+  }, [state.courtMatches])
 
   const availablePlayers = useMemo(
     () => players.filter((p) => p.active && !unavailableIds.has(p.id)),
@@ -51,13 +51,13 @@ export function usePlayTabLogic() {
 
   const handleSaveScore = useCallback(
     (courtId: CourtId, gamesA: number, gamesB: number) => {
-      const courtMatchRow = state.matches[courtId]
+      const courtMatchRow = state.courtMatches[courtId]
       if (!courtMatchRow) return
 
       dispatch({ type: 'updateScore', courtId, gamesA, gamesB })
       updateMatchScore(courtId, gamesA, gamesB)
     },
-    [state.matches],
+    [state.courtMatches],
   )
 
   const handleGenerate = useCallback(
@@ -89,7 +89,7 @@ export function usePlayTabLogic() {
   const handleAddCourt = useCallback(() => setCourts((p) => p + 1), [setCourts])
 
   const courtFinished = (id: number) => {
-    const match = state.matches[id]?.match
+    const match = state.courtMatches[id]?.match
     console.log(`Quadra ${id} - match: `, match) // Log da propriedade match
 
     // Verifica se o match está presente e foi finalizado
