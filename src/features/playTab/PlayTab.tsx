@@ -54,15 +54,16 @@ export function PlayTab() {
         <p className="text-sm text-muted-foreground">Nenhuma quadra cadastrada.</p>
       )}
 
-      {Object.values(courts).map((court) => {
+      {Object.values(courts).map((court, index) => {
         const matchId = court.ongoingMatchId
         const match = matchId ? (getById(matchId) ?? null) : null
         const isOngoing = match?.status === 'ongoing'
+        const courtNumber = index + 1
 
         return (
-          <Card key={court.id}>
+          <Card key={court.id} className="!h-[unset] !gap-8">
             <CardHeader className="flex justify-between items-center">
-              <CardTitle>Quadra {court.id}</CardTitle>
+              <CardTitle>Quadra {courtNumber}</CardTitle>
             </CardHeader>
 
             <CardContent>
@@ -70,7 +71,7 @@ export function PlayTab() {
             </CardContent>
 
             <CardFooter>
-              <Button disabled={isOngoing} onClick={() => handleGenerateMatch(court.id)}>
+              <Button size="sm" className="w-full" disabled={isOngoing} onClick={() => handleGenerateMatch(court.id)}>
                 Gerar nova partida
               </Button>
             </CardFooter>
