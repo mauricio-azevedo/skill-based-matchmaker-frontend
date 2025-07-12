@@ -22,7 +22,11 @@ export function PlayTab() {
         {rows.map(({ id }) => {
           // Verificando a condição de habilitação de canGenerate
 
-          const canGenerate = canGenerateGlobal && (state.courtMatches[id]?.match == null || courtFinished(id))
+          const canGenerate =
+            canGenerateGlobal &&
+            (!state.courtMatches[id]?.match ||
+              Object.keys(state.courtMatches[id]?.match || {}).length === 0 ||
+              courtFinished(id))
 
           console.log(`Quadra ${id} - match: ${state.courtMatches[id]?.match}, canGenerate =`, canGenerate)
 
