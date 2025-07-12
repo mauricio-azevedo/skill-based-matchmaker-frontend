@@ -86,8 +86,8 @@ export function MatchCard({ match, onSave }: Props) {
     <div className="flex items-center justify-between gap-4">
       {/* Equipe A */}
       <div className="flex flex-col gap-2">
-        <PlayerEntry name={teamA[0].name} />
-        <PlayerEntry name={teamA[1].name} />
+        {teamA && teamA[0] && <PlayerEntry name={teamA[0].name} />}
+        {teamA && teamA[1] && <PlayerEntry name={teamA[1].name} />}
       </div>
 
       {/* Placar */}
@@ -101,8 +101,8 @@ export function MatchCard({ match, onSave }: Props) {
 
       {/* Equipe B */}
       <div className="flex flex-col gap-2">
-        <PlayerEntry name={teamB[0].name} reverse />
-        <PlayerEntry name={teamB[1].name} reverse />
+        {teamB && teamB[0] && <PlayerEntry name={teamB[0].name} reverse />}
+        {teamB && teamB[1] && <PlayerEntry name={teamB[1].name} reverse />}
       </div>
     </div>
   )
