@@ -30,8 +30,6 @@ export interface Match {
 
 export interface Court {
   id: string // Unique identifier for the court
-  name: string // Name of the court (e.g., "Court 1", "Court A")
-  location: string // Location description (could be a city, stadium, etc.)
   ongoingMatchId?: string // Optionally, the ID of the ongoing match (if any)
   createdAt: string // Timestamp of when the court was created
   updatedAt: string // Timestamp of when the court was last updated
