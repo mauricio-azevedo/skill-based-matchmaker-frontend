@@ -1,13 +1,11 @@
-// src/context/CourtsContext.tsx
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext } from 'react'
 import useLocalStorage from '@/hooks/useLocalStorage'
-import { FORMATION_MODES } from '@/context/FORMATION_MODES'
+import { FORMATION_MODES, type FormationMode } from '@/types/types'
 
 export const STORAGE_KEY_COURTS = 'match_courts'
 export const STORAGE_KEY_MODE = 'match_formation_mode'
 export const STORAGE_KEY_AUTO = 'match_auto_alternate'
 export const STORAGE_KEY_AUTO_MODE = 'match_auto_alternate_mode'
-export type FormationMode = (typeof FORMATION_MODES)[keyof typeof FORMATION_MODES]
 
 type Ctx = {
   courts: number

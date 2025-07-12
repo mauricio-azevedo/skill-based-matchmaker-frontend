@@ -1,53 +1,53 @@
-// ---------------------------------------------------------------------------
-// Interface que representa um jogador único:
-//   • id – UUID v4 para chave primária
-//   • name – string livre informada pelo usuário
-//   • level – inteiro >= 1 que representa habilidade; usado p/ balancear times
-// ---------------------------------------------------------------------------
-import type { FormationMode } from '@/context/CourtsContext'
-
 export interface Player {
-  id: string
-  name: string
-  level: number // 1..N – maior = melhor
-  active: boolean
-  /** Quantas partidas já jogou */
-  matchCount: number
-  /** Histórico de parcerias: parceiroId → vezes jogadas juntos */
-  partnerCounts: Record<string, number>
-  /** Lista de jogadores com quem esse jogador prefere fazr dupla */
-  preferredPairs: string[]
+  id: string // Unique identifier for the player
+  name: string // Name of the player
+  level: number // Level of the player (higher = better)
+  active: boolean // Whether the player is currently active
+  matchCount: number // How many matches the player has played
+  partnerCounts: Record<string, number> // How many times the player has played with each partner (partnerId → times played together)
+  preferredPairs: string[] // List of player IDs that the player prefers to pair with
+  createdAt: string // Timestamp of when the player was created
+  updatedAt: string // Timestamp of when the player was last updated
 }
 
-/** Cada partida contém dois times de dois jogadores. */
 export interface Match {
-  id: string
-  teamA: Player[]
-  teamB: Player[]
-  gamesA: number | null
-  gamesB: number | null
-  winner: 'A' | 'B' | null
-  formationMode: FormationMode
-  createdAt: string
-  updatedAt: string
+  id: string // Unique identifier for the match
+  courtId: string // The ID of the court where the match is happening
+  teamAPlayer1: string // Player ID for Team A Player 1
+  teamAPlayer2: string // Player ID for Team A Player 2
+  teamBPlayer1: string // Player ID for Team B Player 1
+  teamBPlayer2: string // Player ID for Team B Player 2
+  startTime: string // Start time of the match in ISO format
+  endTime: string | null // Optionally, the end time of the match (if it has ended)
+  status: 'ongoing' | 'completed' // Status of the match
+  gamesA: number | null // Number of games won by Team A, or null if match is ongoing
+  gamesB: number | null // Number of games won by Team B, or null if match is ongoing
+  winner: 'A' | 'B' | null // The winner of the match ('A', 'B', or null if ongoing)
+  formationMode: FormationMode // The formation mode ('homogeneous' or 'mixed')
+  createdAt: string // Timestamp of when the match was created
+  updatedAt: string // Timestamp of when the match was last updated
 }
 
-export interface CourtMatchRow {
-  courtId: number
-  match: Match // A propriedade 'match' já é do tipo 'Match'
-  updatedAt: string
+export interface Court {
+  id: string // Unique identifier for the court
+  name: string // Name of the court (e.g., "Court 1", "Court A")
+  location: string // Location description (could be a city, stadium, etc.)
+  ongoingMatchId?: string // Optionally, the ID of the ongoing match (if any)
+  createdAt: string // Timestamp of when the court was created
+  updatedAt: string // Timestamp of when the court was last updated
 }
 
-/** Conjunto de partidas que podem acontecer simultaneamente. */
-export interface UnsavedRound {
-  id: string
-  matches: Match[]
-  formationMode: FormationMode
+export interface LocalStorageDB {
+  courts: Record<string, Court> // Using a simple object where key is court ID
+  matches: Record<string, Match> // Using a simple object where key is match ID
+  players: Record<string, Player> // Using a simple object where key is player ID
 }
 
-export interface Round extends UnsavedRound {
-  roundNumber: number
-}
+export const FORMATION_MODES = {
+  HOMOGENEOUS: 'homogeneous',
+  MIXED: 'mixed',
+} as const
+export type FormationMode = (typeof FORMATION_MODES)[keyof typeof FORMATION_MODES]
 
 export interface PlayerLBRow extends Player {
   P: number

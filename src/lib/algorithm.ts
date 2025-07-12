@@ -1,7 +1,4 @@
-// src/lib/algorithm.ts
-import type { Match, Player } from '@/types/types'
-import type { FormationMode } from '@/context/CourtsContext'
-import { FORMATION_MODES } from '@/context/FORMATION_MODES'
+import { FORMATION_MODES, type FormationMode, type Player } from '@/types/types'
 
 /* ─────────────────────────────── Constantes ──────────────────────────────── */
 
@@ -147,7 +144,7 @@ function selectBestMatch(matches: InternalMatch[]): InternalMatch {
 
 /* ─────────────────────────── API pública ─────────────────────────────────── */
 
-export function generateSchedule(players: readonly Player[], formationMode: FormationMode): Match {
+export function generateSchedule(players: readonly Player[], formationMode: FormationMode): Record<string, string> {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
@@ -156,14 +153,9 @@ export function generateSchedule(players: readonly Player[], formationMode: Form
   const best = selectBestMatch(allMatches)
 
   return {
-    id: crypto.randomUUID(),
-    teamA: [players[best.teamA[0]], players[best.teamA[1]]],
-    teamB: [players[best.teamB[0]], players[best.teamB[1]]],
-    gamesA: null,
-    gamesB: null,
-    winner: null,
-    formationMode,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    teamAPlayer1: players[best.teamA[0]].id,
+    teamAPlayer2: players[best.teamA[0]].id,
+    teamBPlayer1: players[best.teamA[1]].id,
+    teamBPlayer2: players[best.teamA[1]].id,
   }
 }
