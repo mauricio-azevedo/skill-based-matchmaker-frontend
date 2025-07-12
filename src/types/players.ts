@@ -27,6 +27,8 @@ export interface Match {
   gamesA: number | null
   gamesB: number | null
   winner: 'A' | 'B' | null
+  createdAt: string
+  updatedAt: string
 }
 
 /** Conjunto de partidas que podem acontecer simultaneamente. */

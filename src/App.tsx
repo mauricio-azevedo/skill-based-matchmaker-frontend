@@ -13,8 +13,8 @@ import { singleToastSuccess } from '@/utils/singleToast'
 import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import SetupTab from '@/components/SetupTab'
 import { PlayTab } from '@/features/playTab/PlayTab'
+import { MatchesTab } from '@/components/MatchesTab'
 
 export default function App() {
   // -----------------------------------------------------------
@@ -160,8 +160,8 @@ export default function App() {
           <TabsContent value="players" asChild>
             <PlayersTab />
           </TabsContent>
-          <TabsContent value="setup" asChild>
-            <SetupTab />
+          <TabsContent value="matches" asChild>
+            <MatchesTab />
           </TabsContent>
           <TabsContent value="play" asChild>
             <PlayTab />
@@ -173,9 +173,9 @@ export default function App() {
 
         {/* Barra de triggers */}
         <TabsList className="self-center">
-          <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="players">Jogadores</TabsTrigger>
           <TabsTrigger value="play">PLAY!</TabsTrigger>
+          <TabsTrigger value="matches">Jogos</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
       </Tabs>
