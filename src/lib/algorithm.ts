@@ -154,8 +154,8 @@ export function generateSchedule(players: readonly Player[], formationMode: Form
 
   return {
     teamAPlayer1: players[best.teamA[0]].id,
-    teamAPlayer2: players[best.teamA[0]].id,
-    teamBPlayer1: players[best.teamA[1]].id,
-    teamBPlayer2: players[best.teamA[1]].id,
+    teamAPlayer2: players[best.teamA[1]].id,
+    teamBPlayer1: players[best.teamB[0]].id,
+    teamBPlayer2: players[best.teamB[1]].id,
   }
 }
