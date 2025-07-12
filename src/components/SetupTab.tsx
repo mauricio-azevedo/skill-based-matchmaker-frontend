@@ -1,12 +1,12 @@
 import React, { type FC } from 'react'
 import { Label } from '@/components/ui/label'
-import { type FormationMode, useCourts } from '@/context/CourtsContext'
+import { useCourts } from '@/context/CourtsContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
+import { FORMATION_MODES, type FormationMode } from '@/types/types'
 
 const SetupTab: FC = () => {
   const { courts, setCourts, formationMode, setFormationMode, autoAlternate, setAutoAlternate } = useCourts()

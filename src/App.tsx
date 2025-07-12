@@ -1,5 +1,3 @@
-// src/App.tsx
-
 import { useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
@@ -16,27 +14,29 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { PlayTab } from '@/features/playTab/PlayTab'
 import { MatchesTab } from '@/components/MatchesTab'
 
+// Importando o modal do Shadcn
+import SetupTab from './components/SetupTab'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+
 export default function App() {
-  // -----------------------------------------------------------
-  // Tema (poderia ser trocado por useTheme() do next-themes)
-  // -----------------------------------------------------------
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
-
-  // Estado do diálogo: null | 'rounds' | 'all'
   const [warning, setWarning] = useState<null | 'rounds' | 'all' | 'seed'>(null)
+  const [isSetupOpen, setIsSetupOpen] = useState(false) // Estado para controle do modal "Setup"
 
-  // Aplica a classe "dark" na <html> root
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
-  // -----------------------------------------------------------
-  // Actions: limpar partidas e limpar tudo
-  // -----------------------------------------------------------
   const { rounds, clear: clearRounds } = useRounds()
   const { players, updatePlayers } = usePlayers()
 
-  // Verifica se os jogadores atuais correspondem exatamente ao seed (id, nome e nível), ignorando ordem
   const isSeedLoaded = useMemo(() => {
     if (players.length !== seedPlayers.length) return false
     const seedSet = new Set(seedPlayers.map(({ id, name, level }) => `${id}-${name}-${level}`))
@@ -110,11 +110,14 @@ export default function App() {
               <DropdownMenuItem disabled={noData} className="text-destructive " onSelect={() => setWarning('all')}>
                 Limpar tudo
               </DropdownMenuItem>
+              {/* Nova opção Setup */}
+              <DropdownMenuItem onSelect={() => setIsSetupOpen(true)}>Setup</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </header>
 
+      {/* Confirm Dialogs */}
       <ConfirmDialog
         open={warning === 'seed'}
         onOpenChange={() => setWarning(null)}
@@ -152,6 +155,19 @@ export default function App() {
           setWarning(null)
         }}
       />
+
+      {/* Modal Setup */}
+      <Dialog open={isSetupOpen} onOpenChange={setIsSetupOpen}>
+        <DialogTrigger />
+        <DialogContent>
+          <DialogTitle>Configurações de Setup</DialogTitle>
+          <DialogDescription>Configure as opções de quadras e formação de duplas abaixo.</DialogDescription>
+          <SetupTab />
+          <DialogClose asChild>
+            <button className="btn btn-primary">Fechar</button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
 
       {/* --------- Tabs --------- */}
       <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
