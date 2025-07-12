@@ -62,7 +62,7 @@ interface Props {
 export function MatchCard({ match }: Props) {
   const [gamesA, setGamesA] = useState<number | ''>('')
   const [gamesB, setGamesB] = useState<number | ''>('')
-  const { getById } = usePlayers()
+  const { getById, registerMatch } = usePlayers()
   const { updateMatch } = useMatches()
 
   // Reseta ao trocar de partida
@@ -79,15 +79,30 @@ export function MatchCard({ match }: Props) {
     if (match && filled && dirty && gamesA !== gamesB) {
       const winnerValue = gamesA > gamesB ? 'A' : 'B'
       const now = new Date().toISOString()
-      updateMatch(match.id, {
+
+      // Prepara o payload completo de Match para enviar ao contexto de partidas e de jogadores
+      const updatedMatch: Match = {
+        ...match,
         gamesA: gamesA as number,
         gamesB: gamesB as number,
         winner: winnerValue,
         status: 'completed',
         endTime: now,
+      }
+
+      // Atualiza o contexto de partidas
+      updateMatch(match.id, {
+        gamesA: updatedMatch.gamesA,
+        gamesB: updatedMatch.gamesB,
+        winner: updatedMatch.winner,
+        status: updatedMatch.status,
+        endTime: updatedMatch.endTime,
       })
+
+      // Atualiza o contexto de jogadores
+      registerMatch(updatedMatch)
     }
-  }, [filled, dirty, gamesA, gamesB, match, updateMatch])
+  }, [filled, dirty, gamesA, gamesB, match, updateMatch, registerMatch])
 
   if (!match) {
     return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
