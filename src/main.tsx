@@ -5,15 +5,21 @@ import './index.css'
 import { PlayersProvider } from './context/PlayersContext.js'
 import { RoundsProvider } from './context/RoundsContext.js'
 import { Toaster } from '@/components/ui/sonner'
-import { CourtsProvider } from '@/context/CourtsContext'
+import { FormationModeProvider } from '@/context/FormationModeContext'
+import { CourtsProvider } from './context/CourtsContext.js'
+import { MatchesProvider } from './context/MatchesContext.js'
 
 createRoot(document.getElementById('root')!).render(
-  <CourtsProvider>
-    <PlayersProvider>
-      <RoundsProvider>
-        <App />
-        <Toaster position="top-center" visibleToasts={1} />
-      </RoundsProvider>
-    </PlayersProvider>
-  </CourtsProvider>,
+  <FormationModeProvider>
+    <RoundsProvider>
+      <PlayersProvider>
+        <CourtsProvider>
+          <MatchesProvider>
+            <App />
+            <Toaster position="top-center" visibleToasts={1} />
+          </MatchesProvider>
+        </CourtsProvider>
+      </PlayersProvider>
+    </RoundsProvider>
+  </FormationModeProvider>,
 )
