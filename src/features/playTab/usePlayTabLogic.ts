@@ -38,7 +38,13 @@ export function usePlayTabLogic() {
     Object.values(state.courtMatches).forEach((courtMatchRow) => {
       const match = courtMatchRow?.match
       if (match && (match.gamesA == null || match.gamesB == null)) {
-        ;[...match.teamA, ...match.teamB].forEach((p) => s.add(p.id))
+        // Check if teamA and teamB are arrays before iterating
+        if (Array.isArray(match.teamA)) {
+          match.teamA.forEach((p) => s.add(p.id))
+        }
+        if (Array.isArray(match.teamB)) {
+          match.teamB.forEach((p) => s.add(p.id))
+        }
       }
     })
     return s
