@@ -1,94 +1,65 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
-import { type CourtId, playTabReducer, type State } from './playTabReducer'
-
-import { generateSchedule, MIN_PLAYERS } from '@/lib/algorithm'
 import { useCourts } from '@/context/CourtsContext'
 import { usePlayers } from '@/context/PlayersContext'
-
-import { ensureCourtsTable, readAllCourts } from '@/storage/courtsStorage'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import {
   appendCourtMatch,
   purgeMatchesBeyond,
   readAllCourtMatches,
   updateMatchScore,
 } from '@/storage/courtMatchesStorage'
-
+import { type CourtId, playTabReducer, type State } from '@/features/playTab/playTabReducer'
+import { ensureCourtsTable, readAllCourts } from '@/storage/courtsStorage'
+import { generateSchedule, MIN_PLAYERS } from '@/lib/algorithm'
 import { toast } from 'sonner'
 
-/**
- * Encapsula toda a lógica da aba “Play”.
- * Feita para telas mobile, mas totalmente independente de UI.
- */
 export function usePlayTabLogic() {
-  /* ───────── contexto global ───────── */
   const { courts, setCourts, formationMode } = useCourts()
-  const { players, registerMatch } = usePlayers()
+  const { players } = usePlayers()
 
-  /* ───────── estado local (rounds / seleção) ───────── */
   const [state, dispatch] = useReducer(playTabReducer, {
-    rounds: readAllCourtMatches(),
+    matches: readAllCourtMatches(),
     selected: {},
     loading: {},
   } as State)
 
-  /* ───────── rows da tabela de quadras (1..courts) ───────── */
   const [rows, setRows] = useState(() => readAllCourts())
 
-  /* sincroniza quando o # de quadras muda */
   useEffect(() => {
     ensureCourtsTable(courts)
     purgeMatchesBeyond(courts)
 
-    const fresh = readAllCourts()
-    setRows(fresh)
-    dispatch({ type: 'syncCourts', ids: fresh.map((r) => r.id) })
+    const freshRows = readAllCourts()
+    setRows(freshRows)
+    dispatch({ type: 'syncCourts', ids: freshRows.map((r) => r.id) })
   }, [courts])
 
-  /* ───────── jogadores indisponíveis (partida em andamento) ───────── */
   const unavailableIds = useMemo(() => {
     const s = new Set<string>()
-    Object.values(state.rounds).forEach((courtRounds) =>
-      courtRounds.forEach((r) => {
-        const m = r.matches[0]
-        if (m.gamesA == null || m.gamesB == null) {
-          ;[...m.teamA, ...m.teamB].forEach((p) => s.add(p.id))
-        }
-      }),
-    )
+    Object.values(state.matches).forEach((courtMatchRow) => {
+      const match = courtMatchRow?.match
+      if (match && (match.gamesA == null || match.gamesB == null)) {
+        ;[...match.teamA, ...match.teamB].forEach((p) => s.add(p.id))
+      }
+    })
     return s
-  }, [state.rounds])
+  }, [state.matches])
 
-  /* ───────── jogadores elegíveis p/ gerar partida ─────────
-     • ativos (`active === true`)
-     • não presos em partidas em aberto                       */
   const availablePlayers = useMemo(
     () => players.filter((p) => p.active && !unavailableIds.has(p.id)),
     [players, unavailableIds],
   )
 
-  /* ───────── salvar placar + atualizar estatísticas ───────── */
   const handleSaveScore = useCallback(
     (courtId: CourtId, gamesA: number, gamesB: number) => {
-      const idx = state.selected[courtId] ?? -1
-      if (idx < 0) return
+      const courtMatchRow = state.matches[courtId]
+      if (!courtMatchRow) return
 
-      const round = state.rounds[courtId]?.[idx]
-      if (!round) return
-      const match = round.matches[0]
-
-      const firstTime = match.gamesA == null && match.gamesB == null
-
-      /* atualiza store local + localStorage */
-      dispatch({ type: 'updateScore', courtId, roundIdx: idx, gamesA, gamesB })
-      updateMatchScore(courtId, idx, gamesA, gamesB)
-
-      /* registra estatísticas globais apenas na 1ª vez */
-      if (firstTime) registerMatch(match)
+      dispatch({ type: 'updateScore', courtId, gamesA, gamesB })
+      updateMatchScore(courtId, gamesA, gamesB)
     },
-    [state.rounds, state.selected, registerMatch],
+    [state.matches],
   )
 
-  /* ───────── gerar nova partida ───────── */
   const handleGenerate = useCallback(
     async (courtId: CourtId) => {
       if (availablePlayers.length < MIN_PLAYERS) {
@@ -99,9 +70,13 @@ export function usePlayTabLogic() {
       dispatch({ type: 'loading', courtId, value: true })
 
       try {
-        const round = await generateSchedule(availablePlayers, formationMode)
-        dispatch({ type: 'addRound', courtId, round })
-        appendCourtMatch(courtId, round)
+        const match = await generateSchedule(availablePlayers, formationMode)
+        if (!match) {
+          toast.error('Erro ao gerar partida')
+          return
+        }
+        dispatch({ type: 'addMatch', courtId, match })
+        appendCourtMatch(courtId, match)
       } catch (err) {
         toast.error(err instanceof Error ? err.message : String(err))
       } finally {
@@ -111,28 +86,27 @@ export function usePlayTabLogic() {
     [availablePlayers, formationMode],
   )
 
-  /* ───────── outros handlers ───────── */
   const handleAddCourt = useCallback(() => setCourts((p) => p + 1), [setCourts])
-  const handleSelect = useCallback(
-    (id: CourtId, idx: number) => dispatch({ type: 'select', courtId: id, index: idx }),
-    [],
-  )
 
-  /* ───────── helper p/ habilitar botão “Gerar partida” ───────── */
-  const courtFinished = (id: number) =>
-    (state.rounds[id] ?? []).every((r) => r.matches[0].gamesA != null && r.matches[0].gamesB != null)
+  const courtFinished = (id: number) => {
+    const match = state.matches[id]?.match
+    console.log(`Quadra ${id} - match: `, match) // Log da propriedade match
+
+    // Verifica se o match está presente e foi finalizado
+    return match?.gamesA != null && match?.gamesB != null
+  }
+
+  // Verificando o valor de canGenerateGlobal
+  const canGenerateGlobal = availablePlayers.length >= MIN_PLAYERS
+  console.log('canGenerateGlobal:', canGenerateGlobal)
 
   return {
-    /* dados p/ UI */
     rows,
     state,
     courtFinished,
-    canGenerateGlobal: availablePlayers.length >= MIN_PLAYERS,
-
-    /* callbacks p/ UI */
+    canGenerateGlobal,
     handleAddCourt,
     handleGenerate,
-    handleSelect,
     handleSaveScore,
   }
 }

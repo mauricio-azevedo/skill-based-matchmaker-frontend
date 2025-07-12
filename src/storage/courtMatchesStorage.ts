@@ -1,10 +1,10 @@
-import type { UnsavedRound } from '@/types/players'
+import type { Match } from '@/types/players'
 
 const COURT_MATCHES = 'court_matches'
 
 export type CourtMatchRow = {
   courtId: number
-  rounds: UnsavedRound[]
+  match: Match // A propriedade 'match' já é do tipo 'Match'
   updatedAt: string
 }
 
@@ -16,22 +16,23 @@ function readTable(): Record<number, CourtMatchRow> {
     return {}
   }
 }
+
 function saveTable(t: Record<number, CourtMatchRow>) {
   localStorage.setItem(COURT_MATCHES, JSON.stringify(t))
 }
 
 /* API */
-export function readAllCourtMatches(): Record<number, UnsavedRound[]> {
+export function readAllCourtMatches(): Record<number, CourtMatchRow> {
+  // Retorna o tipo correto
   const t = readTable()
-  return Object.fromEntries(Object.values(t).map(({ courtId, rounds }) => [courtId, rounds]))
+  return t // Já retorna corretamente o dicionário com CourtMatchRow
 }
 
-export function appendCourtMatch(courtId: number, round: UnsavedRound) {
+export function appendCourtMatch(courtId: number, match: Match) {
   const t = readTable()
-  const list = t[courtId]?.rounds ?? []
   t[courtId] = {
     courtId,
-    rounds: [...list, round],
+    match,
     updatedAt: new Date().toISOString(),
   }
   saveTable(t)
@@ -53,18 +54,16 @@ export function purgeMatchesBeyond(maxId: number) {
   if (changed) saveTable(table)
 }
 
-export function updateMatchScore(courtId: number, roundIdx: number, gamesA: number, gamesB: number) {
+export function updateMatchScore(courtId: number, gamesA: number, gamesB: number) {
   const t = readTable()
-  const rounds = t[courtId]?.rounds ?? []
-  const round = rounds[roundIdx]
-  if (!round) return
+  const court = t[courtId]
+  if (!court) return
 
-  const match = round.matches[0]
+  const match = court.match
   match.gamesA = gamesA
   match.gamesB = gamesB
   match.winner = gamesA === gamesB ? null : gamesA > gamesB ? 'A' : 'B'
 
-  rounds[roundIdx] = { ...round, matches: [{ ...match }] }
-  t[courtId] = { ...t[courtId], rounds, updatedAt: new Date().toISOString() }
+  t[courtId] = { ...court, match: { ...match }, updatedAt: new Date().toISOString() }
   saveTable(t)
 }

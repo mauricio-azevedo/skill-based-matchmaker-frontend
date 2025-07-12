@@ -56,7 +56,7 @@ const ScoreSelect = ({
 
 /* MatchCard -------------------------------------------------------------- */
 interface Props {
-  match?: Match
+  match: Match | null
   onSave?: (gamesA: number, gamesB: number) => void
 }
 

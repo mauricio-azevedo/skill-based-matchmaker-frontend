@@ -27,6 +27,7 @@ export interface Match {
   gamesA: number | null
   gamesB: number | null
   winner: 'A' | 'B' | null
+  formationMode: FormationMode
   createdAt: string
   updatedAt: string
 }

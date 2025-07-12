@@ -1,33 +1,37 @@
 import { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { readAllCourtMatches } from '@/storage/courtMatchesStorage'
-import type { Match, UnsavedRound } from '@/types/players'
+import type { Match } from '@/types/players'
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                            */
 /* ------------------------------------------------------------------ */
-const formatTeam = (team: Match['teamA']) => `${team[0].name} & ${team[1].name}`
+const formatTeam = (team: Match['teamA']) => {
+  if (team && team.length >= 2) {
+    return `${team[0].name} & ${team[1].name}`
+  }
+  return 'Equipe incompleta'
+}
 
+/* Helpers */
 const loadFinishedMatches = (): Match[] => {
-  const rounds: UnsavedRound[] = Object.values(readAllCourtMatches()).flat()
+  const courts = readAllCourtMatches()
 
-  return rounds
-    .flatMap((r) => r.matches)
-    .filter((m) => m.gamesA !== null && m.gamesB !== null) // só finalizadas
+  // Filtra os matches para incluir apenas os finalizados
+  return Object.values(courts)
+    .map((court) => court.match) // Acessando o match diretamente
+    .filter((match) => match && match.gamesA !== null && match.gamesB !== null) // Verificando se o placar está finalizado
     .sort((a, b) => {
       const updatedAtA = Number(a.updatedAt)
       const updatedAtB = Number(b.updatedAt)
-      return (updatedAtB || 0) - (updatedAtA || 0) // se for NaN, usa 0
+      return (updatedAtB || 0) - (updatedAtA || 0) // Se for NaN, usa 0
     })
 }
 
-/* ------------------------------------------------------------------ */
-/* Component                                                          */
-/* ------------------------------------------------------------------ */
+/* Component */
 export function MatchesTab() {
   const [matches, setMatches] = useState<Match[]>(loadFinishedMatches)
 
-  /* Atualiza caso outra aba altere o storage */
   useEffect(() => {
     const refresh = () => setMatches(loadFinishedMatches())
     window.addEventListener('storage', refresh)
@@ -54,7 +58,14 @@ export function MatchesTab() {
             {matches.map((m) => (
               <TableRow key={m.id}>
                 <TableCell className="truncate">
-                  {formatTeam(m.teamA)} vs. {formatTeam(m.teamB)}
+                  {/* Verificação adicional para garantir que o time seja válido */}
+                  {m.teamA && m.teamB ? (
+                    <>
+                      {formatTeam(m.teamA)} vs. {formatTeam(m.teamB)}
+                    </>
+                  ) : (
+                    <span className="italic text-muted-foreground">Equipe incompleta</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   {m.gamesA}&nbsp;:&nbsp;{m.gamesB}

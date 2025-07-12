@@ -1,5 +1,5 @@
 // src/lib/algorithm.ts
-import type { Player, UnsavedRound } from '@/types/players'
+import type { Match, Player } from '@/types/players'
 import type { FormationMode } from '@/context/CourtsContext'
 import { FORMATION_MODES } from '@/context/FORMATION_MODES'
 
@@ -147,7 +147,7 @@ function selectBestMatch(matches: InternalMatch[]): InternalMatch {
 
 /* ─────────────────────────── API pública ─────────────────────────────────── */
 
-export function generateSchedule(players: readonly Player[], formationMode: FormationMode): UnsavedRound {
+export function generateSchedule(players: readonly Player[], formationMode: FormationMode): Match {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
@@ -157,16 +157,13 @@ export function generateSchedule(players: readonly Player[], formationMode: Form
 
   return {
     id: crypto.randomUUID(),
+    teamA: [players[best.teamA[0]], players[best.teamA[1]]],
+    teamB: [players[best.teamB[0]], players[best.teamB[1]]],
+    gamesA: null,
+    gamesB: null,
+    winner: null,
     formationMode,
-    matches: [
-      {
-        id: crypto.randomUUID(),
-        teamA: [players[best.teamA[0]], players[best.teamA[1]]],
-        teamB: [players[best.teamB[0]], players[best.teamB[1]]],
-        gamesA: null,
-        gamesB: null,
-        winner: null,
-      },
-    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }
 }

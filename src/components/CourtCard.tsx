@@ -3,12 +3,11 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MatchCard } from '@/components/MatchCard'
-import type { Match, UnsavedRound } from '@/types/players'
+import type { Match } from '@/types/players'
 
 export interface CourtCardProps {
   courtId: number
-  rounds: UnsavedRound[]
-  selected: number
+  match: Match | null
   onGenerate: () => void
   onSaveScore: (gamesA: number, gamesB: number) => void
   canGenerate: boolean
@@ -17,15 +16,13 @@ export interface CourtCardProps {
 
 export const CourtCard = memo(function CourtCard({
   courtId,
-  rounds,
-  selected,
+  match,
   onGenerate,
   onSaveScore,
   canGenerate,
   loading,
 }: CourtCardProps) {
-  const match: Match | undefined = selected >= 0 ? rounds[selected].matches[0] : undefined
-
+  console.log({ match })
   return (
     <Card aria-label={`Quadra ${courtId}`} className="!min-h-[unset] !gap-0 !py-2">
       <CardHeader className="flex flex-col gap-3 p-3">
@@ -33,9 +30,7 @@ export const CourtCard = memo(function CourtCard({
       </CardHeader>
 
       <CardContent className="p-3 !min-h-[unset] flex flex-col gap-3">
-        {/* key força remontagem quando muda a partida */}
         <MatchCard key={match?.id ?? 'no-match'} match={match} onSave={onSaveScore} />
-
         <Button size="sm" className="gap-1 self-center" onClick={onGenerate} disabled={!canGenerate || loading}>
           {loading && <Loader2 size={14} className="animate-spin" />}
           Gerar partida
