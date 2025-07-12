@@ -5,7 +5,6 @@ import PlayersTab from './components/PlayersTab'
 import LeaderboardTab from './components/LeaderboardTab'
 import { Moon, Settings, Sun } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { useRounds } from '@/context/RoundsContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
 import { seedPlayers } from '@/data/seedPlayers'
@@ -16,17 +15,18 @@ import { MatchesTab } from '@/components/MatchesTab'
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { SetupTab } from '@/components/SetupTab'
 import { PlayTab } from '@/features/playTab/PlayTab'
+import { useMatches } from '@/context/MatchesContext'
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
-  const [warning, setWarning] = useState<null | 'rounds' | 'all' | 'seed'>(null)
+  const [warning, setWarning] = useState<null | 'matches' | 'all' | 'seed'>(null)
   const [isSetupOpen, setIsSetupOpen] = useState(false)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
 
-  const { rounds, clear: clearRounds } = useRounds()
+  const { matches, clearMatches } = useMatches()
   const { players, updatePlayers, add } = usePlayers()
 
   const isSeedLoaded = useMemo(() => {
@@ -35,12 +35,12 @@ export default function App() {
     return players.every(({ name, level }) => seedSet.has(`${name}-${level}`))
   }, [players])
 
-  const hasRounds = rounds.length > 0
+  const hasMatches = matches.length > 0
   const hasPlayers = players.length > 0
-  const noData = !hasRounds && !hasPlayers
+  const noData = !hasMatches && !hasPlayers
 
-  const handleClearRounds = () => {
-    clearRounds()
+  const handleClearMatches = () => {
+    clearMatches()
     updatePlayers((prev) =>
       prev.map((player) => ({
         ...player,
@@ -52,17 +52,15 @@ export default function App() {
   }
 
   const handleClearAll = () => {
-    clearRounds()
+    clearMatches()
     updatePlayers(() => [])
     singleToastSuccess('Todos os dados apagados!', { duration: 3000 })
   }
 
   const handleLoadSeed = () => {
-    // Limpa partidas e lista de jogadores
-    clearRounds()
+    clearMatches()
     updatePlayers(() => [])
 
-    // Embaralha e adiciona cada jogador via contexto
     const seeds = [...seedPlayers]
     shuffle(seeds)
     seeds.forEach(({ name, level, preferredPairs = [] }) => {
@@ -102,9 +100,9 @@ export default function App() {
                 Inicializar jogadores
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={!hasRounds}
+                disabled={!hasMatches}
                 className="text-destructive"
-                onSelect={() => setWarning('rounds')}
+                onSelect={() => setWarning('matches')}
               >
                 Limpar partidas
               </DropdownMenuItem>
@@ -131,14 +129,14 @@ export default function App() {
       />
 
       <ConfirmDialog
-        open={warning === 'rounds'}
+        open={warning === 'matches'}
         onOpenChange={() => setWarning(null)}
         title="Limpar todas as partidas?"
         description="Esta ação apagará todos os registros de partidas. Você tem certeza?"
         confirmVariant="destructive"
         confirmText="Sim, limpar partidas"
         onConfirm={() => {
-          handleClearRounds()
+          handleClearMatches()
           setWarning(null)
         }}
       />
