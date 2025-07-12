@@ -144,7 +144,7 @@ function selectBestMatch(matches: InternalMatch[]): InternalMatch {
 
 /* ─────────────────────────── API pública ─────────────────────────────────── */
 
-export function generateSchedule(players: readonly Player[], formationMode: FormationMode): Record<string, string> {
+export function generateMatch(players: readonly Player[], formationMode: FormationMode): Record<string, string> {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
