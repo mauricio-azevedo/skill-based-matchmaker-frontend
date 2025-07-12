@@ -1,48 +1,36 @@
-import { CourtCard } from '@/components/CourtCard'
-import { usePlayTabLogic } from './usePlayTabLogic'
-import { useEffect } from 'react'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { MatchCard } from '@/components/MatchCard'
+import { useCourts } from '@/context/CourtsContext'
+import { useMatches } from '@/context/MatchesContext'
 
-/**
- * Tela principal (mobile-only):
- * • padding lateral mínimo
- * • cards em stack, ocupando 100 % da largura
- */
 export function PlayTab() {
-  const { rows, state, courtFinished, canGenerateGlobal, handleGenerate, handleSaveScore } = usePlayTabLogic()
-
-  // Logando o valor de canGenerateGlobal para cada quadra
-  useEffect(() => {
-    console.log('canGenerateGlobal: ', canGenerateGlobal)
-  }, [canGenerateGlobal])
+  const { courts } = useCourts()
+  const { getById } = useMatches()
 
   return (
-    <div className="flex flex-col gap-3 px-2 py-3 w-full max-w-sm mx-auto overflow-hidden">
-      {/* quadras */}
-      <div className="flex flex-col gap-3 overflow-y-auto">
-        {rows.map(({ id }) => {
-          // Verificando a condição de habilitação de canGenerate
+    <div className="space-y-4">
+      {Object.values(courts).length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhuma quadra cadastrada.</p>
+      )}
 
-          const canGenerate =
-            canGenerateGlobal &&
-            (!state.courtMatches[id]?.match ||
-              Object.keys(state.courtMatches[id]?.match || {}).length === 0 ||
-              courtFinished(id))
+      {Object.values(courts).map((court) => {
+        const matchId = court.ongoingMatchId
+        const match = matchId ? (getById(matchId) ?? null) : null
 
-          console.log(`Quadra ${id} - match: ${state.courtMatches[id]?.match}, canGenerate =`, canGenerate)
+        return (
+          <Card key={court.id}>
+            <CardHeader className="flex justify-between items-center">
+              <CardTitle>Quadra {court.id}</CardTitle>
+            </CardHeader>
 
-          return (
-            <CourtCard
-              key={id}
-              courtId={id}
-              match={state.courtMatches[id]?.match ?? null}
-              onGenerate={() => canGenerate && handleGenerate(id)}
-              onSaveScore={(a, b) => handleSaveScore(id, a, b)}
-              canGenerate={canGenerate}
-              loading={state.loading[id] ?? false}
-            />
-          )
-        })}
-      </div>
+            <CardContent>
+              <MatchCard match={match} />
+            </CardContent>
+
+            <CardFooter>{/* Botão para gerar nova partida, se for o caso */}</CardFooter>
+          </Card>
+        )
+      })}
     </div>
   )
 }
