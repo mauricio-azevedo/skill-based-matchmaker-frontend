@@ -40,10 +40,8 @@ export function PlayTab() {
         formationMode: FORMATION_MODES.MIXED,
       })
 
-      // Atualiza a quadra com o ID da partida em andamento
       updateCourt(courtId, { ongoingMatchId: newMatchId })
     } catch (err) {
-      // Exibe mensagem de erro caso não seja possível gerar a partida
       const message = err instanceof Error ? err.message : 'Erro ao gerar partida.'
       console.error(err)
       alert(message)
@@ -59,6 +57,7 @@ export function PlayTab() {
       {Object.values(courts).map((court) => {
         const matchId = court.ongoingMatchId
         const match = matchId ? (getById(matchId) ?? null) : null
+        const isOngoing = match?.status === 'ongoing'
 
         return (
           <Card key={court.id}>
@@ -67,11 +66,13 @@ export function PlayTab() {
             </CardHeader>
 
             <CardContent>
-              <MatchCard match={match} />
+              <MatchCard key={matchId ?? court.id} match={match} />
             </CardContent>
 
             <CardFooter>
-              {!match && <Button onClick={() => handleGenerateMatch(court.id)}>Gerar nova partida</Button>}
+              <Button disabled={isOngoing} onClick={() => handleGenerateMatch(court.id)}>
+                Gerar nova partida
+              </Button>
             </CardFooter>
           </Card>
         )
