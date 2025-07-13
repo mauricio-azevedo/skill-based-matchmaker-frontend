@@ -1,5 +1,4 @@
-import type { FC } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MatchCard } from '@/components/MatchCard'
 import { useCourts } from '@/context/CourtsContext'
@@ -9,56 +8,38 @@ import { useFormationMode } from '@/context/FormationModeContext'
 import { generateMatch } from '@/lib/algorithm'
 import { FORMATION_MODES, type FormationMode } from '@/types/types'
 
-export const PlayTab: FC = () => {
+export function PlayTab() {
   const { courtsEntities, updateCourt } = useCourts()
   const { matches, getById, addMatch } = useMatches()
   const { players } = usePlayers()
   const { formationMode, autoAlternate } = useFormationMode()
 
-  // Partidas em andamento
-  const ongoingMatches = matches.filter((m) => m.status === 'ongoing')
-  const ongoingCount = ongoingMatches.length
+  const handleGenerateMatch = (courtId: string) => {
+    try {
+      const activePlayers = players.filter((p) => p.active)
+      const ongoingIds = new Set(
+        matches
+          .filter((m) => m.status === 'ongoing')
+          .flatMap((m) => [m.teamAPlayer1, m.teamAPlayer2, m.teamBPlayer1, m.teamBPlayer2]),
+      )
+      const availablePlayers = activePlayers.filter((p) => !ongoingIds.has(p.id))
+      if (availablePlayers.length < 4) {
+        throw new Error('Não há jogadores suficientes disponíveis para gerar partida.')
+      }
 
-  const handleGenerateAll = () => {
-    // quais quadras estão livres (sem match ou com match já concluída)
-    const freeCourts = courtsEntities.filter((court) => {
-      const m = court.matchId ? getById(court.matchId) : null
-      return !m || m.status === 'completed'
-    })
-    const needed = freeCourts.length
-    if (needed === 0) return
+      let modeToUse: FormationMode = formationMode
+      if (autoAlternate && matches.length > 0) {
+        const lastMatch = matches.reduce((prev, cur) =>
+          new Date(prev.updatedAt).getTime() > new Date(cur.updatedAt).getTime() ? prev : cur,
+        )
+        modeToUse =
+          lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
+      }
 
-    // jogadores ativos não ocupados em ongoing
-    const active = players.filter((p) => p.active)
-    const busyIds = new Set(
-      ongoingMatches.flatMap((m) => [m.teamAPlayer1, m.teamAPlayer2, m.teamBPlayer1, m.teamBPlayer2]),
-    )
-    let available = active.filter((p) => !busyIds.has(p.id))
-
-    if (available.length < needed * 4) {
-      alert(`Não há jogadores suficientes disponíveis para gerar ${needed} partida(s).`)
-      return
-    }
-
-    // define modo inicial e alterna se necessário
-    let modeToUse: FormationMode = formationMode
-    if (autoAlternate && matches.length > 0) {
-      const last = [...matches].reduce((a, b) => (new Date(a.updatedAt) > new Date(b.updatedAt) ? a : b))
-      modeToUse =
-        last.formationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
-    }
-
-    // gera uma partida para cada quadra livre
-    freeCourts.forEach((court) => {
-      const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(available, modeToUse)
-
-      // remove os 4 jogadores usados
-      const used = new Set([teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2])
-      available = available.filter((p) => !used.has(p.id))
-
+      const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(availablePlayers, modeToUse)
       const now = new Date().toISOString()
       const newMatchId = addMatch({
-        courtId: court.id,
+        courtId,
         teamAPlayer1,
         teamAPlayer2,
         teamBPlayer1,
@@ -72,36 +53,51 @@ export const PlayTab: FC = () => {
         formationMode: modeToUse,
       })
 
-      updateCourt(court.id, newMatchId)
-    })
+      updateCourt(courtId, newMatchId)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao gerar partida.'
+      console.error(err)
+      alert(message)
+    }
   }
 
   return (
     <div className="space-y-4">
-      {courtsEntities.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma quadra cadastrada.</p>}
+      {Object.values(courtsEntities).length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhuma quadra cadastrada.</p>
+      )}
 
-      {courtsEntities.map((court, idx) => {
-        const match = court.matchId ? (getById(court.matchId) ?? null) : null
+      {Object.values(courtsEntities).map((court, idx) => {
+        const matchId = court.matchId
+        const match = matchId ? (getById(matchId) ?? null) : null
+        const isOngoing = match?.status === 'ongoing'
+        const courtNumber = idx + 1
+
         return (
           <Card key={court.id} className="!h-[unset] !gap-8">
             <CardHeader className="flex justify-between items-center">
-              <CardTitle>Quadra {idx + 1}</CardTitle>
-              {match && (
-                <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-800 uppercase">
-                  {match.formationMode}
-                </span>
-              )}
+              <div className="flex items-center space-x-2">
+                <CardTitle>Quadra {courtNumber}</CardTitle>
+                {match && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-800 uppercase">
+                    {match.formationMode}
+                  </span>
+                )}
+              </div>
             </CardHeader>
+
             <CardContent>
-              <MatchCard key={match?.id ?? court.id} match={match} />
+              <MatchCard key={matchId ?? court.id} match={match} />
             </CardContent>
+
+            <CardFooter>
+              <Button size="sm" className="w-full" disabled={isOngoing} onClick={() => handleGenerateMatch(court.id)}>
+                Gerar nova partida
+              </Button>
+            </CardFooter>
           </Card>
         )
       })}
-
-      <Button size="sm" className="w-full" onClick={handleGenerateAll} disabled={ongoingCount >= courtsEntities.length}>
-        Gerar novas partidas
-      </Button>
     </div>
   )
 }
