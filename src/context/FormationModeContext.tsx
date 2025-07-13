@@ -4,15 +4,12 @@ import { FORMATION_MODES, type FormationMode } from '@/types/types'
 
 export const STORAGE_KEY_MODE = 'match_formation_mode'
 export const STORAGE_KEY_AUTO = 'match_auto_alternate'
-export const STORAGE_KEY_AUTO_MODE = 'match_auto_alternate_mode'
 
 type Ctx = {
   formationMode: FormationMode
   setFormationMode: Dispatch<SetStateAction<FormationMode>>
   autoAlternate: boolean
   setAutoAlternate: Dispatch<SetStateAction<boolean>>
-  autoAlternateMode: FormationMode
-  setAutoAlternateMode: Dispatch<SetStateAction<FormationMode>>
 }
 
 const FormationModeContext = createContext<Ctx | undefined>(undefined)
@@ -23,10 +20,6 @@ export const FormationModeProvider = ({ children }: { children: ReactNode }) => 
     FORMATION_MODES.HOMOGENEOUS,
   )
   const [autoAlternate, setAutoAlternate] = useLocalStorage<boolean>(STORAGE_KEY_AUTO, true)
-  const [autoAlternateMode, setAutoAlternateMode] = useLocalStorage<FormationMode>(
-    STORAGE_KEY_AUTO_MODE,
-    FORMATION_MODES.HOMOGENEOUS,
-  )
 
   return (
     <FormationModeContext.Provider
@@ -35,8 +28,6 @@ export const FormationModeProvider = ({ children }: { children: ReactNode }) => 
         setFormationMode,
         autoAlternate,
         setAutoAlternate,
-        autoAlternateMode,
-        setAutoAlternateMode,
       }}
     >
       {children}

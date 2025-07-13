@@ -6,12 +6,13 @@ import { useMatches } from '@/context/MatchesContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { useFormationMode } from '@/context/FormationModeContext'
 import { generateMatch } from '@/lib/algorithm'
+import { FORMATION_MODES, type FormationMode } from '@/types/types'
 
 export function PlayTab() {
   const { courts, updateCourt } = useCourts()
   const { matches, getById, addMatch } = useMatches()
   const { players } = usePlayers()
-  const { formationMode, autoAlternate, autoAlternateMode } = useFormationMode()
+  const { formationMode, autoAlternate } = useFormationMode()
 
   const handleGenerateMatch = (courtId: string) => {
     try {
@@ -22,15 +23,23 @@ export function PlayTab() {
           .flatMap((m) => [m.teamAPlayer1, m.teamAPlayer2, m.teamBPlayer1, m.teamBPlayer2]),
       )
       const availablePlayers = activePlayers.filter((p) => !ongoingIds.has(p.id))
-
       if (availablePlayers.length < 4) {
         throw new Error('Não há jogadores suficientes disponíveis para gerar partida.')
       }
 
-      let modeToUse = formationMode
+      let modeToUse: FormationMode = formationMode
+
       if (autoAlternate) {
-        const pastMatchesCount = matches.filter((m) => m.courtId === courtId).length
-        modeToUse = pastMatchesCount % 2 === 0 ? formationMode : autoAlternateMode
+        const completedMatches = matches.filter((m) => m.status === 'completed')
+        if (completedMatches.length > 0) {
+          const lastMatch = completedMatches.reduce((prev, cur) =>
+            new Date(prev.updatedAt).getTime() > new Date(cur.updatedAt).getTime() ? prev : cur,
+          )
+          modeToUse =
+            lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS
+              ? FORMATION_MODES.MIXED
+              : FORMATION_MODES.HOMOGENEOUS
+        }
       }
 
       const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(availablePlayers, modeToUse)
@@ -64,11 +73,11 @@ export function PlayTab() {
         <p className="text-sm text-muted-foreground">Nenhuma quadra cadastrada.</p>
       )}
 
-      {Object.values(courts).map((court, index) => {
+      {Object.values(courts).map((court, idx) => {
         const matchId = court.ongoingMatchId
         const match = matchId ? (getById(matchId) ?? null) : null
         const isOngoing = match?.status === 'ongoing'
-        const courtNumber = index + 1
+        const courtNumber = idx + 1
 
         return (
           <Card key={court.id} className="!h-[unset] !gap-8">
