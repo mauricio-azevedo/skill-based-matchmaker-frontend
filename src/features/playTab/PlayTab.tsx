@@ -73,7 +73,14 @@ export function PlayTab() {
         return (
           <Card key={court.id} className="!h-[unset] !gap-8">
             <CardHeader className="flex justify-between items-center">
-              <CardTitle>Quadra {courtNumber}</CardTitle>
+              <div className="flex items-center space-x-2">
+                <CardTitle>Quadra {courtNumber}</CardTitle>
+                {match && (
+                  <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-800 uppercase">
+                    {match.formationMode}
+                  </span>
+                )}
+              </div>
             </CardHeader>
 
             <CardContent>
