@@ -1,11 +1,8 @@
-// src/lib/algorithm.ts
-import type { Player, UnsavedRound } from '@/types/players'
-import type { FormationMode } from '@/context/CourtsContext'
-import { FORMATION_MODES } from '@/context/FORMATION_MODES'
+import { FORMATION_MODES, type FormationMode, type Player } from '@/types/types'
 
 /* ─────────────────────────────── Constantes ──────────────────────────────── */
 
-const MIN_PLAYERS = 4 as const
+export const MIN_PLAYERS = 4 as const
 
 /** Pesos já na mesma ordem de grandeza dos fatores normalizados */
 const WEIGHT = {
@@ -131,57 +128,34 @@ function generateAllMatches(players: readonly Player[], formationMode: Formation
 
 /* ─────────────────────────── Seleção final ───────────────────────────────── */
 
-function selectTopMatches(matches: InternalMatch[], courts: number): InternalMatch[] {
-  // Ordena por score crescente; usa random como tie‑break (estável).
+function selectBestMatch(matches: InternalMatch[]): InternalMatch {
+  // Ordena por score crescente; usa random como tie-break (estável).
   matches.sort((m1, m2) => {
     if (m1.score !== m2.score) return m1.score - m2.score
     return Math.random() - 0.5
   })
 
-  const selected: InternalMatch[] = []
-  const used = new Set<number>()
-
-  for (const m of matches) {
-    if (selected.length === courts) break
-
-    const ids = [...m.teamA, ...m.teamB]
-    if (ids.some((i) => used.has(i))) continue
-
-    ids.forEach((i) => used.add(i))
-    selected.push(m)
+  if (matches.length === 0) {
+    throw new Error('Nenhuma combinação possível de partidas.')
   }
 
-  if (selected.length < courts) {
-    throw new Error(`Não foi possível preencher todas as ${courts} quadras (apenas ${selected.length}).`)
-  }
-
-  return selected
+  return matches[0] // a melhor (menor score) já respeita o critério.
 }
 
 /* ─────────────────────────── API pública ─────────────────────────────────── */
 
-export function generateSchedule(
-  players: readonly Player[],
-  courts: number,
-  formationMode: FormationMode,
-): UnsavedRound {
+export function generateMatch(players: readonly Player[], formationMode: FormationMode): Record<string, string> {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
   const allMatches = generateAllMatches(players, formationMode)
-  const best = selectTopMatches(allMatches, courts)
+  const best = selectBestMatch(allMatches)
 
   return {
-    id: crypto.randomUUID(),
-    formationMode,
-    matches: best.map(({ teamA, teamB }) => ({
-      id: crypto.randomUUID(),
-      teamA: [players[teamA[0]], players[teamA[1]]],
-      teamB: [players[teamB[0]], players[teamB[1]]],
-      gamesA: null,
-      gamesB: null,
-      winner: null,
-    })),
+    teamAPlayer1: players[best.teamA[0]].id,
+    teamAPlayer2: players[best.teamA[1]].id,
+    teamBPlayer1: players[best.teamB[0]].id,
+    teamBPlayer2: players[best.teamB[1]].id,
   }
 }

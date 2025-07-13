@@ -26,7 +26,7 @@ const PlayersTab: FC = () => {
       {/* Header */}
       <div className="flex w-full items-center justify-between h-8">
         <div className="flex items-center gap-1">
-          <div className="text-lg font-semibold">Jogadores</div>
+          <h2 className="text-lg font-semibold">Jogadores</h2>
           <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
         </div>
 

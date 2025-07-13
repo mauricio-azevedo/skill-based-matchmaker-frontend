@@ -1,59 +1,76 @@
-// src/context/CourtsContext.tsx
-import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext } from 'react'
-import useLocalStorage from '@/hooks/useLocalStorage'
-import { FORMATION_MODES } from '@/context/FORMATION_MODES'
+import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
+import type { Court } from '@/types/types'
 
-export const STORAGE_KEY_COURTS = 'match_courts'
-export const STORAGE_KEY_MODE = 'match_formation_mode'
-export const STORAGE_KEY_AUTO = 'match_auto_alternate'
-export const STORAGE_KEY_AUTO_MODE = 'match_auto_alternate_mode'
-export type FormationMode = (typeof FORMATION_MODES)[keyof typeof FORMATION_MODES]
+const COURTS_KEY = 'courts'
 
-type Ctx = {
-  courts: number
-  setCourts: Dispatch<SetStateAction<number>>
-  formationMode: FormationMode
-  setFormationMode: Dispatch<SetStateAction<FormationMode>>
-  autoAlternate: boolean
-  setAutoAlternate: Dispatch<SetStateAction<boolean>>
-  autoAlternateMode: FormationMode
-  setAutoAlternateMode: Dispatch<SetStateAction<FormationMode>>
+interface CourtsCtx {
+  /** Lista de todas as quadras */
+  courts: Court[]
+  addCourt: () => string
+  updateCourt: (courtId: string, updates: Partial<Omit<Court, 'id' | 'createdAt'>>) => void
+  deleteCourt: (courtId: string) => void
 }
 
-const CourtsContext = createContext<Ctx | undefined>(undefined)
+const CourtsContext = createContext<CourtsCtx | undefined>(undefined)
 
-export const CourtsProvider = ({ children }: { children: ReactNode }) => {
-  const [courts, setCourts] = useLocalStorage<number>(STORAGE_KEY_COURTS, 2)
-  const [formationMode, setFormationMode] = useLocalStorage<FormationMode>(
-    STORAGE_KEY_MODE,
-    FORMATION_MODES.HOMOGENEOUS,
-  )
-  const [autoAlternate, setAutoAlternate] = useLocalStorage<boolean>(STORAGE_KEY_AUTO, true)
-  const [autoAlternateMode, setAutoAlternateMode] = useLocalStorage<FormationMode>(
-    STORAGE_KEY_AUTO_MODE,
-    FORMATION_MODES.HOMOGENEOUS,
-  )
+export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [courtsById, setCourtsById] = useState<Record<string, Court>>({})
+
+  // Carrega as quadras do localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(COURTS_KEY)
+    if (stored) {
+      try {
+        setCourtsById(JSON.parse(stored))
+      } catch (err) {
+        console.error('Erro ao ler quadras do localStorage:', err)
+      }
+    }
+  }, [])
+
+  // Persiste no localStorage sempre que mudar
+  useEffect(() => {
+    localStorage.setItem(COURTS_KEY, JSON.stringify(courtsById))
+  }, [courtsById])
+
+  const addCourt = (): string => {
+    const id = crypto.randomUUID()
+    const now = new Date().toISOString()
+    const newCourt: Court = { id, createdAt: now, updatedAt: now }
+    setCourtsById((prev) => ({ ...prev, [id]: newCourt }))
+    return id
+  }
+
+  const updateCourt = (courtId: string, updates: Partial<Omit<Court, 'id' | 'createdAt'>>) => {
+    setCourtsById((prev) => {
+      const existing = prev[courtId]
+      if (!existing) return prev
+      const now = new Date().toISOString()
+      return {
+        ...prev,
+        [courtId]: { ...existing, ...updates, updatedAt: now },
+      }
+    })
+  }
+
+  const deleteCourt = (courtId: string) => {
+    setCourtsById((prev) => {
+      if (!(courtId in prev)) return prev
+      const { [courtId]: _, ...rest } = prev
+      return rest
+    })
+  }
+
+  // Array derivado para consumo em componentes
+  const courts = useMemo(() => Object.values(courtsById), [courtsById])
 
   return (
-    <CourtsContext.Provider
-      value={{
-        courts,
-        setCourts,
-        formationMode,
-        setFormationMode,
-        autoAlternate,
-        setAutoAlternate,
-        autoAlternateMode,
-        setAutoAlternateMode,
-      }}
-    >
-      {children}
-    </CourtsContext.Provider>
+    <CourtsContext.Provider value={{ courts, addCourt, updateCourt, deleteCourt }}>{children}</CourtsContext.Provider>
   )
 }
 
-export const useCourts = () => {
-  const ctx = useContext(CourtsContext)
-  if (!ctx) throw new Error('useCourts must be inside CourtsProvider')
-  return ctx
+export const useCourts = (): CourtsCtx => {
+  const context = useContext(CourtsContext)
+  if (!context) throw new Error('useCourts must be used within a CourtsProvider')
+  return context
 }

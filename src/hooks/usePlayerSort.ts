@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { Player } from '@/types/players'
+import type { Player } from '@/types/types'
 
 export type SortBy = 'active' | 'name' | 'level'
 
