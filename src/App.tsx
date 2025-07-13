@@ -52,8 +52,11 @@ export default function App() {
   }
 
   const handleClearAll = () => {
+    window.localStorage.clear()
+
     clearMatches()
     updatePlayers(() => [])
+
     singleToastSuccess('Todos os dados apagados!', { duration: 3000 })
   }
 
@@ -145,7 +148,7 @@ export default function App() {
         open={warning === 'all'}
         onOpenChange={() => setWarning(null)}
         title="Limpar todos os dados?"
-        description="Isso removerá jogadores e partidas e não poderá ser desfeito. Deseja continuar?"
+        description="Excluir permanentemente jogadores, quadras, partidas e configurações? Esta operação não pode ser desfeita."
         confirmVariant="destructive"
         confirmText="Sim, limpar tudo"
         onConfirm={() => {
