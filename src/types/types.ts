@@ -29,10 +29,10 @@ export interface Match {
 }
 
 export interface Court {
-  id: string // Unique identifier for the court
-  ongoingMatchId?: string // Optionally, the ID of the ongoing match (if any)
-  createdAt: string // Timestamp of when the court was created
-  updatedAt: string // Timestamp of when the court was last updated
+  id: string // Identificador único da quadra
+  matchId?: string // ID da partida atribuída (ongoing ou completed)
+  createdAt: string // Timestamp de criação
+  updatedAt: string // Timestamp de última atualização
 }
 
 export interface LocalStorageDB {
