@@ -1,86 +1,32 @@
-import { Label } from '@/components/ui/label'
-import { useFormationMode } from '@/context/FormationModeContext'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
-import { FORMATION_MODES, type FormationMode } from '@/types/types'
+import PlayersTab from './PlayersTab'
 import { CourtList } from '@/components/CourtList'
+import { Settings } from '@/components/Settings'
 
 export function SetupTab() {
-  const { formationMode, setFormationMode, autoAlternate, setAutoAlternate } = useFormationMode()
-
   return (
-    <>
-      <div className="flex w-full items-center justify-between h-8 mb-4">
-        <div className="text-lg font-semibold">Setup</div>
-      </div>
+    <Tabs defaultValue="jogadores" className="w-full h-full flex flex-col">
+      {/* Lista de abas */}
+      <TabsList className="border-b">
+        <TabsTrigger value="players">Jogadores</TabsTrigger>
+        <TabsTrigger value="courts">Quadras</TabsTrigger>
+        <TabsTrigger value="settings">Configurações</TabsTrigger>
+      </TabsList>
 
-      <Tabs defaultValue="courts" className="w-full">
-        <TabsList>
-          <TabsTrigger value="courts">Quadras</TabsTrigger>
-          <TabsTrigger value="formation">Duplas</TabsTrigger>
-        </TabsList>
+      {/* Jogadores */}
+      <TabsContent value="players" className="flex-1 overflow-auto">
+        <PlayersTab />
+      </TabsContent>
 
-        <TabsContent value="courts" className="mt-4">
-          <div className="flex flex-col items-start w-full">
-            <div className="flex flex-col justify-between items-center w-full gap-4 mb-8">
-              <h2 className="text-md font-medium">Gerenciar Quadras</h2>
-              <CourtList />
-            </div>
-          </div>
-        </TabsContent>
+      {/* Quadras */}
+      <TabsContent value="courts" className="flex-1 overflow-auto">
+        <CourtList />
+      </TabsContent>
 
-        <TabsContent value="formation" className="mt-4">
-          <div className="flex flex-col w-full">
-            <h2 className="text-md font-medium mb-6">Duplas</h2>
-
-            <div className={cn('flex flex-col gap-2 mb-4', autoAlternate ? 'opacity-50' : 'opacity-100')}>
-              <Label className="flex-col items-start">
-                <span>Formação</span>
-                <span className="text-xs text-muted-foreground font-normal">
-                  Define como as duplas são formadas com base nos níveis de seus jogadores.
-                </span>
-              </Label>
-              <RadioGroup
-                value={formationMode}
-                onValueChange={(value: FormationMode) => setFormationMode(value)}
-                disabled={autoAlternate}
-                className="flex"
-              >
-                <div className="flex flex-1 items-start gap-2 border p-2 rounded-lg">
-                  <RadioGroupItem id={FORMATION_MODES.HOMOGENEOUS} value={FORMATION_MODES.HOMOGENEOUS} />
-                  <Label htmlFor={FORMATION_MODES.HOMOGENEOUS} className="flex-col items-start">
-                    <span>Homogêneo</span>
-                    <span className="text-xs text-muted-foreground font-normal">
-                      <strong>Menor</strong> diferença entre níveis (5+5 vs 5+5).
-                    </span>
-                  </Label>
-                </div>
-                <div className="flex flex-1 items-start gap-2 border p-2 rounded-lg">
-                  <RadioGroupItem id={FORMATION_MODES.MIXED} value={FORMATION_MODES.MIXED} />
-                  <Label htmlFor={FORMATION_MODES.MIXED} className="flex-col items-start">
-                    <span>Misto</span>
-                    <span className="text-xs text-muted-foreground font-normal">
-                      <strong>Maior</strong> diferença entre níveis (5+1 vs 5+1).
-                    </span>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div className="flex justify-between items-center w-full gap-4">
-              <Label htmlFor="auto-switch" className="flex-col items-start">
-                <span>Automático</span>
-                <span className="text-xs text-muted-foreground font-normal">
-                  Alterna automaticamente entre modos misto e homogêneo a cada nova rodada.
-                </span>
-              </Label>
-              <Switch id="auto-switch" checked={autoAlternate} onCheckedChange={setAutoAlternate} />
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </>
+      {/* Configurações */}
+      <TabsContent value="settings" className="flex-1 overflow-auto">
+        <Settings />
+      </TabsContent>
+    </Tabs>
   )
 }

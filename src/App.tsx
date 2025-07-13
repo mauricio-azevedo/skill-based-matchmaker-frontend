@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import PlayersTab from './components/PlayersTab'
 import LeaderboardTab from './components/LeaderboardTab'
 import { Moon, Settings, Sun } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -12,15 +11,13 @@ import { shuffle } from '@/utils/shuffle'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { MatchesTab } from '@/components/MatchesTab'
 
-import { Dialog, DialogClose, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-import { SetupTab } from '@/components/SetupTab'
 import { PlayTab } from '@/features/playTab/PlayTab'
 import { useMatches } from '@/context/MatchesContext'
+import { SetupTab } from '@/components/SetupTab'
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [warning, setWarning] = useState<null | 'matches' | 'all' | 'seed'>(null)
-  const [isSetupOpen, setIsSetupOpen] = useState(false)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -112,7 +109,6 @@ export default function App() {
               <DropdownMenuItem disabled={noData} className="text-destructive" onSelect={() => setWarning('all')}>
                 Limpar tudo
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setIsSetupOpen(true)}>Setup</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -157,22 +153,11 @@ export default function App() {
         }}
       />
 
-      {/* Modal Setup */}
-      <Dialog open={isSetupOpen} onOpenChange={setIsSetupOpen}>
-        <DialogTrigger />
-        <DialogContent>
-          <SetupTab />
-          <DialogClose asChild>
-            <button className="btn btn-primary">Fechar</button>
-          </DialogClose>
-        </DialogContent>
-      </Dialog>
-
       {/* Tabs */}
       <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
         <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center gap-2">
-          <TabsContent value="players" asChild>
-            <PlayersTab />
+          <TabsContent value="setup" asChild>
+            <SetupTab />
           </TabsContent>
           <TabsContent value="matches" asChild>
             <MatchesTab />
@@ -186,7 +171,7 @@ export default function App() {
         </main>
 
         <TabsList className="self-center">
-          <TabsTrigger value="players">Jogadores</TabsTrigger>
+          <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="play">PLAY!</TabsTrigger>
           <TabsTrigger value="matches">Jogos</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
