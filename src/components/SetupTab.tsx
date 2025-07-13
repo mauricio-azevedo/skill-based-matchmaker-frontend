@@ -14,17 +14,17 @@ export function SetupTab() {
       </TabsList>
 
       {/* Jogadores */}
-      <TabsContent value="players" className="flex-1 overflow-auto">
+      <TabsContent value="players" className="flex-1 overflow-auto pt-2">
         <PlayersTab />
       </TabsContent>
 
       {/* Quadras */}
-      <TabsContent value="courts" className="flex-1 overflow-auto">
+      <TabsContent value="courts" className="flex-1 overflow-auto pt-2">
         <CourtList />
       </TabsContent>
 
       {/* Configurações */}
-      <TabsContent value="settings" className="flex-1 overflow-auto">
+      <TabsContent value="settings" className="flex-1 overflow-auto pt-2">
         <Settings />
       </TabsContent>
     </Tabs>

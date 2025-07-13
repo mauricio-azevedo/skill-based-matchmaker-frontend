@@ -1,40 +1,31 @@
-import { Button } from '@/components/ui/button'
 import { useCourts } from '@/context/CourtsContext'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 
 /**
- * CourtList component: shows all courts with controls to add and delete courts.
+ * CourtList: mostra o número de quadras e permite selecionar de 1 a 6.
  */
 export function CourtList() {
-  const { courts, addCourt, deleteCourt } = useCourts()
-  const courtEntries = Object.values(courts)
-
-  const handleAdd = () => {
-    addCourt()
-  }
+  const { courts, setCourts } = useCourts()
 
   return (
-    <div className="w-full">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-medium">Quadras ({courtEntries.length})</span>
-        <Button size="sm" onClick={handleAdd}>
-          Adicionar quadra
-        </Button>
-      </div>
-
-      {courtEntries.length > 0 ? (
-        <ul className="space-y-2">
-          {courtEntries.map((court, index) => (
-            <li key={court.id} className="flex justify-between items-center p-2 border rounded-md">
-              <span className="text-sm">Quadra {index + 1}</span>
-              <Button size="sm" variant="destructive" onClick={() => deleteCourt(court.id)}>
-                Excluir
-              </Button>
-            </li>
+    <div className="flex justify-between items-center mb-2">
+      <Label className="flex-col items-start">
+        <span>Quadras</span>
+        <span className="text-xs text-muted-foreground font-normal">Quantidade de quadras disponíveis.</span>
+      </Label>
+      <Select value={courts.toString()} onValueChange={(value) => setCourts(Number(value))}>
+        <SelectTrigger className="w-[80px]">
+          <SelectValue placeholder="Selecione" />
+        </SelectTrigger>
+        <SelectContent>
+          {[1, 2, 3, 4, 5, 6].map((num) => (
+            <SelectItem key={num} value={num.toString()}>
+              {num}
+            </SelectItem>
           ))}
-        </ul>
-      ) : (
-        <p className="text-xs text-muted-foreground">Nenhuma quadra adicionada.</p>
-      )}
+        </SelectContent>
+      </Select>
     </div>
   )
 }
