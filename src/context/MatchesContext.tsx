@@ -5,7 +5,7 @@ const MATCHES_KEY = 'matches'
 
 interface MatchesCtx {
   matches: Match[]
-  getById: (id: string) => Match | undefined
+  getById: (id: string) => Match | null
   addMatch: (data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>) => string
   updateMatch: (matchId: string, updates: Partial<Omit<Match, 'id' | 'createdAt'>>) => void
   deleteMatch: (matchId: string) => void
@@ -61,7 +61,7 @@ export const MatchesProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }
 
   const matches = useMemo(() => Object.values(matchesById), [matchesById])
-  const getById = (id: string): Match | undefined => matchesById[id]
+  const getById = (id: string): Match | null => matchesById[id] ?? null
 
   return (
     <MatchesContext.Provider value={{ matches, getById, addMatch, updateMatch, deleteMatch, clearMatches }}>

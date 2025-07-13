@@ -14,7 +14,7 @@ export function PlayTab() {
   const { players } = usePlayers()
   const { formationMode, autoAlternate } = useFormationMode()
 
-  const handleGenerateMatch = (courtId: string) => {
+  const handleGenerateMatch = (courtId: string, lastMatchFormationMode?: FormationMode) => {
     try {
       const activePlayers = players.filter((p) => p.active)
       const ongoingIds = new Set(
@@ -28,12 +28,26 @@ export function PlayTab() {
       }
 
       let modeToUse: FormationMode = formationMode
-      if (autoAlternate && matches.length > 0) {
-        const lastMatch = matches.reduce((prev, cur) =>
-          new Date(prev.updatedAt).getTime() > new Date(cur.updatedAt).getTime() ? prev : cur,
-        )
-        modeToUse =
-          lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
+      if (autoAlternate) {
+        // se vier um modo da própria quadra, alterna com base nele
+        if (lastMatchFormationMode != null) {
+          modeToUse =
+            lastMatchFormationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
+        } else {
+          // sem histórico nesta quadra; decide pelo histórico global
+          if (matches.length === 0) {
+            modeToUse = FORMATION_MODES.MIXED
+          } else {
+            // pega a última partida criada globalmente (maior startTime)
+            const lastGlobalMatch = matches.reduce((prev, curr) =>
+              new Date(prev.startTime).getTime() > new Date(curr.startTime).getTime() ? prev : curr,
+            )
+            modeToUse =
+              lastGlobalMatch.formationMode === FORMATION_MODES.HOMOGENEOUS
+                ? FORMATION_MODES.MIXED
+                : FORMATION_MODES.HOMOGENEOUS
+          }
+        }
       }
 
       const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(availablePlayers, modeToUse)
@@ -69,7 +83,7 @@ export function PlayTab() {
 
       {Object.values(courtsEntities).map((court, idx) => {
         const matchId = court.matchId
-        const match = matchId ? (getById(matchId) ?? null) : null
+        const match = matchId ? getById(matchId) : null
         const isOngoing = match?.status === 'ongoing'
         const courtNumber = idx + 1
 
@@ -91,7 +105,12 @@ export function PlayTab() {
             </CardContent>
 
             <CardFooter>
-              <Button size="sm" className="w-full" disabled={isOngoing} onClick={() => handleGenerateMatch(court.id)}>
+              <Button
+                size="sm"
+                className="w-full"
+                disabled={isOngoing}
+                onClick={() => handleGenerateMatch(court.id, match?.formationMode)}
+              >
                 Gerar nova partida
               </Button>
             </CardFooter>
