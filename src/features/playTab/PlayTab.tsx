@@ -28,18 +28,12 @@ export function PlayTab() {
       }
 
       let modeToUse: FormationMode = formationMode
-
-      if (autoAlternate) {
-        const completedMatches = matches.filter((m) => m.status === 'completed')
-        if (completedMatches.length > 0) {
-          const lastMatch = completedMatches.reduce((prev, cur) =>
-            new Date(prev.updatedAt).getTime() > new Date(cur.updatedAt).getTime() ? prev : cur,
-          )
-          modeToUse =
-            lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS
-              ? FORMATION_MODES.MIXED
-              : FORMATION_MODES.HOMOGENEOUS
-        }
+      if (autoAlternate && matches.length > 0) {
+        const lastMatch = matches.reduce((prev, cur) =>
+          new Date(prev.updatedAt).getTime() > new Date(cur.updatedAt).getTime() ? prev : cur,
+        )
+        modeToUse =
+          lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
       }
 
       const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 } = generateMatch(availablePlayers, modeToUse)
