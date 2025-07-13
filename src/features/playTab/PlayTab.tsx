@@ -73,10 +73,6 @@ export const PlayTab: FC = () => {
       })
 
       updateCourt(court.id, newMatchId)
-
-      if (autoAlternate) {
-        modeToUse = modeToUse === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
-      }
     })
   }
 
