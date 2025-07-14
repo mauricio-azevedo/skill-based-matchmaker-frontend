@@ -31,23 +31,25 @@ export function PlayTab() {
   }
 
   return (
-    <div className="w-full overflow-auto">
+    <div className="w-full overflow-auto pb-8">
       {courts.map((court, courtIdx) => {
         const match = court.matchId ? getById(court.matchId) : null
         const isOngoing = match?.status === 'ongoing'
 
         return (
           <Fragment key={court.id}>
-            <p className="text-md font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
+            <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
             {match ? (
               <div className="mb-6">
                 <MatchCard key={match.id ?? court.id} match={match} />
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground leading-tight">Nenhuma partida gerada.</p>
+              <p className="text-sm text-muted-foreground leading-tight h-[85.5px] text-center items-center pt-6">
+                Nenhuma partida gerada.
+              </p>
             )}
             <Button size="sm" className="w-full" disabled={isOngoing} onClick={() => handleStart(court.id)}>
-              {match ? 'Gerar nova partida' : 'Iniciar partida'}
+              Gerar nova partida
             </Button>
             {courtIdx < courts.length - 1 && <Separator className="my-4" />}
           </Fragment>
