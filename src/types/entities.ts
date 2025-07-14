@@ -1,3 +1,5 @@
+import type { FormationMode } from '@/types/types'
+
 export interface Player {
   id: string // Unique identifier for the player
   name: string // Name of the player
@@ -30,43 +32,9 @@ export interface Match {
 
 export interface Court {
   id: string // Identificador único da quadra
-  matchId?: string // ID da partida atribuída (ongoing ou completed)
+  matchId: string | null // ID da partida atribuída (ongoing ou completed)
+  formationMode: FormationMode // Modo de formação desta quadra
+  autoAlternate: boolean // Alterna automaticamente para esta quadra?
   createdAt: string // Timestamp de criação
   updatedAt: string // Timestamp de última atualização
-}
-
-export interface LocalStorageDB {
-  courts: Record<string, Court> // Using a simple object where key is court ID
-  matches: Record<string, Match> // Using a simple object where key is match ID
-  players: Record<string, Player> // Using a simple object where key is player ID
-}
-
-export const FORMATION_MODES = {
-  HOMOGENEOUS: 'homogeneous',
-  MIXED: 'mixed',
-} as const
-export type FormationMode = (typeof FORMATION_MODES)[keyof typeof FORMATION_MODES]
-
-export interface PlayerLBRow extends Player {
-  P: number
-  SV: number
-  SG: number
-  /** vitórias totais */
-  W: number
-  /** derrotas totais */
-  L: number
-  /** saldo de vitórias interno dentro do bloco empatado (undefined se não houver empate) */
-  miniSV?: number
-  /** saldo de games interno dentro do bloco empatado (undefined se não houver empate) */
-  miniSG?: number
-  /** games pró na mini-liga */
-  GPmini?: number
-  /** games contra na mini-liga */
-  GCmini?: number
-  /** vitórias na mini-liga */
-  miniW?: number
-  /** derrotas na mini-liga */
-  miniL?: number
-  /** nomes dos adversários no bloco ― útil para tooltip */
-  oppMini?: string[]
 }

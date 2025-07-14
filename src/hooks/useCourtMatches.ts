@@ -1,7 +1,8 @@
 import { useMatches } from '@/context/MatchesContext'
 import { useCourts } from '@/context/CourtsContext'
-import type { CreateMatchPayload } from '@/types/types'
+import { type CreateMatchPayload } from '@/types/types'
 import type { Match } from '@/types/entities'
+import { FORMATION_MODES } from '@/lib/formationModes'
 
 export function useCourtMatches() {
   const { addMatch, deleteMatch, matches } = useMatches()
@@ -14,8 +15,8 @@ export function useCourtMatches() {
   function addMatchToCourt(data: CreateMatchPayload): string {
     // 1) cria a partida
     const matchId = addMatch(data)
-    // 2) vincula automaticamente a quadra à essa partida
-    updateCourt(data.courtId, matchId)
+    // 2) vincula a quadra, agora passando um objeto de updates
+    updateCourt(data.courtId, { matchId })
     return matchId
   }
 
@@ -27,12 +28,16 @@ export function useCourtMatches() {
     setCourtsEntities((prev) => {
       const current = prev.length
       if (count === current) return prev
+
       const now = new Date().toISOString()
 
       if (count > current) {
-        // adiciona novas quadras
+        // adiciona novas quadras, agora com formationMode e autoAlternate
         const toAdd = Array.from({ length: count - current }).map(() => ({
           id: crypto.randomUUID(),
+          matchId: null,
+          formationMode: FORMATION_MODES.MIXED,
+          autoAlternate: true,
           createdAt: now,
           updatedAt: now,
         }))
@@ -54,11 +59,10 @@ export function useCourtMatches() {
       }
 
       const removable = prev.filter((c) => !ongoingCourtIds.includes(c.id))
-      const numToKeepFromRemovable = count - ongoingCourtIds.length
-      const removableIdsToKeep = new Set(removable.slice(0, numToKeepFromRemovable).map((c) => c.id))
+      const keepFromRemovable = removable.slice(0, count - ongoingCourtIds.length).map((c) => c.id)
 
       return prev
-        .filter((c) => ongoingCourtIds.includes(c.id) || removableIdsToKeep.has(c.id))
+        .filter((c) => ongoingCourtIds.includes(c.id) || keepFromRemovable.includes(c.id))
         .map((c) => ({ ...c, updatedAt: now }))
     })
   }
@@ -82,10 +86,7 @@ export function useCourtMatches() {
         newList = newList.slice(0, finalCount)
       }
       const now = new Date().toISOString()
-      return newList.map((c) => ({
-        ...c,
-        updatedAt: now,
-      }))
+      return newList.map((c) => ({ ...c, updatedAt: now }))
     })
   }
 

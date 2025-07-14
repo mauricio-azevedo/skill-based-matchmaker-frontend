@@ -1,6 +1,7 @@
 import { createContext, type Dispatch, type ReactNode, type SetStateAction, useContext } from 'react'
 import useLocalStorage from '@/hooks/useLocalStorage'
-import { FORMATION_MODES, type FormationMode } from '@/types/entities'
+import type { FormationMode } from '@/types/types'
+import { FORMATION_MODES } from '@/lib/formationModes'
 
 export const STORAGE_KEY_MODE = 'match_formation_mode'
 export const STORAGE_KEY_AUTO = 'match_auto_alternate'

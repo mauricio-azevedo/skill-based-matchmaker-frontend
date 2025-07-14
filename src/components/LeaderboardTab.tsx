@@ -3,12 +3,13 @@ import { Info } from 'lucide-react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
-import type { Match, PlayerLBRow } from '@/types/entities'
+import type { Match } from '@/types/entities'
 
 // shadcn/ui components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import type { PlayerLBRow } from '@/types/types'
 
 /* --------------------------------------------------------------------------
  * Types & pure helpers

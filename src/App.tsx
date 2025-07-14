@@ -15,7 +15,6 @@ import { PlayTab } from '@/features/playTab/PlayTab'
 import { useMatches } from '@/context/MatchesContext'
 import { usePlayerMatchSync } from '@/hooks/usePlayerMatchSync'
 import { PlayersTab } from '@/components/PlayersTab'
-import { Settings } from '@/components/Settings'
 
 export default function App() {
   usePlayerMatchSync()
@@ -161,7 +160,7 @@ export default function App() {
       <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
         <main className="container mx-auto flex h-full max-w-lg flex-col flex-grow overflow-hidden items-center gap-2">
           <TabsContent value="setup" asChild>
-            <Settings />
+            {/*<Settings />*/}
           </TabsContent>
           <TabsContent value="players" asChild>
             <PlayersTab />

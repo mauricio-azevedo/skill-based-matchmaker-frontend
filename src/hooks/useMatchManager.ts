@@ -1,16 +1,15 @@
 import { useCallback } from 'react'
 import { useMatches } from '@/context/MatchesContext'
 import { usePlayers } from '@/context/PlayersContext'
-import { useFormationMode } from '@/context/FormationModeContext'
+import { useCourts } from '@/context/CourtsContext'
 import { generateMatch } from '@/lib/algorithm'
-import { FORMATION_MODES, type FormationMode, type Match } from '@/types/entities'
+import { type Match } from '@/types/entities'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
+import { type FormationMode } from '@/types/types'
+import { FORMATION_MODES } from '@/lib/formationModes'
 
 const MIN_PLAYERS = 4
 
-/**
- * Determina o modo de formação a ser usado, alternando entre homogêneo e misto quando configurado.
- */
 function determineFormationMode(defaultMode: FormationMode, autoAlternate: boolean, matches: Match[]): FormationMode {
   if (!autoAlternate) return defaultMode
   if (matches.length === 0) return FORMATION_MODES.MIXED
@@ -20,20 +19,20 @@ function determineFormationMode(defaultMode: FormationMode, autoAlternate: boole
   return lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
 }
 
-/**
- * Hook que encapsula lógica de geração e início de partidas.
- */
 export function useMatchManager(): { generateAndStartMatch: (courtId: string) => void } {
   const { players } = usePlayers()
   const { matches } = useMatches()
-  const { formationMode, autoAlternate } = useFormationMode()
+  const { courtsEntities } = useCourts()
   const { addMatchToCourt } = useCourtMatches()
 
   const generateAndStartMatch = useCallback(
     (courtId: string): void => {
-      const activePlayers = players.filter((p) => p.active)
+      const court = courtsEntities.find((c) => c.id === courtId)
+      if (!court) throw new Error('Quadra não encontrada')
 
-      // Identifica IDs de jogadores em partidas em andamento
+      const { formationMode: defaultMode, autoAlternate } = court
+
+      const activePlayers = players.filter((p) => p.active)
       const busyIds = new Set(
         matches
           .filter((m) => m.status === 'ongoing')
@@ -44,17 +43,15 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
             teamBPlayer2,
           ]),
       )
-
-      // Seleciona ativos e que não estão em partidas em andamento
-      const freePlayers = activePlayers.filter(({ id }) => !busyIds.has(id))
+      const freePlayers = activePlayers.filter((p) => !busyIds.has(p.id))
       if (freePlayers.length < MIN_PLAYERS) {
-        throw new Error(`Não há pelo menos ${MIN_PLAYERS} jogadores disponíveis para gerar partida.`)
+        throw new Error(`Não há pelo menos ${MIN_PLAYERS} jogadores disponíveis.`)
       }
 
-      const modeToUse = determineFormationMode(formationMode, autoAlternate, matches)
-
+      const modeToUse = determineFormationMode(defaultMode, autoAlternate, matches)
       const teams = generateMatch(freePlayers, modeToUse)
       const startTime = new Date().toISOString()
+
       addMatchToCourt({
         courtId,
         ...teams,
@@ -67,7 +64,7 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
         formationMode: modeToUse,
       })
     },
-    [players, matches, formationMode, autoAlternate, addMatchToCourt],
+    [players, matches, courtsEntities, addMatchToCourt],
   )
 
   return { generateAndStartMatch }

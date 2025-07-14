@@ -1,18 +1,28 @@
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { FORMATION_MODES, type FormationMode } from '@/types/entities'
 import { Switch } from '@/components/ui/switch'
-import { useFormationMode } from '@/context/FormationModeContext'
 import { Separator } from '@/components/ui/separator'
+import { useCourts } from '@/context/CourtsContext'
+import type { FormationMode } from '@/types/types'
+import { FORMATION_MODES } from '@/lib/formationModes'
 
-export function Settings() {
-  const { formationMode, setFormationMode, autoAlternate, setAutoAlternate } = useFormationMode()
+interface SettingsProps {
+  courtId: string
+}
+
+export function Settings({ courtId }: SettingsProps) {
+  const { courtsEntities, updateCourt } = useCourts()
+  const court = courtsEntities.find((c) => c.id === courtId)
+  if (!court) return null
+
+  const { formationMode, autoAlternate } = court
 
   return (
     <div className="flex flex-col w-full">
-      <h2 className="text-lg font-semibold pl-4">Configurações</h2>
+      <h2 className="text-lg font-semibold pl-4">Configurações da Quadra</h2>
       <Separator className="mt-2 mb-4" />
+
       <h2 className="text-md font-medium">Duplas</h2>
       <Separator className="mt-2 mb-4" />
 
@@ -25,7 +35,7 @@ export function Settings() {
         </Label>
         <RadioGroup
           value={formationMode}
-          onValueChange={(value: FormationMode) => setFormationMode(value)}
+          onValueChange={(value: FormationMode) => updateCourt(courtId, { formationMode: value })}
           disabled={autoAlternate}
           className="flex"
         >
@@ -51,13 +61,17 @@ export function Settings() {
       </div>
 
       <div className="flex justify-between items-center w-full gap-4">
-        <Label htmlFor="auto-switch" className="flex-col items-start">
+        <Label htmlFor={`auto-switch-${courtId}`} className="flex-col items-start">
           <span>Automático</span>
           <span className="text-xs text-muted-foreground font-normal">
             Alterna automaticamente entre modos misto e homogêneo a cada nova rodada.
           </span>
         </Label>
-        <Switch id="auto-switch" checked={autoAlternate} onCheckedChange={setAutoAlternate} />
+        <Switch
+          id={`auto-switch-${courtId}`}
+          checked={autoAlternate}
+          onCheckedChange={(checked) => updateCourt(courtId, { autoAlternate: checked })}
+        />
       </div>
     </div>
   )

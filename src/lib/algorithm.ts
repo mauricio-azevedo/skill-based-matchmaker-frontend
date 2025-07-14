@@ -1,7 +1,8 @@
-import { FORMATION_MODES, type FormationMode, type Player } from '@/types/entities'
+import type { Player } from '@/types/entities'
+import { type FormationMode } from '@/types/types'
+import { FORMATION_MODES } from '@/lib/formationModes'
 
 /* ─────────────────────────────── Constantes ──────────────────────────────── */
-
 export const MIN_PLAYERS = 4 as const
 
 /** Pesos já na mesma ordem de grandeza dos fatores normalizados */
