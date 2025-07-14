@@ -8,7 +8,7 @@ export function MatchesTab() {
   const completedMatches = useMemo(() => matches.filter((m) => m.status === 'completed'), [matches])
 
   return (
-    <div className="flex flex-col w-full overflow-hidden space-y-2">
+    <div className="flex flex-col w-full overflow-hidden space-y-2 pl-4">
       <h2 className="text-lg font-semibold mb-1">Histórico de partidas</h2>
       <Separator className="mb-4" />
 

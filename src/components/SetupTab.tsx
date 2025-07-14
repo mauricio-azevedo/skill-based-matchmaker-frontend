@@ -1,11 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import PlayersTab from './PlayersTab'
 import { CourtList } from '@/components/CourtList'
 import { Settings } from '@/components/Settings'
+import { PlayersTab } from '@/components/PlayersTab'
 
 export function SetupTab() {
   return (
-    <Tabs defaultValue="players" className="w-full h-full flex flex-col items-center">
+    <Tabs defaultValue="players" className="w-full h-full flex flex-col items-center pl-4">
       {/* Lista de abas */}
       <TabsList className="border-b">
         <TabsTrigger value="players">Jogadores</TabsTrigger>

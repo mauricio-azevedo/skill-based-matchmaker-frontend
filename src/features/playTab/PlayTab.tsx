@@ -31,7 +31,7 @@ export function PlayTab() {
   }
 
   return (
-    <div className="w-full pb-8 overflow-hidden">
+    <div className="w-full pb-8 overflow-hidden pl-4">
       <h2 className="text-lg font-semibold mb-1">Partidas</h2>
       <Separator className="mb-4" />
 

@@ -158,7 +158,7 @@ export default function App() {
 
       {/* Tabs */}
       <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
-        <main className="container mx-auto flex h-full max-w-lg flex-col pl-4 flex-grow overflow-hidden items-center gap-2">
+        <main className="container mx-auto flex h-full max-w-lg flex-col flex-grow overflow-hidden items-center gap-2">
           <TabsContent value="setup" asChild>
             <SetupTab />
           </TabsContent>

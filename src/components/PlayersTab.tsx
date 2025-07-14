@@ -1,4 +1,4 @@
-import React, { type FC, useState } from 'react'
+import React, { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -11,7 +11,7 @@ import { getLevelLabel } from '@/consts/levels'
 import { type SortBy, usePlayerSort } from '@/hooks/usePlayerSort'
 import PlayerSortDropdown from '@/components/PlayerSortDropdown'
 
-const PlayersTab: FC = () => {
+export function PlayersTab() {
   const { players, toggleActive } = usePlayers()
 
   const [sortBy, setSortBy] = useState<SortBy>('active')
@@ -103,5 +103,3 @@ const PlayersTab: FC = () => {
     </React.Fragment>
   )
 }
-
-export default PlayersTab
