@@ -25,7 +25,10 @@ export function PlayersTab() {
     <div className="px-4 w-full">
       {/* Header */}
       <div className="flex items-center justify-between h-8 mb-2">
-        <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
+        <div className="flex gap-1">
+          <h2 className="text-lg font-semibold">Jogadores</h2>
+          <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
+        </div>
 
         <div className="flex items-center gap-3">
           {/* Contador de jogadores ativos */}

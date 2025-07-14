@@ -63,7 +63,7 @@ export function CourtCountSelector() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-2 pr-4">
+      <div className="flex justify-between items-center">
         <Select value={courts.toString()} onValueChange={handleValueChange}>
           <SelectTrigger className="w-[120px]">
             <SelectValue placeholder="Selecione" />

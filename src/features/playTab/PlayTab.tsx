@@ -33,11 +33,11 @@ export function PlayTab() {
 
   return (
     <div className="w-full pb-8 overflow-hidden pl-4">
-      <div className="flex justify-between gap-2">
-        <h2 className="text-lg font-semibold mb-1">Partidas</h2>
+      <div className="flex justify-between items-center gap-2 pr-4">
+        <h2 className="text-lg font-semibold leading-tight m-0">Partidas</h2>
         <CourtCountSelector />
       </div>
-      <Separator className="mb-4" />
+      <Separator className="mt-2 mb-4" />
 
       <div className="h-full overflow-y-auto">
         {courts.map((court, courtIdx) => {
