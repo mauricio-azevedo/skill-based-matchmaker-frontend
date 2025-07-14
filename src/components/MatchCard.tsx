@@ -56,7 +56,7 @@ const ScoreSelect = ({
 
 /* MatchCard -------------------------------------------------------------- */
 interface Props {
-  match: Match | null
+  match: Match
 }
 
 export function MatchCard({ match }: Props) {
@@ -100,10 +100,6 @@ export function MatchCard({ match }: Props) {
       })
     }
   }, [filled, dirty, gamesA, gamesB, match, updateMatch, registerMatch])
-
-  if (!match) {
-    return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
-  }
 
   const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2, winner } = match
 

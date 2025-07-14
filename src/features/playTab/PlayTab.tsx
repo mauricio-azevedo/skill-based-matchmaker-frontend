@@ -87,6 +87,10 @@ export function PlayTab() {
         const isOngoing = match?.status === 'ongoing'
         const courtNumber = idx + 1
 
+        if (!match) {
+          return <span className="text-muted-foreground text-sm">Nenhuma partida gerada.</span>
+        }
+
         return (
           <Card key={court.id} className="!h-[218px] !gap-6">
             <CardHeader className="flex justify-between items-center">
