@@ -5,7 +5,7 @@ import { Settings } from '@/components/Settings'
 
 export function SetupTab() {
   return (
-    <Tabs defaultValue="jogadores" className="w-full h-full flex flex-col">
+    <Tabs defaultValue="players" className="w-full h-full flex flex-col">
       {/* Lista de abas */}
       <TabsList className="border-b">
         <TabsTrigger value="players">Jogadores</TabsTrigger>
