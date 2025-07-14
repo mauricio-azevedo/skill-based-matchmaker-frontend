@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import LeaderboardTab from './components/LeaderboardTab'
-import { Moon, Settings, Sun } from 'lucide-react'
+import { Clock, Moon, Play, Settings, Sun, Trophy } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
@@ -173,11 +173,19 @@ export default function App() {
           </TabsContent>
         </main>
 
-        <TabsList className="self-center">
-          <TabsTrigger value="setup">Setup</TabsTrigger>
-          <TabsTrigger value="play">PLAY!</TabsTrigger>
-          <TabsTrigger value="history">Histórico</TabsTrigger>
-          <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+        <TabsList className="self-center space-x-2">
+          <TabsTrigger value="setup" aria-label="Configuração">
+            <Settings className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="play" aria-label="Jogar">
+            <Play className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="history" aria-label="Histórico">
+            <Clock className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="leaderboard" aria-label="Leaderboard">
+            <Trophy className="!w-8" />
+          </TabsTrigger>
         </TabsList>
       </Tabs>
     </div>
