@@ -162,7 +162,7 @@ export default function App() {
           <TabsContent value="setup" asChild>
             <SetupTab />
           </TabsContent>
-          <TabsContent value="matches" asChild>
+          <TabsContent value="history" asChild>
             <MatchesTab />
           </TabsContent>
           <TabsContent value="play" asChild>
@@ -176,7 +176,7 @@ export default function App() {
         <TabsList className="self-center">
           <TabsTrigger value="setup">Setup</TabsTrigger>
           <TabsTrigger value="play">PLAY!</TabsTrigger>
-          <TabsTrigger value="matches">Jogos</TabsTrigger>
+          <TabsTrigger value="history">Histórico</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
       </Tabs>
