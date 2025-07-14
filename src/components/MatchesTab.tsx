@@ -15,7 +15,7 @@ export function MatchesTab() {
       ) : (
         completedMatches.map((match) => (
           <div key={match.id} className="p-4 bg-background rounded shadow-sm">
-            <MatchCard match={match} />
+            <MatchCard key={match.id} match={match} />
           </div>
         ))
       )}
