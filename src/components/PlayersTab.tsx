@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -22,9 +22,9 @@ export function PlayersTab() {
   const plural = activeCount === 1 ? 'ativo' : 'ativos'
 
   return (
-    <React.Fragment>
+    <div className="px-4 w-full">
       {/* Header */}
-      <div className="flex w-full items-center justify-between h-8 pr-4 mb-2">
+      <div className="flex items-center justify-between h-8 mb-2">
         <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
 
         <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ export function PlayersTab() {
       {players.length === 0 ? (
         <p className="italic text-muted-foreground flex-1 w-full">Adicione pelo menos 4 jogadores.</p>
       ) : (
-        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto pr-4">
+        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto">
           <AnimatePresence initial={false}>
             {sortedPlayers.map((p) => (
               <motion.li
@@ -100,6 +100,6 @@ export function PlayersTab() {
           </AnimatePresence>
         </ul>
       )}
-    </React.Fragment>
+    </div>
   )
 }

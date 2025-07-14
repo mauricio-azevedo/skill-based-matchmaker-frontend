@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import LeaderboardTab from './components/LeaderboardTab'
-import { Clock, Moon, Play, Settings, Sun, Trophy } from 'lucide-react'
+import { Clock, Moon, Play, Settings, Sun, Trophy, Users } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
@@ -15,6 +15,7 @@ import { PlayTab } from '@/features/playTab/PlayTab'
 import { useMatches } from '@/context/MatchesContext'
 import { SetupTab } from '@/components/SetupTab'
 import { usePlayerMatchSync } from '@/hooks/usePlayerMatchSync'
+import { PlayersTab } from '@/components/PlayersTab'
 
 export default function App() {
   usePlayerMatchSync()
@@ -162,11 +163,14 @@ export default function App() {
           <TabsContent value="setup" asChild>
             <SetupTab />
           </TabsContent>
-          <TabsContent value="history" asChild>
-            <MatchesTab />
+          <TabsContent value="players" asChild>
+            <PlayersTab />
           </TabsContent>
           <TabsContent value="play" asChild>
             <PlayTab />
+          </TabsContent>
+          <TabsContent value="history" asChild>
+            <MatchesTab />
           </TabsContent>
           <TabsContent value="leaderboard" asChild>
             <LeaderboardTab />
@@ -176,6 +180,9 @@ export default function App() {
         <TabsList className="self-center space-x-2">
           <TabsTrigger value="setup" aria-label="Configuração">
             <Settings className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="players" aria-label="Jogadores">
+            <Users className="!w-8" />
           </TabsTrigger>
           <TabsTrigger value="play" aria-label="Jogar">
             <Play className="!w-8" />
