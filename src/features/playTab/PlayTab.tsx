@@ -37,7 +37,7 @@ export function PlayTab() {
         <h2 className="text-lg font-semibold leading-tight m-0">Partidas</h2>
         <CourtCountSelector />
       </div>
-      <Separator className="mb-o mt-2" />
+      <Separator className="mb-0 mt-2" />
 
       <div className="h-full overflow-y-auto pt-4">
         {courts.map((court, courtIdx) => {

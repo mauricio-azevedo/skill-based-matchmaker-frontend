@@ -10,7 +10,7 @@ export function MatchesTab() {
   return (
     <div className="flex flex-col w-full overflow-hidden space-y-2 pl-4">
       <h2 className="text-lg font-semibold leading-tight m-0">Histórico de partidas</h2>
-      <Separator className="mb-o mt-2" />
+      <Separator className="mb-0 mt-2" />
 
       {completedMatches.length === 0 ? (
         <p className="italic text-muted-foreground p-4 text-sm">Nenhuma partida concluída até o momento.</p>
