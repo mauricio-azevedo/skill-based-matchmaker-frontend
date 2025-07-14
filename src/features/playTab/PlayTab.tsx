@@ -8,7 +8,7 @@ import { CourtCountSelector } from '@/components/CourtCountSelector'
 import { Settings } from '@/components/Settings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { ChevronDownIcon } from 'lucide-react'
+import { ChevronDownIcon, MoreVertical } from 'lucide-react'
 import { getNextModeLabel } from '@/lib/formationModes'
 
 /**
@@ -56,7 +56,12 @@ export function PlayTab() {
           return (
             <Fragment key={court.id}>
               <div className="pr-4">
-                <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
+                <div className="flex justify-between items-center">
+                  <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
+                  <Button size="icon" variant="ghost">
+                    <MoreVertical></MoreVertical>
+                  </Button>
+                </div>
                 {match ? (
                   <MatchCard key={match.id} match={match} />
                 ) : (
