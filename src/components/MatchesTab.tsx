@@ -18,7 +18,9 @@ export function MatchesTab() {
         <div className="flex flex-col pb-8 overflow-auto">
           {completedMatches.map((match) => (
             <Fragment key={match.id}>
-              <MatchCard match={match} />
+              <div className="pr-4">
+                <MatchCard match={match} />
+              </div>
               <Separator className="my-4" />
             </Fragment>
           ))}
