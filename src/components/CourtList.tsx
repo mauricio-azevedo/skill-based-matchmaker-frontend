@@ -45,8 +45,6 @@ export function CourtList() {
 
   const handleValueChange = (value: string) => {
     const newCount = Number(value)
-
-    console.log({ newCount, ongoingCount })
     if (newCount < ongoingCount) {
       setDesiredCount(newCount)
       setDialogOpen(true)
