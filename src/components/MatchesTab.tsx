@@ -1,12 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useMatches } from '@/context/MatchesContext'
 import { usePlayers } from '@/context/PlayersContext'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Edit } from 'lucide-react'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { MatchCard } from '@/components/MatchCard'
 import type { Match, Player } from '@/types/types'
 
 /* ------------------------------------------------------------------ */
@@ -28,32 +27,24 @@ const formatTeam = (
 }
 
 export function MatchesTab() {
-  const { matches, updateMatch } = useMatches()
+  const { matches, getById: getMatchById } = useMatches()
   const { getById: getPlayer } = usePlayers()
-  const completedMatches: Match[] = matches.filter((m) => m.status === 'completed')
+  const completedMatches: Match[] = useMemo(() => matches.filter((m) => m.status === 'completed'), [matches])
 
   const [open, setOpen] = useState(false)
-  const [selected, setSelected] = useState<Match | null>(null)
-  const [scoreA, setScoreA] = useState(0)
-  const [scoreB, setScoreB] = useState(0)
+  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null)
 
-  const openDialog = (match: Match) => {
-    setSelected(match)
-    setScoreA(match.gamesA ?? 0)
-    setScoreB(match.gamesB ?? 0)
+  const openDialog = (matchId: string) => {
+    setSelectedMatchId(matchId)
     setOpen(true)
   }
 
-  const handleSave = () => {
-    if (selected) {
-      updateMatch(selected.id, {
-        gamesA: scoreA,
-        gamesB: scoreB,
-        winner: scoreA > scoreB ? 'A' : scoreB > scoreA ? 'B' : null,
-      })
-    }
+  const closeDialog = () => {
     setOpen(false)
+    setSelectedMatchId(null)
   }
+
+  const selectedMatch = selectedMatchId ? getMatchById(selectedMatchId) : null
 
   return (
     <div className="flex flex-col w-full overflow-hidden">
@@ -85,7 +76,7 @@ export function MatchesTab() {
                     </TableCell>
                     <TableCell className="text-right">{score}</TableCell>
                     <TableCell className="text-center">
-                      <Button variant="ghost" size="icon" onClick={() => openDialog(m)}>
+                      <Button variant="ghost" size="icon" onClick={() => openDialog(m.id)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -95,28 +86,23 @@ export function MatchesTab() {
             </TableBody>
           </Table>
 
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={open} onOpenChange={(open) => !open && closeDialog()}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Editar Placar</DialogTitle>
               </DialogHeader>
 
-              <div className="space-y-4">
-                <div>
-                  <Label>Placar Equipe A</Label>
-                  <Input type="number" value={scoreA} onChange={(e) => setScoreA(Number(e.target.value))} />
-                </div>
-                <div>
-                  <Label>Placar Equipe B</Label>
-                  <Input type="number" value={scoreB} onChange={(e) => setScoreB(Number(e.target.value))} />
-                </div>
-              </div>
+              {/* Reuso do MatchCard para edição de placar */}
+              {selectedMatch ? (
+                <MatchCard key={selectedMatch.id} match={selectedMatch} />
+              ) : (
+                <p className="text-sm text-muted-foreground">Selecione uma partida para editar.</p>
+              )}
 
               <DialogFooter>
-                <Button variant="secondary" onClick={() => setOpen(false)}>
-                  Cancelar
+                <Button variant="secondary" onClick={closeDialog}>
+                  Fechar
                 </Button>
-                <Button onClick={handleSave}>Salvar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
