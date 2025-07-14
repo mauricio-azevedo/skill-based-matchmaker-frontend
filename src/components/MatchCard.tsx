@@ -113,26 +113,29 @@ export function MatchCard({ match }: Props) {
   const playerB2 = getById(teamBPlayer2)
 
   return (
-    <div className="flex items-center justify-between gap-4">
-      {/* Equipe A */}
-      <div className="flex flex-col gap-2 text-right">
-        {playerA1 && <PlayerEntry name={playerA1.name} />}
-        {playerA2 && <PlayerEntry name={playerA2.name} />}
-      </div>
-
-      {/* Placar */}
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex items-center gap-1">
-          <ScoreSelect value={gamesA} onChange={setGamesA} label="Games equipe A" isWinner={winner === 'A'} />
-          <span className="text-muted-foreground">x</span>
-          <ScoreSelect value={gamesB} onChange={setGamesB} label="Games equipe B" isWinner={winner === 'B'} />
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-muted-foreground">{match.formationMode}</p>
+      <div className="flex items-center justify-between gap-4">
+        {/* Equipe A */}
+        <div className="flex flex-col gap-2 text-right">
+          {playerA1 && <PlayerEntry name={playerA1.name} />}
+          {playerA2 && <PlayerEntry name={playerA2.name} />}
         </div>
-      </div>
 
-      {/* Equipe B */}
-      <div className="flex flex-col gap-2 text-left">
-        {playerB1 && <PlayerEntry name={playerB1.name} reverse />}
-        {playerB2 && <PlayerEntry name={playerB2.name} reverse />}
+        {/* Placar */}
+        <div className="flex flex-col items-center gap-1">
+          <div className="flex items-center gap-1">
+            <ScoreSelect value={gamesA} onChange={setGamesA} label="Games equipe A" isWinner={winner === 'A'} />
+            <span className="text-muted-foreground">x</span>
+            <ScoreSelect value={gamesB} onChange={setGamesB} label="Games equipe B" isWinner={winner === 'B'} />
+          </div>
+        </div>
+
+        {/* Equipe B */}
+        <div className="flex flex-col gap-2 text-left">
+          {playerB1 && <PlayerEntry name={playerB1.name} reverse />}
+          {playerB2 && <PlayerEntry name={playerB2.name} reverse />}
+        </div>
       </div>
     </div>
   )

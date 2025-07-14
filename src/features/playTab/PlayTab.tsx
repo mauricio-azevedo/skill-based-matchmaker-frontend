@@ -88,15 +88,10 @@ export function PlayTab() {
         const courtNumber = idx + 1
 
         return (
-          <Card key={court.id} className="!h-[206px] !gap-8">
+          <Card key={court.id} className="!h-[218px] !gap-6">
             <CardHeader className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <CardTitle>Quadra {courtNumber}</CardTitle>
-                {match && (
-                  <span className="px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-800 uppercase">
-                    {match.formationMode}
-                  </span>
-                )}
               </div>
             </CardHeader>
 
