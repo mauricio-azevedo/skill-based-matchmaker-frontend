@@ -55,7 +55,7 @@ export function Settings({ courtId }: SettingsProps) {
 
         <div className="flex justify-between items-center w-full gap-4">
           <Label htmlFor={`auto-switch-${courtId}`} className="flex-col items-start">
-            Automático
+            Alternado
             <span className="text-xs text-muted-foreground font-normal">
               Alterna automaticamente entre modos misto e homogêneo a cada nova rodada.
             </span>
