@@ -38,18 +38,16 @@ export function PlayTab() {
 
         return (
           <Fragment key={court.id}>
-            <div className="flex flex-col justify-between h-[176px]">
+            <div>
               <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
               {match ? (
-                <div className="mb-6">
-                  <MatchCard key={match.id ?? court.id} match={match} />
-                </div>
+                <MatchCard key={match.id ?? court.id} match={match} />
               ) : (
                 <p className="text-sm text-muted-foreground leading-tight text-center items-center">
                   Nenhuma partida gerada.
                 </p>
               )}
-              <Button size="sm" className="w-full" disabled={isOngoing} onClick={() => handleStart(court.id)}>
+              <Button size="sm" className="w-full mt-6" disabled={isOngoing} onClick={() => handleStart(court.id)}>
                 Gerar nova partida
               </Button>
             </div>
