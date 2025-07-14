@@ -14,7 +14,7 @@ import type { Match, Player } from '@/types/types'
 const formatTeam = (
   player1Id: string | null,
   player2Id: string | null,
-  getPlayer: (id: string) => Player | undefined,
+  getPlayer: (id: string) => Player | null,
 ): string => {
   if (player1Id && player2Id) {
     const p1 = getPlayer(player1Id)

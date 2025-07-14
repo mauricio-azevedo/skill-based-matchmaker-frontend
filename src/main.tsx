@@ -11,12 +11,12 @@ import { MatchesProvider } from './context/MatchesContext.js'
 createRoot(document.getElementById('root')!).render(
   <FormationModeProvider>
     <PlayersProvider>
-      <CourtsProvider>
-        <MatchesProvider>
+      <MatchesProvider>
+        <CourtsProvider>
           <App />
           <Toaster position="top-center" visibleToasts={1} />
-        </MatchesProvider>
-      </CourtsProvider>
+        </CourtsProvider>
+      </MatchesProvider>
     </PlayersProvider>
   </FormationModeProvider>,
 )

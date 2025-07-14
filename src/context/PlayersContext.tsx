@@ -9,7 +9,7 @@ function getMinMatchCount(players: Player[]): number {
 /* ───────── interface do contexto ───────── */
 type Ctx = {
   players: Player[]
-  getById: (id: string) => Player | undefined
+  getById: (id: string) => Player | null
   add: (name: string, level: number, preferredPairs?: string[]) => void
   remove: (id: string) => void
   toggleActive: (id: string) => void
@@ -151,7 +151,7 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
     <PlayersContext.Provider
       value={{
         players,
-        getById: (id: string) => playersById[id],
+        getById: (id: string) => playersById[id] ?? null,
         add,
         remove,
         toggleActive,
