@@ -110,7 +110,7 @@ export function MatchCard({ match }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">{match.formationMode}</p>
+      <p className="text-sm text-muted-foreground leading-tight">{match.formationMode}</p>
       <div className="flex items-center justify-between gap-4">
         {/* Equipe A */}
         <div className="flex flex-col gap-2 text-right">

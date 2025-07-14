@@ -1,10 +1,10 @@
-import { useCallback, useMemo } from 'react'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Fragment, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { MatchCard } from '@/components/MatchCard'
 import { useCourts } from '@/context/CourtsContext'
 import { useMatchManager } from '@/hooks/useMatchManager'
 import { useMatches } from '@/context/MatchesContext'
+import { Separator } from '@/components/ui/separator'
 
 /**
  * Aba de jogo que lista as quadras e permite iniciar ou regenerar partidas.
@@ -31,29 +31,26 @@ export function PlayTab() {
   }
 
   return (
-    <div className="w-full space-y-2 overflow-auto">
+    <div className="w-full overflow-auto">
       {courts.map((court, courtIdx) => {
         const match = court.matchId ? getById(court.matchId) : null
         const isOngoing = match?.status === 'ongoing'
 
         return (
-          <Card key={courtIdx} className="!h-[218px] !gap-6">
-            <CardHeader className="flex justify-between items-center">
-              <CardTitle>Quadra {courtIdx + 1}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {match ? (
+          <Fragment key={court.id}>
+            <p className="text-md font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
+            {match ? (
+              <div className="mb-6">
                 <MatchCard key={match.id ?? court.id} match={match} />
-              ) : (
-                <p className="text-sm text-muted-foreground">Nenhuma partida gerada.</p>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button size="sm" className="w-full" disabled={isOngoing} onClick={() => handleStart(court.id)}>
-                {match ? 'Gerar nova partida' : 'Iniciar partida'}
-              </Button>
-            </CardFooter>
-          </Card>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground leading-tight">Nenhuma partida gerada.</p>
+            )}
+            <Button size="sm" className="w-full" disabled={isOngoing} onClick={() => handleStart(court.id)}>
+              {match ? 'Gerar nova partida' : 'Iniciar partida'}
+            </Button>
+            {courtIdx < courts.length - 1 && <Separator className="my-4" />}
+          </Fragment>
         )
       })}
     </div>
