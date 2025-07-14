@@ -15,6 +15,7 @@ type Ctx = {
   toggleActive: (id: string) => void
   updatePlayers: (fn: (p: Player[]) => Player[]) => void
   registerMatch: (match: Match) => void
+  unregisterMatch: (match: Match) => void
 }
 
 const PlayersContext = createContext<Ctx | undefined>(undefined)
@@ -90,17 +91,16 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
   /* ───── Estatísticas de partida ───── */
   const registerMatch = (match: Match) =>
     setPlayers((prev) => {
-      const teamAIds = [match.teamAPlayer1, match.teamAPlayer2]
-      const teamBIds = [match.teamBPlayer1, match.teamBPlayer2]
+      const teamA = [match.teamAPlayer1, match.teamAPlayer2]
+      const teamB = [match.teamBPlayer1, match.teamBPlayer2]
       const now = new Date().toISOString()
 
       return prev.map((pl) => {
-        if (!teamAIds.includes(pl.id) && !teamBIds.includes(pl.id)) {
-          return pl
-        }
+        const isInA = teamA.includes(pl.id)
+        const isInB = teamB.includes(pl.id)
+        if (!isInA && !isInB) return pl
 
-        const inTeamA = teamAIds.includes(pl.id)
-        const mateId = inTeamA ? teamAIds.find((id) => id !== pl.id)! : teamBIds.find((id) => id !== pl.id)!
+        const mateId = isInA ? teamA.find((id) => id !== pl.id)! : teamB.find((id) => id !== pl.id)!
 
         return {
           ...pl,
@@ -108,6 +108,33 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
           partnerCounts: {
             ...pl.partnerCounts,
             [mateId]: (pl.partnerCounts[mateId] ?? 0) + 1,
+          },
+          updatedAt: now,
+        }
+      })
+    })
+
+  const unregisterMatch = (match: Match) =>
+    setPlayers((prev) => {
+      const teamA = [match.teamAPlayer1, match.teamAPlayer2]
+      const teamB = [match.teamBPlayer1, match.teamBPlayer2]
+      const now = new Date().toISOString()
+
+      return prev.map((pl) => {
+        const isInA = teamA.includes(pl.id)
+        const isInB = teamB.includes(pl.id)
+        if (!isInA && !isInB) return pl
+
+        const mateId = isInA ? teamA.find((id) => id !== pl.id)! : teamB.find((id) => id !== pl.id)!
+        const prevCount = pl.partnerCounts[mateId] ?? 1
+
+        return {
+          ...pl,
+          matchCount: pl.matchCount - 1,
+          partnerCounts: {
+            ...pl.partnerCounts,
+            // se chegar a zero, opcionalmente remove a chave
+            ...(prevCount > 1 ? { [mateId]: prevCount - 1 } : {}),
           },
           updatedAt: now,
         }
@@ -130,6 +157,7 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
         toggleActive,
         updatePlayers,
         registerMatch,
+        unregisterMatch,
       }}
     >
       {children}

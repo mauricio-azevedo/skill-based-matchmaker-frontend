@@ -98,9 +98,6 @@ export function MatchCard({ match }: Props) {
         status: updatedMatch.status,
         endTime: updatedMatch.endTime,
       })
-
-      // Atualiza o contexto de jogadores
-      registerMatch(updatedMatch)
     }
   }, [filled, dirty, gamesA, gamesB, match, updateMatch, registerMatch])
 

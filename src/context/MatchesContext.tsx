@@ -1,9 +1,10 @@
-import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { Match } from '@/types/types'
+import { usePlayers } from './PlayersContext'
 
 const MATCHES_KEY = 'matches'
 
-interface MatchesCtx {
+export interface MatchesCtx {
   matches: Match[]
   getById: (id: string) => Match | null
   addMatch: (data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>) => string
@@ -16,21 +17,53 @@ const MatchesContext = createContext<MatchesCtx | undefined>(undefined)
 
 export const MatchesProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [matchesById, setMatchesById] = useState<Record<string, Match>>({})
+  const prevRef = useRef<Record<string, Match>>({})
 
+  const { registerMatch, unregisterMatch } = usePlayers()
+
+  // Load from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem(MATCHES_KEY)
     if (stored) {
       try {
         setMatchesById(JSON.parse(stored))
       } catch (err) {
-        console.error('Erro ao ler partidas do localStorage:', err)
+        console.error('Failed to parse stored matches:', err)
       }
     }
   }, [])
 
+  // Persist to localStorage whenever matchesById changes
   useEffect(() => {
     localStorage.setItem(MATCHES_KEY, JSON.stringify(matchesById))
   }, [matchesById])
+
+  // Sync player stats when matches are completed or scores change
+  useEffect(() => {
+    const prev = prevRef.current
+    const curr = matchesById
+
+    Object.entries(curr).forEach(([id, m]) => {
+      const old = prev[id]
+
+      // Case 1: new match or status changed to 'completed'
+      const justCompleted = m.status === 'completed' && (!old || old.status !== 'completed')
+      if (justCompleted) {
+        registerMatch(m)
+        return
+      }
+
+      // Case 2: already completed but score changed
+      const scoreChanged =
+        old?.status === 'completed' && m.status === 'completed' && (old.gamesA !== m.gamesA || old.gamesB !== m.gamesB)
+      if (scoreChanged) {
+        unregisterMatch(old)
+        registerMatch(m)
+      }
+    })
+
+    prevRef.current = { ...curr }
+  }, [matchesById, registerMatch, unregisterMatch])
 
   const addMatch = (data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>): string => {
     const id = crypto.randomUUID()
@@ -50,7 +83,6 @@ export const MatchesProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const deleteMatch = (matchId: string) => {
     setMatchesById((prev) => {
-      if (!(matchId in prev)) return prev
       const { [matchId]: _, ...rest } = prev
       return rest
     })
