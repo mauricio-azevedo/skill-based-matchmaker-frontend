@@ -32,6 +32,9 @@ export function PlayTab() {
 
   return (
     <div className="w-full overflow-auto pb-8">
+      <h2 className="text-lg font-semibold mb-1">Partidas</h2>
+      <Separator className="mb-4" />
+
       {courts.map((court, courtIdx) => {
         const match = court.matchId ? getById(court.matchId) : null
         const isOngoing = match?.status === 'ongoing'
@@ -51,7 +54,7 @@ export function PlayTab() {
                 Gerar nova partida
               </Button>
             </div>
-            {courtIdx < courts.length - 1 && <Separator className="my-6" />}
+            <Separator className="my-6" />
           </Fragment>
         )
       })}
