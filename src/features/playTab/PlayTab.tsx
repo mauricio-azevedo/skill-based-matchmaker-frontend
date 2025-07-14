@@ -6,19 +6,18 @@ import { useMatches } from '@/context/MatchesContext'
 import { Separator } from '@/components/ui/separator'
 import { CourtCountSelector } from '@/components/CourtCountSelector'
 import { Settings } from '@/components/Settings'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { ChevronDownIcon, MoreVertical } from 'lucide-react'
+import { ChevronDownIcon, MoreVertical, TrashIcon } from 'lucide-react'
 import { getNextModeLabel } from '@/lib/formationModes'
+import { useCourtMatches } from '@/hooks/useCourtMatches'
 
-/**
- * Aba de jogo que lista as quadras e permite iniciar ou regenerar partidas.
- */
 export function PlayTab() {
   const { courtsEntities } = useCourts()
   const courts = useMemo(() => Object.values(courtsEntities), [courtsEntities])
   const { generateAndStartMatch } = useMatchManager()
   const { getById } = useMatches()
+  const { removeCourtsAndMatches } = useCourtMatches()
 
   const handleStart = useCallback(
     async (courtId: string) => {
@@ -29,6 +28,15 @@ export function PlayTab() {
       }
     },
     [generateAndStartMatch],
+  )
+
+  const handleDeleteCourt = useCallback(
+    (courtId: string) => {
+      if (confirm('Deseja realmente remover essa quadra e suas partidas associadas?')) {
+        removeCourtsAndMatches([courtId], courts.length - 1)
+      }
+    },
+    [removeCourtsAndMatches, courts.length],
   )
 
   if (courts.length === 0) {
@@ -44,7 +52,6 @@ export function PlayTab() {
       <div className="flex justify-end gap-2 pr-4">
         <CourtCountSelector />
       </div>
-      {/*<Separator className="mt-2" />*/}
 
       <div className="h-full overflow-y-auto pt-4 pl-4">
         {courts.map((court, courtIdx) => {
@@ -58,16 +65,23 @@ export function PlayTab() {
               <div className="pr-4">
                 <div className="flex justify-between items-center">
                   <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
-                  <Button size="icon" variant="ghost">
-                    <MoreVertical></MoreVertical>
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost">
+                        <MoreVertical />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem variant="destructive" onSelect={() => handleDeleteCourt(court.id)}>
+                        <TrashIcon className="h-4 w-4" /> Remover quadra {isOngoing && 'e partida'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 {match ? (
                   <MatchCard key={match.id} match={match} />
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-tight text-center items-center">
-                    Nenhuma partida gerada.
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-tight text-center">Nenhuma partida gerada.</p>
                 )}
 
                 <div className="w-full mt-6 flex items-center">
