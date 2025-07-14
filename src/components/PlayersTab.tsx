@@ -24,7 +24,7 @@ const PlayersTab: FC = () => {
   return (
     <React.Fragment>
       {/* Header */}
-      <div className="flex w-full items-center justify-between h-8">
+      <div className="flex w-full items-center justify-between h-8 pr-4 mb-2">
         <div className="flex items-center gap-1">
           <h2 className="text-lg font-semibold">Jogadores</h2>
           <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
@@ -61,7 +61,7 @@ const PlayersTab: FC = () => {
       {players.length === 0 ? (
         <p className="italic text-muted-foreground flex-1 w-full">Adicione pelo menos 4 jogadores.</p>
       ) : (
-        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto">
+        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto pr-4">
           <AnimatePresence initial={false}>
             {sortedPlayers.map((p) => (
               <motion.li
