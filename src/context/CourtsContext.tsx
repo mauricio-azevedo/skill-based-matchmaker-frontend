@@ -9,16 +9,13 @@ import {
   useState,
 } from 'react'
 import type { Court } from '@/types/entities'
+import { FORMATION_MODES } from '@/lib/formationModes'
 
 interface CourtsCtx {
-  /** Número de quadras (1–6) */
   courts: number
-  /** Setter bruto de courtsEntities (para uso em hooks que combinam lógica de quadras+partidas) */
-  setCourtsEntities: Dispatch<SetStateAction<Court[]>>
-  /** Apenas para uso interno: vincula/desvincula uma partida à quadra */
-  updateCourt: (courtId: string, matchId?: string) => void
-  /** Lista completa das entidades Court (útil para PlayTab, por exemplo) */
   courtsEntities: Court[]
+  setCourtsEntities: Dispatch<SetStateAction<Court[]>>
+  updateCourt: (courtId: string, updates: Partial<Pick<Court, 'matchId' | 'formationMode' | 'autoAlternate'>>) => void
 }
 
 const CourtsContext = createContext<CourtsCtx | undefined>(undefined)
@@ -27,7 +24,7 @@ const COURTS_KEY = 'courts'
 export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [courtsEntities, setCourtsEntities] = useState<Court[]>([])
 
-  // Carrega do localStorage ou inicializa com 1 quadra
+  // Carrega do localStorage ou cria 1 quadra com configs padrão
   useEffect(() => {
     const stored = localStorage.getItem(COURTS_KEY)
     if (stored) {
@@ -39,7 +36,16 @@ export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }
     }
     const now = new Date().toISOString()
-    setCourtsEntities([{ id: crypto.randomUUID(), createdAt: now, updatedAt: now }])
+    setCourtsEntities([
+      {
+        id: crypto.randomUUID(),
+        matchId: null,
+        formationMode: FORMATION_MODES.MIXED,
+        autoAlternate: true,
+        createdAt: now,
+        updatedAt: now,
+      },
+    ])
   }, [])
 
   // Persiste sempre que mudar
@@ -47,9 +53,12 @@ export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     localStorage.setItem(COURTS_KEY, JSON.stringify(courtsEntities))
   }, [courtsEntities])
 
-  const updateCourt = (courtId: string, matchId?: string) => {
+  const updateCourt = (
+    courtId: string,
+    updates: Partial<Pick<Court, 'matchId' | 'formationMode' | 'autoAlternate'>>,
+  ) => {
     setCourtsEntities((prev) =>
-      prev.map((c) => (c.id === courtId ? { ...c, matchId, updatedAt: new Date().toISOString() } : c)),
+      prev.map((c) => (c.id === courtId ? { ...c, ...updates, updatedAt: new Date().toISOString() } : c)),
     )
   }
 
@@ -57,9 +66,9 @@ export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     <CourtsContext.Provider
       value={{
         courts: courtsEntities.length,
+        courtsEntities,
         setCourtsEntities,
         updateCourt,
-        courtsEntities,
       }}
     >
       {children}
@@ -69,8 +78,6 @@ export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
 export const useCourts = (): CourtsCtx => {
   const ctx = useContext(CourtsContext)
-  if (!ctx) {
-    throw new Error('useCourts deve ser usado dentro de um CourtsProvider')
-  }
+  if (!ctx) throw new Error('useCourts deve ser usado dentro de um CourtsProvider')
   return ctx
 }
