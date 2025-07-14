@@ -64,7 +64,7 @@ export function CourtList() {
 
   return (
     <>
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-2 pr-4">
         <Label className="flex-col items-start">
           <span>Quadras</span>
           <span className="text-xs text-muted-foreground font-normal">Quantidade de quadras disponíveis.</span>

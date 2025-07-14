@@ -57,7 +57,7 @@ export const RemoveCourtsDialog: FC<RemoveCourtsDialogProps> = ({
           {options.map((opt) => {
             const disabled = !selected.includes(opt.id) && selected.length >= toRemoveCount
             return (
-              <label key={opt.id} className="flex items-start p-2 border rounded cursor-pointer">
+              <label key={opt.id} className="flex items-start px-4 py-2 border rounded-xl cursor-pointer">
                 <Checkbox
                   checked={selected.includes(opt.id)}
                   disabled={disabled}
@@ -73,7 +73,7 @@ export const RemoveCourtsDialog: FC<RemoveCourtsDialogProps> = ({
           })}
         </div>
 
-        <DialogFooter className="mt-4">
+        <DialogFooter className="mt-4 flex-row justify-end">
           <Button variant="ghost" onClick={onCancel}>
             Cancelar
           </Button>

@@ -10,7 +10,7 @@ export function SetupTab() {
       <TabsList className="border-b">
         <TabsTrigger value="players">Jogadores</TabsTrigger>
         <TabsTrigger value="courts">Quadras</TabsTrigger>
-        <TabsTrigger value="settings">Configurações</TabsTrigger>
+        <TabsTrigger value="settings">Balanceamento</TabsTrigger>
       </TabsList>
 
       {/* Jogadores */}
