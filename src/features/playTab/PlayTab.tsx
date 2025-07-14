@@ -76,7 +76,7 @@ export function PlayTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-2 overflow-auto">
       {Object.values(courtsEntities).length === 0 && (
         <p className="text-sm text-muted-foreground">Nenhuma quadra cadastrada.</p>
       )}
@@ -88,7 +88,7 @@ export function PlayTab() {
         const courtNumber = idx + 1
 
         return (
-          <Card key={court.id} className="!h-[unset] !gap-8">
+          <Card key={court.id} className="!h-[206px] !gap-8">
             <CardHeader className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <CardTitle>Quadra {courtNumber}</CardTitle>
