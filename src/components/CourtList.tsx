@@ -6,9 +6,11 @@ import { Label } from '@/components/ui/label'
 import { type CourtOption, RemoveCourtsDialog } from './RemoveCourtsDialog'
 import { usePlayers } from '@/context/PlayersContext'
 import type { Player } from '@/types/entities'
+import { useCourtMatches } from '@/hooks/useCourtMatches'
 
 export function CourtList() {
-  const { courts, setCourts, removeCourtsAndMatches, courtsEntities } = useCourts()
+  const { courts, courtsEntities } = useCourts()
+  const { updateCourtsCount, removeCourtsAndMatches } = useCourtMatches()
   const { matches } = useMatches()
   const { getById } = usePlayers()
 
@@ -43,11 +45,13 @@ export function CourtList() {
 
   const handleValueChange = (value: string) => {
     const newCount = Number(value)
+
+    console.log({ newCount, ongoingCount })
     if (newCount < ongoingCount) {
       setDesiredCount(newCount)
       setDialogOpen(true)
     } else {
-      setCourts(newCount)
+      updateCourtsCount(newCount)
     }
   }
 
