@@ -36,17 +36,17 @@ export function PlayTab() {
   }
 
   return (
-    <div className="w-full pb-8 overflow-hidden pl-4">
+    <div className="w-full pb-8 overflow-hidden">
       <div className="flex justify-between items-center gap-2 pr-4">
         <h2 className="text-lg font-semibold leading-tight m-0 text-center w-full">Partidas</h2>
       </div>
       <Separator className="my-2" />
-      <div className="flex justify-between items-center gap-2 pr-4">
+      <div className="flex justify-end gap-2 pr-4">
         <CourtCountSelector />
       </div>
-      <Separator className="mt-2" />
+      {/*<Separator className="mt-2" />*/}
 
-      <div className="h-full overflow-y-auto pt-4">
+      <div className="h-full overflow-y-auto pt-4 pl-4">
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const isOngoing = match?.status === 'ongoing'
