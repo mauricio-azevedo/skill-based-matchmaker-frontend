@@ -14,8 +14,11 @@ import { MatchesTab } from '@/components/MatchesTab'
 import { PlayTab } from '@/features/playTab/PlayTab'
 import { useMatches } from '@/context/MatchesContext'
 import { SetupTab } from '@/components/SetupTab'
+import { usePlayerMatchSync } from '@/hooks/usePlayerMatchSync'
 
 export default function App() {
+  usePlayerMatchSync()
+
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const [warning, setWarning] = useState<null | 'matches' | 'all' | 'seed'>(null)
 

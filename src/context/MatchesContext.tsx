@@ -1,6 +1,5 @@
-import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
 import type { Match } from '@/types/entities'
-import { usePlayers } from './PlayersContext'
 import type { CreateMatchPayload } from '@/types/types'
 
 const MATCHES_KEY = 'matches'
@@ -18,9 +17,6 @@ const MatchesContext = createContext<MatchesCtx | undefined>(undefined)
 
 export const MatchesProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [matchesById, setMatchesById] = useState<Record<string, Match>>({})
-  const prevRef = useRef<Record<string, Match>>({})
-
-  const { registerMatch, unregisterMatch } = usePlayers()
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -38,33 +34,6 @@ export const MatchesProvider: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => {
     localStorage.setItem(MATCHES_KEY, JSON.stringify(matchesById))
   }, [matchesById])
-
-  // Sync player stats when matches are completed or scores change
-  useEffect(() => {
-    const prev = prevRef.current
-    const curr = matchesById
-
-    Object.entries(curr).forEach(([id, m]) => {
-      const old = prev[id]
-
-      // Case 1: new match or status changed to 'completed'
-      const justCompleted = m.status === 'completed' && (!old || old.status !== 'completed')
-      if (justCompleted) {
-        registerMatch(m)
-        return
-      }
-
-      // Case 2: already completed but score changed
-      const scoreChanged =
-        old?.status === 'completed' && m.status === 'completed' && (old.gamesA !== m.gamesA || old.gamesB !== m.gamesB)
-      if (scoreChanged) {
-        unregisterMatch(old)
-        registerMatch(m)
-      }
-    })
-
-    prevRef.current = { ...curr }
-  }, [matchesById, registerMatch, unregisterMatch])
 
   const addMatch = (data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>): string => {
     const id = crypto.randomUUID()
