@@ -76,7 +76,7 @@ export default function App() {
   return (
     <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
       {/* Header */}
-      <header className="flex items-center border-b px-2 py-2">
+      <header className="flex items-center border-b px-4 py-2">
         <h1 className="text-xl font-semibold tracking-tight">PLAY!</h1>
         <div className="ml-auto flex items-center gap-4">
           {/* Tema */}
@@ -158,7 +158,7 @@ export default function App() {
 
       {/* Tabs */}
       <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
-        <main className="container mx-auto flex h-full max-w-lg flex-col px-2 flex-grow overflow-hidden items-center gap-2">
+        <main className="container mx-auto flex h-full max-w-lg flex-col pl-4 flex-grow overflow-hidden items-center gap-2">
           <TabsContent value="setup" asChild>
             <SetupTab />
           </TabsContent>

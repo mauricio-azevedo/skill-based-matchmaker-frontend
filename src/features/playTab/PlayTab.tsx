@@ -31,33 +31,35 @@ export function PlayTab() {
   }
 
   return (
-    <div className="w-full overflow-auto pb-8">
+    <div className="w-full pb-8 overflow-hidden">
       <h2 className="text-lg font-semibold mb-1">Partidas</h2>
       <Separator className="mb-4" />
 
-      {courts.map((court, courtIdx) => {
-        const match = court.matchId ? getById(court.matchId) : null
-        const isOngoing = match?.status === 'ongoing'
+      <div className="h-full overflow-y-auto">
+        {courts.map((court, courtIdx) => {
+          const match = court.matchId ? getById(court.matchId) : null
+          const isOngoing = match?.status === 'ongoing'
 
-        return (
-          <Fragment key={court.id}>
-            <div>
-              <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
-              {match ? (
-                <MatchCard key={match.id ?? court.id} match={match} />
-              ) : (
-                <p className="text-sm text-muted-foreground leading-tight text-center items-center">
-                  Nenhuma partida gerada.
-                </p>
-              )}
-              <Button size="sm" className="w-full mt-6" disabled={isOngoing} onClick={() => handleStart(court.id)}>
-                Gerar nova partida
-              </Button>
-            </div>
-            <Separator className="my-6" />
-          </Fragment>
-        )
-      })}
+          return (
+            <Fragment key={court.id}>
+              <div className="pr-4">
+                <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
+                {match ? (
+                  <MatchCard key={match.id ?? court.id} match={match} />
+                ) : (
+                  <p className="text-sm text-muted-foreground leading-tight text-center items-center">
+                    Nenhuma partida gerada.
+                  </p>
+                )}
+                <Button size="sm" className="w-full mt-6" disabled={isOngoing} onClick={() => handleStart(court.id)}>
+                  Gerar nova partida
+                </Button>
+              </div>
+              <Separator className="my-6" />
+            </Fragment>
+          )
+        })}
+      </div>
     </div>
   )
 }
