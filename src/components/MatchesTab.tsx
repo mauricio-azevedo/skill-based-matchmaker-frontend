@@ -10,12 +10,12 @@ export function MatchesTab() {
   return (
     <div className="flex flex-col w-full overflow-hidden space-y-2 pl-4">
       <h2 className="text-lg font-semibold leading-tight m-0">Histórico de partidas</h2>
-      <Separator className="mt-2 mb-4" />
+      <Separator className="mt-2" />
 
       {completedMatches.length === 0 ? (
         <p className="italic text-muted-foreground p-4 text-sm">Nenhuma partida concluída até o momento.</p>
       ) : (
-        <div className="flex flex-col pb-8 overflow-auto">
+        <div className="flex flex-col pb-8 overflow-auto pt-4">
           {completedMatches.map((match) => (
             <Fragment key={match.id}>
               <div className="pr-4">
