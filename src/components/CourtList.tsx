@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label'
 import { type CourtOption, RemoveCourtsDialog } from './RemoveCourtsDialog'
 import { usePlayers } from '@/context/PlayersContext'
-import type { Player } from '@/types/types'
+import type { Player } from '@/types/entities'
 
 export function CourtList() {
   const { courts, setCourts, removeCourtsAndMatches, courtsEntities } = useCourts()

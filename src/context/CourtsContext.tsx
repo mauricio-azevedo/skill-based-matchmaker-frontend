@@ -1,5 +1,5 @@
 import { createContext, type FC, type ReactNode, useContext, useEffect, useState } from 'react'
-import type { Court } from '@/types/types'
+import type { Court } from '@/types/entities'
 import { useMatches } from './MatchesContext'
 
 interface CourtsCtx {

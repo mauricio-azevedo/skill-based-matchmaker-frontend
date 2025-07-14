@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { FORMATION_MODES, type FormationMode } from '@/types/types'
+import { FORMATION_MODES, type FormationMode } from '@/types/entities'
 import { Switch } from '@/components/ui/switch'
 import { useFormationMode } from '@/context/FormationModeContext'
 

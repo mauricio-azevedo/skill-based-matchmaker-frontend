@@ -3,7 +3,7 @@ import { Info } from 'lucide-react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
-import type { Match, PlayerLBRow } from '@/types/types'
+import type { Match, PlayerLBRow } from '@/types/entities'
 
 // shadcn/ui components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

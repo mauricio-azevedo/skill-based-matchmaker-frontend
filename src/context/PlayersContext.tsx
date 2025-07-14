@@ -1,5 +1,5 @@
 import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useState } from 'react'
-import type { Match, Player } from '@/types/types'
+import type { Match, Player } from '@/types/entities'
 
 /* ───────── helpers ───────── */
 function getMinMatchCount(players: Player[]): number {

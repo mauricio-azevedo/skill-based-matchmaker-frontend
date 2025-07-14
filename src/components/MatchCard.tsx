@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
-import type { Match } from '@/types/types'
+import type { Match } from '@/types/entities'
 
 /* Helpers ---------------------------------------------------------------- */
 const SCORES = ['1', '2', '3', '4', '5', '6'] as const

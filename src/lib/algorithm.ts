@@ -1,4 +1,4 @@
-import { FORMATION_MODES, type FormationMode, type Player } from '@/types/types'
+import { FORMATION_MODES, type FormationMode, type Player } from '@/types/entities'
 
 /* ─────────────────────────────── Constantes ──────────────────────────────── */
 
@@ -144,7 +144,10 @@ function selectBestMatch(matches: InternalMatch[]): InternalMatch {
 
 /* ─────────────────────────── API pública ─────────────────────────────────── */
 
-export function generateMatch(players: readonly Player[], formationMode: FormationMode): Record<string, string> {
+export function generateMatch(
+  players: readonly Player[],
+  formationMode: FormationMode,
+): { teamAPlayer1: string; teamAPlayer2: string; teamBPlayer1: string; teamBPlayer2: string } {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }

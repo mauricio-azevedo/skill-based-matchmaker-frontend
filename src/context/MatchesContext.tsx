@@ -1,13 +1,14 @@
 import { createContext, type FC, type ReactNode, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import type { Match } from '@/types/types'
+import type { Match } from '@/types/entities'
 import { usePlayers } from './PlayersContext'
+import type { CreateMatchPayload } from '@/types/types'
 
 const MATCHES_KEY = 'matches'
 
 export interface MatchesCtx {
   matches: Match[]
   getById: (id: string) => Match | null
-  addMatch: (data: Omit<Match, 'id' | 'createdAt' | 'updatedAt'>) => string
+  addMatch: (data: CreateMatchPayload) => string
   updateMatch: (matchId: string, updates: Partial<Omit<Match, 'id' | 'createdAt'>>) => void
   deleteMatch: (matchId: string) => void
   clearMatches: () => void
