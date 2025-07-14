@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import LeaderboardTab from './components/LeaderboardTab'
-import { Clock, Moon, Play, Settings, Sun, Trophy, Users } from 'lucide-react'
+import { Clock, Moon, Play, SettingsIcon, Sun, Trophy, Users } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
@@ -13,9 +13,9 @@ import { MatchesTab } from '@/components/MatchesTab'
 
 import { PlayTab } from '@/features/playTab/PlayTab'
 import { useMatches } from '@/context/MatchesContext'
-import { SetupTab } from '@/components/SetupTab'
 import { usePlayerMatchSync } from '@/hooks/usePlayerMatchSync'
 import { PlayersTab } from '@/components/PlayersTab'
+import { Settings } from '@/components/Settings'
 
 export default function App() {
   usePlayerMatchSync()
@@ -96,7 +96,7 @@ export default function App() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="rounded-md p-2 transition hover:bg-muted" aria-label="Configurações">
-                <Settings className="h-4 w-4" />
+                <SettingsIcon className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -161,7 +161,7 @@ export default function App() {
       <Tabs defaultValue="play" className="flex flex-col flex-grow overflow-hidden gap-2">
         <main className="container mx-auto flex h-full max-w-lg flex-col flex-grow overflow-hidden items-center gap-2">
           <TabsContent value="setup" asChild>
-            <SetupTab />
+            <Settings />
           </TabsContent>
           <TabsContent value="players" asChild>
             <PlayersTab />
@@ -179,7 +179,7 @@ export default function App() {
 
         <TabsList className="self-center space-x-2">
           <TabsTrigger value="setup" aria-label="Configuração">
-            <Settings className="!w-8" />
+            <SettingsIcon className="!w-8" />
           </TabsTrigger>
           <TabsTrigger value="players" aria-label="Jogadores">
             <Users className="!w-8" />

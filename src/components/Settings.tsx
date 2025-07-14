@@ -9,7 +9,7 @@ export function Settings() {
   const { formationMode, setFormationMode, autoAlternate, setAutoAlternate } = useFormationMode()
 
   return (
-    <div className="flex flex-col w-full pr-4">
+    <div className="flex flex-col w-full px-4">
       <h2 className="text-md font-medium mb-6">Duplas</h2>
 
       <div className={cn('flex flex-col gap-2 mb-4', autoAlternate ? 'opacity-50' : 'opacity-100')}>
