@@ -5,6 +5,7 @@ import { useCourts } from '@/context/CourtsContext'
 import { useMatchManager } from '@/hooks/useMatchManager'
 import { useMatches } from '@/context/MatchesContext'
 import { Separator } from '@/components/ui/separator'
+import { CourtCountSelector } from '@/components/CourtCountSelector'
 
 /**
  * Aba de jogo que lista as quadras e permite iniciar ou regenerar partidas.
@@ -32,7 +33,10 @@ export function PlayTab() {
 
   return (
     <div className="w-full pb-8 overflow-hidden pl-4">
-      <h2 className="text-lg font-semibold mb-1">Partidas</h2>
+      <div className="flex justify-between gap-2">
+        <h2 className="text-lg font-semibold mb-1">Partidas</h2>
+        <CourtCountSelector />
+      </div>
       <Separator className="mb-4" />
 
       <div className="h-full overflow-y-auto">
