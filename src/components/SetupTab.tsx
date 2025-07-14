@@ -5,7 +5,7 @@ import { Settings } from '@/components/Settings'
 
 export function SetupTab() {
   return (
-    <Tabs defaultValue="players" className="w-full h-full flex flex-col">
+    <Tabs defaultValue="players" className="w-full h-full flex flex-col items-center">
       {/* Lista de abas */}
       <TabsList className="border-b">
         <TabsTrigger value="players">Jogadores</TabsTrigger>
@@ -14,17 +14,17 @@ export function SetupTab() {
       </TabsList>
 
       {/* Jogadores */}
-      <TabsContent value="players" className="flex-1 overflow-auto pt-2">
+      <TabsContent value="players" className="flex-1 overflow-auto pt-2 w-full">
         <PlayersTab />
       </TabsContent>
 
       {/* Quadras */}
-      <TabsContent value="courts" className="flex-1 overflow-auto pt-2">
+      <TabsContent value="courts" className="flex-1 overflow-auto pt-2 w-full">
         <CourtList />
       </TabsContent>
 
       {/* Configurações */}
-      <TabsContent value="settings" className="flex-1 overflow-auto pt-2">
+      <TabsContent value="settings" className="flex-1 overflow-auto pt-2 w-full">
         <Settings />
       </TabsContent>
     </Tabs>
