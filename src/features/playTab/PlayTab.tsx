@@ -37,9 +37,9 @@ export function PlayTab() {
         <h2 className="text-lg font-semibold leading-tight m-0">Partidas</h2>
         <CourtCountSelector />
       </div>
-      <Separator className="mt-2 mb-4" />
+      <Separator className="mt-2" />
 
-      <div className="h-full overflow-y-auto">
+      <div className="h-full overflow-y-auto pt-4">
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const isOngoing = match?.status === 'ongoing'
