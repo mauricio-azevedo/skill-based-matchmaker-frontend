@@ -48,8 +48,12 @@ export const RemoveCourtsDialog: FC<RemoveCourtsDialogProps> = ({
     <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Escolha {toRemoveCount} quadra{toRemoveCount > 1 ? 's' : ''} para remover
+          <DialogTitle className="flex flex-col">
+            Descartar partida{toRemoveCount > 1 ? 's' : ''}
+            <span className="text-sm text-muted-foreground font-normal">
+              Algumas quadras possuem partidas em andamento, escolha {toRemoveCount > 1 ? 'quais delas' : 'qual delas'}{' '}
+              deseja remover.
+            </span>
           </DialogTitle>
         </DialogHeader>
 
