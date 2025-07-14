@@ -89,7 +89,12 @@ export function PlayTab() {
                         <ChevronDownIcon size={16} aria-hidden="true" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="max-w-64 md:max-w-xs" side="bottom" sideOffset={4} align="end">
+                    <DropdownMenuContent
+                      className="max-w-[calc(100vw-4rem)] md:max-w-xs p-0"
+                      side="bottom"
+                      sideOffset={4}
+                      align="end"
+                    >
                       <Settings courtId={court.id} />
                     </DropdownMenuContent>
                   </DropdownMenu>
