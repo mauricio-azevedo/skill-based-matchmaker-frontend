@@ -57,7 +57,7 @@ export function Settings({ courtId }: SettingsProps) {
           <Label htmlFor={`auto-switch-${courtId}`} className="flex-col items-start">
             Alternado
             <span className="text-xs text-muted-foreground font-normal">
-              Alterna automaticamente entre modos misto e homogêneo a cada nova rodada.
+              Alterna automaticamente entre modos misto e homogêneo a cada nova partida.
             </span>
           </Label>
           <Switch
