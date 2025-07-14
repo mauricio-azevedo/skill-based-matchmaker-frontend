@@ -3,10 +3,13 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 
-interface CourtOption {
+export interface CourtOption {
   id: string
   label: string
-  players: string[]
+  teamAPlayer1: string
+  teamAPlayer2: string
+  teamBPlayer1: string
+  teamBPlayer2: string
 }
 
 interface RemoveCourtsDialogProps {
@@ -26,7 +29,6 @@ export const RemoveCourtsDialog: FC<RemoveCourtsDialogProps> = ({
 }) => {
   const [selected, setSelected] = useState<string[]>([])
 
-  // resetar seleção quando abrir o diálogo
   useEffect(() => {
     if (open) setSelected([])
   }, [open])
@@ -38,6 +40,9 @@ export const RemoveCourtsDialog: FC<RemoveCourtsDialogProps> = ({
       setSelected((s) => [...s, id])
     }
   }
+
+  const formatPlayers = (opt: CourtOption): string =>
+    `${opt.teamAPlayer1} & ${opt.teamAPlayer2} vs ${opt.teamBPlayer1} & ${opt.teamBPlayer2}`
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
@@ -61,7 +66,7 @@ export const RemoveCourtsDialog: FC<RemoveCourtsDialogProps> = ({
                 />
                 <div>
                   <p className="font-medium">{opt.label}</p>
-                  <p className="text-sm text-muted-foreground">{opt.players.join(' vs ')}</p>
+                  <p className="text-sm text-muted-foreground">{formatPlayers(opt)}</p>
                 </div>
               </label>
             )

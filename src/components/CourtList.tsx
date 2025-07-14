@@ -3,7 +3,7 @@ import { useCourts } from '@/context/CourtsContext'
 import { useMatches } from '@/context/MatchesContext'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { RemoveCourtsDialog } from './RemoveCourtsDialog'
+import { type CourtOption, RemoveCourtsDialog } from './RemoveCourtsDialog'
 import { usePlayers } from '@/context/PlayersContext'
 import type { Player } from '@/types/types'
 
@@ -18,8 +18,7 @@ export function CourtList() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [desiredCount, setDesiredCount] = useState<number>(courts)
 
-  // prepara opções para o diálogo
-  const options = courtsEntities
+  const options: CourtOption[] = courtsEntities
     .filter((c) => c.matchId && ongoingMatches.some((m) => m.id === c.matchId))
     .map((c, idx) => {
       const m = ongoingMatches.find((m) => m.id === c.matchId)!
@@ -35,7 +34,10 @@ export function CourtList() {
       return {
         id: c.id,
         label: `Quadra ${idx + 1}`,
-        players: [a1.name, a2.name, b1.name, b2.name],
+        teamAPlayer1: a1.name,
+        teamAPlayer2: a2.name,
+        teamBPlayer1: b1.name,
+        teamBPlayer2: b2.name,
       }
     })
 
@@ -56,7 +58,6 @@ export function CourtList() {
 
   const handleCancel = () => {
     setDialogOpen(false)
-    // não faz nada; o Select continua mostrando o valor original (courts)
   }
 
   return (
