@@ -50,9 +50,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const [name, setName] = useState(player?.name ?? '')
   const [level, setLevel] = useState((player?.level ?? 1).toString())
   const [active, setActive] = useState(player?.active ?? true)
-
-  // Estado controlado para o Select
-  const [isPairSelectOpen, setPairSelectOpen] = useState(false)
   const [preferredPair, setPreferredPair] = useState<string>(player?.preferredPairs?.[0] ?? '')
 
   // reset do formulário
@@ -61,7 +58,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     setLevel((player?.level ?? 1).toString())
     setActive(player?.active ?? true)
     setPreferredPair(player?.preferredPairs?.[0] ?? '')
-    setPairSelectOpen(false)
   }, [player])
 
   useEffect(() => {
@@ -171,38 +167,13 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           {/* Dupla preferida */}
           <div className="grid gap-3">
             <Label htmlFor="preferred-pair">Dupla preferida</Label>
-            <Select
-              open={isPairSelectOpen}
-              onOpenChange={(o) => {
-                setTimeout(() => {
-                  setPairSelectOpen(o)
-                })
-                if (o) nameInputRef.current?.focus()
-              }}
-              value={preferredPair}
-              onValueChange={(val) => setPreferredPair(val)}
-            >
-              <SelectTrigger
-                className="w-full"
-                onPointerDown={(e) => {
-                  e.preventDefault()
-                  setTimeout(() => {
-                    setPairSelectOpen(true)
-                  })
-                }}
-                onClick={(e) => e.preventDefault()}
-              >
+            <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione um parceiro…" />
               </SelectTrigger>
-              <SelectContent side="top" onClick={(e) => e.preventDefault()}>
+              <SelectContent side="top">
                 {selectablePlayers.map((pl) => (
-                  <SelectItem
-                    key={pl.id}
-                    value={pl.id}
-                    className="flex items-center gap-2"
-                    onPointerDown={(e) => e.preventDefault()}
-                    onClick={(e) => e.preventDefault()}
-                  >
+                  <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2">
                     {pl.name}
                   </SelectItem>
                 ))}
