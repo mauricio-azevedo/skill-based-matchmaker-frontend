@@ -10,6 +10,7 @@ import { itemVariants } from '@/consts/animation'
 import { getLevelLabel } from '@/consts/levels'
 import { type SortBy, usePlayerSort } from '@/hooks/usePlayerSort'
 import PlayerSortDropdown from '@/components/PlayerSortDropdown'
+import { Separator } from '@/components/ui/separator'
 
 export function PlayersTab() {
   const { players, toggleActive } = usePlayers()
@@ -22,87 +23,91 @@ export function PlayersTab() {
   const plural = activeCount === 1 ? 'ativo' : 'ativos'
 
   return (
-    <div className="px-4 w-full">
-      {/* Header */}
-      <div className="flex items-center justify-between h-8 mb-2">
-        <div className="flex gap-1">
-          <h2 className="text-lg font-semibold">Jogadores</h2>
-          <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
-        </div>
+    <div className="w-full h-full flex flex-col">
+      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Jogadores</h2>
+      <Separator className="mt-2 mb-0" />
 
-        <div className="flex items-center gap-3">
-          {/* Contador de jogadores ativos */}
-          <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" aria-hidden="true" />
-            <span className="text-sm">
-              {activeCount === total ? (
-                `${total}`
-              ) : (
-                <>
-                  {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
-                </>
-              )}
-            </span>
+      <div className="pt-4 overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between h-8 mb-2 px-4">
+          <div className="flex gap-1">
+            <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
           </div>
 
-          {/* Botão que abre o dialog de adição */}
-          <PlayerModal
-            mode="add"
-            trigger={
-              <Button className="h-8 w-8" size="icon" variant="default" aria-label="Adicionar jogador">
-                <Plus className="h-4 w-4" />
-              </Button>
-            }
-          />
-        </div>
-      </div>
+          <div className="flex items-center gap-3">
+            {/* Contador de jogadores ativos */}
+            <div className="flex items-center gap-1">
+              <Users className="h-4 w-4" aria-hidden="true" />
+              <span className="text-sm">
+                {activeCount === total ? (
+                  `${total}`
+                ) : (
+                  <>
+                    {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
+                  </>
+                )}
+              </span>
+            </div>
 
-      {/* Lista de jogadores */}
-      {players.length === 0 ? (
-        <p className="text-sm text-muted-foreground flex-1 w-full text-center">Adicione pelo menos 4 jogadores.</p>
-      ) : (
-        <ul className="flex w-full flex-col gap-3 flex-1 overflow-y-auto">
-          <AnimatePresence initial={false}>
-            {sortedPlayers.map((p) => (
-              <motion.li
-                key={p.id}
-                layout="position"
-                variants={itemVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="flex items-center gap-1"
-              >
-                {/* cartão interno */}
-                <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center">
-                      <p className="font-medium text-sm">{p.name}</p>
-                      <Badge variant="secondary" className="ml-2 text-xs">
-                        {getLevelLabel(p.level)}
-                      </Badge>
+            {/* Botão que abre o dialog de adição */}
+            <PlayerModal
+              mode="add"
+              trigger={
+                <Button className="h-8 w-8" size="icon" variant="default" aria-label="Adicionar jogador">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              }
+            />
+          </div>
+        </div>
+
+        {/* Lista de jogadores */}
+        {players.length === 0 ? (
+          <p className="text-sm text-muted-foreground flex-1 w-full text-center">Adicione pelo menos 4 jogadores.</p>
+        ) : (
+          <div className="flex w-full flex-col gap-3 flex-1 overflow-auto px-4 pb-4">
+            <AnimatePresence initial={false}>
+              {sortedPlayers.map((p) => (
+                <motion.li
+                  key={p.id}
+                  layout="position"
+                  variants={itemVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  className="flex items-center gap-1"
+                >
+                  {/* cartão interno */}
+                  <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center">
+                        <p className="font-medium text-sm">{p.name}</p>
+                        <Badge variant="secondary" className="ml-2 text-xs">
+                          {getLevelLabel(p.level)}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
-                  </div>
-                </div>
 
-                {/* trigger do modal de edição */}
-                <PlayerModal
-                  mode="edit"
-                  player={p}
-                  trigger={
-                    <Button className="h-8 w-8" variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
-                      <Edit size={16} />
-                    </Button>
-                  }
-                />
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </ul>
-      )}
+                  {/* trigger do modal de edição */}
+                  <PlayerModal
+                    mode="edit"
+                    player={p}
+                    trigger={
+                      <Button className="h-8 w-8" variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
+                        <Edit size={16} />
+                      </Button>
+                    }
+                  />
+                </motion.li>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
