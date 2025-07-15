@@ -14,7 +14,7 @@ import { getNextFormationMode, translateFormationMode } from '@/lib/formationMod
 export function PlayTab() {
   const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
-  const { getById } = useMatches()
+  const { getById, matches } = useMatches()
   const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()
 
   const handleStart = useCallback(
@@ -52,6 +52,7 @@ export function PlayTab() {
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const hasOngoingMatch = match?.status === 'ongoing'
+          const matchNumber: number = matches.filter((m) => m.id === match?.id).length + 1
 
           return (
             <div className="w-full" key={court.id}>
@@ -78,8 +79,9 @@ export function PlayTab() {
                 </div>
                 {match ? (
                   <div className="mt-2 flex flex-col gap-2" key={match.id}>
-                    <p className="text-sm font-medium leading-tight">
-                      <span className="text-sm text-muted-foreground font-normal leading-tight">
+                    <p className="text-sm font-normal leading-tight">
+                      Partida {matchNumber}{' '}
+                      <span className="text-xs font-light text-muted-foreground leading-tight">
                         {translateFormationMode(match.formationMode)}
                       </span>
                     </p>
@@ -98,7 +100,7 @@ export function PlayTab() {
                   >
                     <p className="leading-tight">
                       <span>Gerar nova partida</span>{' '}
-                      <span className="text-sm text-muted-foreground font-normal">
+                      <span className="text-xs text-muted-foreground font-normal leading-tight">
                         ({getNextFormationMode(court.formationMode, court.autoAlternate)})
                       </span>
                     </p>
