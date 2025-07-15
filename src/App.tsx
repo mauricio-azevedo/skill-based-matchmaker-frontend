@@ -15,6 +15,7 @@ import { PlayTab } from '@/features/playTab/PlayTab'
 import { useMatches } from '@/context/MatchesContext'
 import { usePlayerMatchSync } from '@/hooks/usePlayerMatchSync'
 import { PlayersTab } from '@/components/PlayersTab'
+import { useCourts } from '@/context/CourtsContext'
 
 export default function App() {
   usePlayerMatchSync()
@@ -27,6 +28,7 @@ export default function App() {
   }, [theme])
 
   const { matches, clearMatches } = useMatches()
+  const { clearCourts } = useCourts()
   const { players, updatePlayers, add } = usePlayers()
 
   const isSeedLoaded = useMemo(() => {
@@ -55,6 +57,7 @@ export default function App() {
     window.localStorage.clear()
 
     clearMatches()
+    clearCourts()
     updatePlayers(() => [])
 
     singleToastSuccess('Todos os dados apagados!', { duration: 3000 })

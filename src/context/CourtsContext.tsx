@@ -15,6 +15,7 @@ interface CourtsCtx {
   courtsEntities: Court[]
   setCourtsEntities: Dispatch<SetStateAction<Court[]>>
   updateCourt: (courtId: string, updates: Partial<Pick<Court, 'matchId' | 'formationMode' | 'autoAlternate'>>) => void
+  clearCourts: () => void
 }
 
 const CourtsContext = createContext<CourtsCtx | undefined>(undefined)
@@ -50,6 +51,10 @@ export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
     )
   }
 
+  const clearCourts = () => {
+    setCourtsEntities([])
+  }
+
   return (
     <CourtsContext.Provider
       value={{
@@ -57,6 +62,7 @@ export const CourtsProvider: FC<{ children: ReactNode }> = ({ children }) => {
         courtsEntities,
         setCourtsEntities,
         updateCourt,
+        clearCourts,
       }}
     >
       {children}
