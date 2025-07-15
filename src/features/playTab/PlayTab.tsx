@@ -11,6 +11,9 @@ import { ChevronDownIcon, MoreVertical, TrashIcon } from 'lucide-react'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
 import { getNextFormationMode, translateFormationMode } from '@/lib/formationModes'
 
+// **Import framer-motion**
+import { AnimatePresence, motion } from 'framer-motion'
+
 export function PlayTab() {
   const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
@@ -31,7 +34,7 @@ export function PlayTab() {
   const handleDeleteCourt = useCallback(
     (courtId: string, hasOngoingMatch: boolean) => {
       if (hasOngoingMatch) {
-        if (confirm('Deseja realmente remover essa quadra e suas partidas associadas?')) {
+        if (window.confirm('Deseja realmente remover essa quadra e suas partidas associadas?')) {
           removeCourtsAndMatches([courtId], courts.length - 1)
         }
       } else {
@@ -77,19 +80,39 @@ export function PlayTab() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                {match ? (
-                  <div className="mt-2 flex flex-col gap-2" key={match.id}>
-                    <p className="text-sm font-normal leading-tight">
-                      Partida {matchNumber}{' '}
-                      <span className="text-xs font-light text-muted-foreground leading-tight">
-                        {translateFormationMode(match.formationMode)}
-                      </span>
-                    </p>
-                    <MatchCard key={match.id} match={match} />
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground leading-tight text-center mt-4">Nenhuma partida ainda.</p>
-                )}
+
+                {/* Animação de fade in/out */}
+                <AnimatePresence initial={false} mode="wait">
+                  {match ? (
+                    <motion.div
+                      key={`match-${match.id}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-2 flex flex-col gap-2"
+                    >
+                      <p className="text-sm font-normal leading-tight">
+                        Partida {matchNumber}{' '}
+                        <span className="text-xs font-light text-muted-foreground leading-tight">
+                          {translateFormationMode(match.formationMode)}
+                        </span>
+                      </p>
+                      <MatchCard key={match.id} match={match} />
+                    </motion.div>
+                  ) : (
+                    <motion.p
+                      key={`no-match-${court.id}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0 }}
+                      className="text-sm text-muted-foreground leading-tight text-center mt-4"
+                    >
+                      Nenhuma partida ainda.
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
                 <div className="w-full mt-4 flex items-center">
                   <Button
