@@ -9,7 +9,7 @@ export const FORMATION_MODES = {
  * Mapa de cada FormationMode para sua label em Português.
  */
 export const FORMATION_MODE_LABELS: Record<FormationMode, string> = {
-  [FORMATION_MODES.HOMOGENEOUS]: 'homogênea',
+  [FORMATION_MODES.HOMOGENEOUS]: 'nivelada',
   [FORMATION_MODES.MIXED]: 'mista',
 }
 
