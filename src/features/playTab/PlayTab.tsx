@@ -60,9 +60,7 @@ export function PlayTab() {
                   <div className="flex gap-1 items-end-safe">
                     <p className="text-lg font-semibold leading-tight">Quadra {courtIdx + 1}</p>
                     <p className="text-sm text-muted-foreground leading-tight">
-                      {court.autoAlternate
-                        ? `alternada (${translateFormationMode(match?.formationMode ?? court.formationMode)})`
-                        : translateFormationMode(match?.formationMode ?? court.formationMode)}
+                      {translateFormationMode(match?.formationMode ?? court.formationMode)}
                     </p>
                   </div>
                   <DropdownMenu>
