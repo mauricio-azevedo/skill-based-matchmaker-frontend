@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { MatchCard } from '@/components/MatchCard'
 import { useCourts } from '@/context/CourtsContext'
 import { useMatchManager } from '@/hooks/useMatchManager'
@@ -12,8 +12,7 @@ import { useCourtMatches } from '@/hooks/useCourtMatches'
 import { translateFormationMode } from '@/lib/formationModes'
 
 export function PlayTab() {
-  const { courtsEntities } = useCourts()
-  const courts = useMemo(() => Object.values(courtsEntities), [courtsEntities])
+  const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
   const { getById } = useMatches()
   const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()

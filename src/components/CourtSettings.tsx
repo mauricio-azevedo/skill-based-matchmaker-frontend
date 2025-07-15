@@ -14,8 +14,8 @@ interface SettingsProps {
 }
 
 export function CourtSettings({ courtId }: SettingsProps) {
-  const { courtsEntities, updateCourt } = useCourts()
-  const court = courtsEntities.find((c) => c.id === courtId)
+  const { courts, updateCourt } = useCourts()
+  const court = courts.find((c) => c.id === courtId)
   if (!court) return null
 
   const { formationMode, autoAlternate } = court

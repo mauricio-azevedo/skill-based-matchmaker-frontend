@@ -31,7 +31,7 @@ function determineFormationMode(
 export function useMatchManager(): { generateAndStartMatch: (courtId: string) => void } {
   const { players } = usePlayers()
   const { addMatch, matches } = useMatches()
-  const { courtsEntities, updateCourt } = useCourts()
+  const { courts, updateCourt } = useCourts()
 
   const addMatchToCourt = useCallback(
     (data: CreateMatchPayload): string => {
@@ -46,7 +46,7 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
 
   const generateAndStartMatch = useCallback(
     (courtId: string): void => {
-      const court = courtsEntities.find((c) => c.id === courtId)
+      const court = courts.find((c) => c.id === courtId)
       if (!court) throw new Error('Quadra não encontrada')
 
       const { formationMode: defaultMode, autoAlternate } = court
@@ -84,7 +84,7 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
         formationMode: modeToUse,
       })
     },
-    [players, matches, courtsEntities, addMatchToCourt],
+    [players, matches, courts, addMatchToCourt],
   )
 
   return { generateAndStartMatch }

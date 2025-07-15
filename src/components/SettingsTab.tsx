@@ -13,7 +13,7 @@ export function SettingsTab() {
   const [warning, setWarning] = useState<null | 'matches' | 'all' | 'seed'>(null)
 
   const { matches, clearMatches } = useMatches()
-  const { clearCourts } = useCourts()
+  const { courts, clearCourts } = useCourts()
   const { players, updatePlayers, add } = usePlayers()
 
   const isSeedLoaded = useMemo(() => {
@@ -24,7 +24,8 @@ export function SettingsTab() {
 
   const hasMatches = matches.length > 0
   const hasPlayers = players.length > 0
-  const noData = !hasMatches && !hasPlayers
+  const hasCourts = courts.length > 0
+  const noData = !hasMatches && !hasPlayers && !hasCourts
 
   const handleClearMatches = () => {
     clearMatches()
