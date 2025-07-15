@@ -200,7 +200,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
               >
                 <SelectValue placeholder="Selecione um parceiro…" />
               </SelectTrigger>
-              <SelectContent side="bottom">
+              <SelectContent side="top">
                 {selectablePlayers.map((pl) => (
                   <SelectItem
                     key={pl.id}
