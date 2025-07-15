@@ -52,108 +52,119 @@ export function PlayTab() {
       <Separator className="mt-2" />
 
       <div className="flex flex-col items-center overflow-y-auto pt-4 pb-14 pl-4 h-full">
-        {courts.map((court, courtIdx) => {
-          const match = court.matchId ? getById(court.matchId) : null
-          const hasOngoingMatch = match?.status === 'ongoing'
-          const matchNumber: number = matches.findIndex((m) => m.id === match?.id) + 1
+        {/* AnimatePresence wraps the list to animate court add/remove */}
+        <AnimatePresence initial={false} mode="popLayout">
+          {courts.map((court, courtIdx) => {
+            const match = court.matchId ? getById(court.matchId) : null
+            const hasOngoingMatch = match?.status === 'ongoing'
+            const matchNumber: number = matches.findIndex((m) => m.id === match?.id) + 1
 
-          return (
-            <div className="w-full" key={court.id}>
-              <div className="pr-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex gap-1 items-end-safe">
-                    <p className="text-lg font-semibold leading-tight">Quadra {courtIdx + 1}</p>
+            return (
+              <motion.div
+                key={court.id}
+                layout
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full"
+              >
+                <div className="pr-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-1 items-end-safe">
+                      <p className="text-lg font-semibold leading-tight">Quadra {courtIdx + 1}</p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="ghost">
+                          <MoreVertical />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => handleDeleteCourt(court.id, hasOngoingMatch)}
+                        >
+                          <TrashIcon className="h-4 w-4" /> Remover quadra {hasOngoingMatch && 'e partida'}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button size="icon" variant="ghost">
-                        <MoreVertical />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onSelect={() => handleDeleteCourt(court.id, hasOngoingMatch)}
-                      >
-                        <TrashIcon className="h-4 w-4" /> Remover quadra {hasOngoingMatch && 'e partida'}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
 
-                {/* Animação de fade in/out */}
-                <AnimatePresence initial={false} mode="wait">
-                  {match ? (
-                    <motion.div
-                      key={`match-${match.id}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="mt-2 flex flex-col gap-2"
+                  {/* Animação de fade in/out para conteúdo da partida */}
+                  <AnimatePresence initial={false} mode="wait">
+                    {match ? (
+                      <motion.div
+                        key={`match-${match.id}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-2 flex flex-col gap-2"
+                      >
+                        <p className="text-sm font-normal leading-tight">
+                          Partida {matchNumber}{' '}
+                          <span className="text-xs font-light text-muted-foreground leading-tight">
+                            {translateFormationMode(match.formationMode)}
+                          </span>
+                        </p>
+                        <MatchCard key={match.id} match={match} />
+                      </motion.div>
+                    ) : (
+                      <motion.p
+                        key={`no-match-${court.id}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0 }}
+                        className="text-sm text-muted-foreground leading-tight text-center mt-4"
+                      >
+                        Nenhuma partida ainda.
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+
+                  <div className="w-full mt-4 flex items-center">
+                    <Button
+                      variant="secondary"
+                      disabled={hasOngoingMatch}
+                      onClick={() => handleStart(court.id)}
+                      className="rounded-l-md rounded-r-none flex-1 px-2"
                     >
-                      <p className="text-sm font-normal leading-tight">
-                        Partida {matchNumber}{' '}
-                        <span className="text-xs font-light text-muted-foreground leading-tight">
-                          {translateFormationMode(match.formationMode)}
+                      <p className="leading-tight">
+                        <span>Gerar nova partida</span>{' '}
+                        <span className="text-xs text-muted-foreground font-normal leading-tight">
+                          ({getNextFormationMode(court.formationMode, court.autoAlternate)})
                         </span>
                       </p>
-                      <MatchCard key={match.id} match={match} />
-                    </motion.div>
-                  ) : (
-                    <motion.p
-                      key={`no-match-${court.id}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0 }}
-                      className="text-sm text-muted-foreground leading-tight text-center mt-4"
-                    >
-                      Nenhuma partida ainda.
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                    </Button>
 
-                <div className="w-full mt-4 flex items-center">
-                  <Button
-                    variant="secondary"
-                    disabled={hasOngoingMatch}
-                    onClick={() => handleStart(court.id)}
-                    className="rounded-l-md rounded-r-none flex-1 px-2"
-                  >
-                    <p className="leading-tight">
-                      <span>Gerar nova partida</span>{' '}
-                      <span className="text-xs text-muted-foreground font-normal leading-tight">
-                        ({getNextFormationMode(court.formationMode, court.autoAlternate)})
-                      </span>
-                    </p>
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        aria-label="Options"
-                        className="rounded-r-md rounded-l-none border-l !border-l-[#fffff26] !ring-0 !ring-offset-0 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          aria-label="Options"
+                          className="rounded-r-md rounded-l-none border-l !border-l-[#fffff26] !ring-0 !ring-offset-0 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:ring-offset-0 focus-visible:ring-offset-0"
+                        >
+                          <ChevronDownIcon size={16} aria-hidden="true" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="max-w-[calc(100vw-4rem)] md:max-w-xs p-0"
+                        side="bottom"
+                        sideOffset={4}
+                        align="end"
                       >
-                        <ChevronDownIcon size={16} aria-hidden="true" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="max-w-[calc(100vw-4rem)] md:max-w-xs p-0"
-                      side="bottom"
-                      sideOffset={4}
-                      align="end"
-                    >
-                      <CourtSettings courtId={court.id} />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <CourtSettings courtId={court.id} />
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-              </div>
-              <Separator className="mt-6 mb-4" />
-            </div>
-          )
-        })}
+                <Separator className="mt-6 mb-4" />
+              </motion.div>
+            )
+          })}
+        </AnimatePresence>
 
         {courts.length === 0 && (
           <div className="h-full flex items-center justify-center pr-4">
