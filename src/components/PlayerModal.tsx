@@ -176,7 +176,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             <Select
               open={isPairSelectOpen}
               onOpenChange={(o) => {
-                setPairSelectOpen(o)
+                setTimeout(() => {
+                  setPairSelectOpen(o)
+                })
                 // garante que o input de nome nunca perca o foco
                 if (o) nameInputRef.current?.focus()
               }}
@@ -188,7 +190,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                 // aqui evitamos que o trigger receba foco
                 onPointerDown={(e) => {
                   e.preventDefault()
-                  setPairSelectOpen(true)
+                  setTimeout(() => {
+                    setPairSelectOpen(true)
+                  })
                 }}
                 onClick={(e) => {
                   e.preventDefault()
