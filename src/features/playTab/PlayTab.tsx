@@ -80,7 +80,9 @@ export function PlayTab() {
                   </DropdownMenu>
                 </div>
                 {match ? (
-                  <MatchCard key={match.id} match={match} />
+                  <div className="mt-4" key={match.id}>
+                    <MatchCard key={match.id} match={match} />
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground leading-tight text-center mt-4">Nenhuma partida ainda.</p>
                 )}

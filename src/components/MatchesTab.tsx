@@ -28,7 +28,7 @@ export function MatchesTab() {
                     {translateFormationMode(match.formationMode)}
                   </p>
                 </div>
-                <div className="pr-4">
+                <div className="pr-4 mt-4">
                   <MatchCard key={match.id} match={match} />
                 </div>
                 <Separator className="my-6" />
