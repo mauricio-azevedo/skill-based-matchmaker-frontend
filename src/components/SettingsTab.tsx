@@ -5,8 +5,8 @@ import { useMatches } from '@/context/MatchesContext'
 import { useCourts } from '@/context/CourtsContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
-import { Separator } from '@radix-ui/react-select'
 import { useVersionGuard } from '@/hooks/useVersionGuard'
+import { Separator } from '@/components/ui/separator'
 
 export function SettingsTab() {
   const [warning, setWarning] = useState<null | 'matches' | 'all'>(null)
