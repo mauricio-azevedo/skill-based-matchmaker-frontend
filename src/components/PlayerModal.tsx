@@ -198,9 +198,19 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                   e.preventDefault()
                 }}
               >
-                <SelectValue placeholder="Selecione um parceiro…" />
+                <SelectValue
+                  onClick={(e) => {
+                    e.preventDefault()
+                  }}
+                  placeholder="Selecione um parceiro…"
+                />
               </SelectTrigger>
-              <SelectContent side="top">
+              <SelectContent
+                side="top"
+                onClick={(e) => {
+                  e.preventDefault()
+                }}
+              >
                 {selectablePlayers.map((pl) => (
                   <SelectItem
                     key={pl.id}
@@ -208,6 +218,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                     className="flex items-center gap-2"
                     // evitar que os items foquem
                     onPointerDown={(e) => e.preventDefault()}
+                    onClick={(e) => {
+                      e.preventDefault()
+                    }}
                   >
                     {pl.name}
                   </SelectItem>
