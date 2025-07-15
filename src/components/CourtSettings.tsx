@@ -13,7 +13,7 @@ interface SettingsProps {
   courtId: string
 }
 
-export function Settings({ courtId }: SettingsProps) {
+export function CourtSettings({ courtId }: SettingsProps) {
   const { courtsEntities, updateCourt } = useCourts()
   const court = courtsEntities.find((c) => c.id === courtId)
   if (!court) return null

@@ -4,7 +4,7 @@ import { useCourts } from '@/context/CourtsContext'
 import { useMatchManager } from '@/hooks/useMatchManager'
 import { useMatches } from '@/context/MatchesContext'
 import { Separator } from '@/components/ui/separator'
-import { Settings } from '@/components/Settings'
+import { CourtSettings } from '@/components/CourtSettings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { ChevronDownIcon, MoreVertical, TrashIcon } from 'lucide-react'
@@ -115,7 +115,7 @@ export function PlayTab() {
                       sideOffset={4}
                       align="end"
                     >
-                      <Settings courtId={court.id} />
+                      <CourtSettings courtId={court.id} />
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
