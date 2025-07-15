@@ -91,7 +91,7 @@ export function PlayTab() {
 
                 <div className="w-full mt-4 flex items-center">
                   <Button
-                    size="sm"
+                    variant="secondary"
                     disabled={hasOngoingMatch}
                     onClick={() => handleStart(court.id)}
                     className="rounded-l-md rounded-r-none flex-1 px-2"
@@ -107,9 +107,9 @@ export function PlayTab() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
-                        size="sm"
+                        variant="secondary"
                         aria-label="Options"
-                        className="rounded-r-md rounded-l-none border-l !border-l-neutral-300 !ring-0"
+                        className="rounded-r-md rounded-l-none border-l !border-l-[#fffff26] !ring-0"
                       >
                         <ChevronDownIcon size={16} aria-hidden="true" />
                       </Button>
