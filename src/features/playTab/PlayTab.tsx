@@ -136,6 +136,7 @@ export function PlayTab() {
 
         <div className="pr-4 my-4">
           <Button
+            size="sm"
             variant="secondary"
             onClick={() => {
               addCourtWithMatch()
