@@ -37,7 +37,7 @@ export function CourtSettings({ courtId }: SettingsProps) {
                   </button>
                 </PopoverTrigger>
                 <PopoverContent side="top" className="text-sm w-fit">
-                  <strong>Homogêneo:</strong> níveis próximos (5+5 vs 5+5).
+                  <strong>Nivelado:</strong> níveis próximos (5+5 vs 5+5).
                   <br />
                   <strong>Misto:</strong> maior diferença (5+1 vs 5+1).
                 </PopoverContent>
@@ -58,7 +58,7 @@ export function CourtSettings({ courtId }: SettingsProps) {
               className="flex flex-1 items-start gap-2 border p-4 rounded-lg"
             >
               <RadioGroupItem id={FORMATION_MODES.HOMOGENEOUS} value={FORMATION_MODES.HOMOGENEOUS} />
-              Homogêneo
+              Nivelado
             </Label>
             <Label htmlFor={FORMATION_MODES.MIXED} className="flex flex-1 items-start gap-2 border p-4 rounded-lg">
               <RadioGroupItem id={FORMATION_MODES.MIXED} value={FORMATION_MODES.MIXED} />
