@@ -13,13 +13,11 @@ export function MatchesTab() {
       <h2 className="text-lg font-semibold leading-tight m-0 text-center">Partidas concluídas</h2>
       <Separator className="mt-2 mb-0" />
 
-      {/*<div className="flex flex-col pl-4 overflow-hidden h-full">*/}
       {completedMatches.length === 0 ? (
         <div className="pl-4 h-full flex items-center justify-center pr-4">
           <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
         </div>
       ) : (
-        // <p className="text-muted-foreground py-4 text-sm text-center !pr-4">Nenhuma partida concluída ainda.</p>
         <div className="pl-4 flex flex-col pb-8 overflow-auto pt-4">
           {completedMatches.map((match, matchIdx) => (
             <Fragment key={match.id}>
@@ -37,7 +35,6 @@ export function MatchesTab() {
           ))}
         </div>
       )}
-      {/*</div>*/}
     </div>
   )
 }
