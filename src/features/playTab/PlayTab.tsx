@@ -14,7 +14,7 @@ import { getNextFormationMode, translateFormationMode } from '@/lib/formationMod
 export function PlayTab() {
   const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
-  const { getById, matches } = useMatches()
+  const { getById } = useMatches()
   const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()
 
   const handleStart = useCallback(
@@ -52,7 +52,6 @@ export function PlayTab() {
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const hasOngoingMatch = match?.status === 'ongoing'
-          const matchNumber = matches.findIndex((m) => m.courtId === court.id) + 1
 
           return (
             <div className="w-full" key={court.id}>
@@ -78,9 +77,8 @@ export function PlayTab() {
                   </DropdownMenu>
                 </div>
                 {match ? (
-                  <div className="mt-4 flex flex-col gap-4" key={match.id}>
+                  <div className="mt-2 flex flex-col gap-2" key={match.id}>
                     <p className="text-sm font-medium leading-tight">
-                      Partida {matchNumber}{' '}
                       <span className="text-sm text-muted-foreground font-normal leading-tight">
                         {translateFormationMode(match.formationMode)}
                       </span>
@@ -91,7 +89,7 @@ export function PlayTab() {
                   <p className="text-sm text-muted-foreground leading-tight text-center mt-4">Nenhuma partida ainda.</p>
                 )}
 
-                <div className="w-full mt-8 flex items-center">
+                <div className="w-full mt-4 flex items-center">
                   <Button
                     size="sm"
                     disabled={hasOngoingMatch}
