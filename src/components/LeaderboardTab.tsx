@@ -240,10 +240,12 @@ const LeaderboardTab: FC = () => {
       <h2 className="text-lg font-semibold leading-tight m-0 text-center">Leaderboard</h2>
       <Separator className="mt-2 mb-0" />
 
-      <div className="flex flex-col overflow-y-auto pl-4 mt-4">
-        {rows.length === 0 ? (
-          <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
-        ) : (
+      {rows.length === 0 ? (
+        <div className="h-full flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col overflow-y-auto pl-4 mt-4">
           <TooltipProvider delayDuration={200}>
             <Table>
               <TableHeader>
@@ -296,18 +298,18 @@ const LeaderboardTab: FC = () => {
               </TableBody>
             </Table>
           </TooltipProvider>
-        )}
+        </div>
+      )}
 
-        {rows.length > 0 && (
-          <div className="flex flex-col text-xs text-muted-foreground mt-2">
-            <p>
-              <b>P</b> = Pontos (3 por vitória) | <b>V-D</b> = Vitórias-Derrotas
-              <br />
-              <b>SV</b> = Saldo de Vitórias | <b>SG</b> = Saldo de Games
-            </p>
-          </div>
-        )}
-      </div>
+      {rows.length > 0 && (
+        <div className="flex flex-col text-xs text-muted-foreground mt-2 pl-4">
+          <p>
+            <b>P</b> = Pontos (3 por vitória) | <b>V-D</b> = Vitórias-Derrotas
+            <br />
+            <b>SV</b> = Saldo de Vitórias | <b>SG</b> = Saldo de Games
+          </p>
+        </div>
+      )}
     </div>
   )
 }
