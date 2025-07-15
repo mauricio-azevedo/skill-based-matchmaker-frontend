@@ -6,10 +6,11 @@ import { useMatches } from '@/context/MatchesContext'
 import type { Match } from '@/types/entities'
 
 // shadcn/ui components
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { PlayerLBRow } from '@/types/types'
+import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 /* --------------------------------------------------------------------------
  * Types & pure helpers
@@ -236,25 +237,25 @@ const LeaderboardTab: FC = () => {
   })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Leaderboard</CardTitle>
-      </CardHeader>
+    <div className="flex flex-col w-full h-full">
+      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Leaderboard</h2>
+      <Separator className="mt-2 mb-0" />
 
-      <CardContent>
+      <div className="flex flex-col overflow-y-auto pl-4 mt-4">
         {rows.length === 0 ? (
           <p className="italic text-muted-foreground">Nenhum jogador cadastrado.</p>
         ) : (
           <TooltipProvider delayDuration={200}>
             <Table>
               <TableHeader>
-                <TableRow className="sticky top-0 z-20 bg-card/90 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-                  <TableHead className="w-8">#</TableHead>
-                  <TableHead>Jogador</TableHead>
-                  <TableHead className="text-right">P</TableHead>
-                  <TableHead className="text-right">V-D</TableHead>
-                  <TableHead className="text-right">SV</TableHead>
-                  <TableHead className="text-right">SG</TableHead>
+                <TableRow className="sticky top-0 z-20 bg-background pointer-events-none">
+                  <TableHead>#</TableHead>
+                  <TableHead className="w-full">Jogador</TableHead>
+                  <TableHead>P</TableHead>
+                  <TableHead>V-D</TableHead>
+                  <TableHead>SV</TableHead>
+                  <TableHead>SG</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -263,7 +264,7 @@ const LeaderboardTab: FC = () => {
                   const showSg = (p.miniSG ?? 0) !== 0
 
                   return (
-                    <TableRow key={p.id}>
+                    <TableRow key={p.id} className="pointer-events-none">
                       <TableCell>{rankNumbers[idx]}</TableCell>
                       <TableCell>{p.name}</TableCell>
                       <TableCell className="text-right">{p.P}</TableCell>
@@ -271,10 +272,10 @@ const LeaderboardTab: FC = () => {
                         {p.W}-{p.L}
                       </TableCell>
                       <TableCell className="text-right">{p.SV}</TableCell>
-                      <TableCell className="text-right">{p.SG}</TableCell>
+                      <TableCell className={cn('text-right', !showTooltip && 'pr-4')}>{p.SG}</TableCell>
 
                       {showTooltip ? (
-                        <TableCell className="text-center">
+                        <TableCell className="text-center pr-4">
                           {(showSv || showSg) && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -301,18 +302,14 @@ const LeaderboardTab: FC = () => {
         {rows.length > 0 && (
           <div className="flex flex-col text-xs text-muted-foreground mt-2">
             <p>
-              <b>P</b> = Pontos (3 por vitória)
+              <b>P</b> = Pontos (3 por vitória) | <b>V-D</b> = Vitórias-Derrotas
               <br />
-              <b>V-D</b> = Vitórias-Derrotas
-              <br />
-              <b>SV</b> = Saldo de Vitórias
-              <br />
-              <b>SG</b> = Saldo de Games
+              <b>SV</b> = Saldo de Vitórias | <b>SG</b> = Saldo de Games
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 
