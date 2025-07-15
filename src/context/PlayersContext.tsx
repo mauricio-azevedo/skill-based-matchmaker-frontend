@@ -10,7 +10,7 @@ function getMinMatchCount(players: Player[]): number {
 type Ctx = {
   players: Player[]
   getById: (id: string) => Player | null
-  add: (name: string, level: number, preferredPairs?: string[]) => void
+  add: (name: string, level: number, preferredPairs?: string[], id?: string) => void
   remove: (id: string) => void
   toggleActive: (id: string) => void
   updatePlayers: (fn: (p: Player[]) => Player[]) => void
@@ -48,12 +48,12 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, [players])
 
   /* ───── CRUD ───── */
-  const add = (name: string, level: number, preferredPairs: string[] = []) => {
+  const add = (name: string, level: number, preferredPairs: string[] = [], id?: string) => {
     const now = new Date().toISOString()
     setPlayers((prev) => {
       const min = getMinMatchCount(prev.filter((pl) => pl.active))
       const newPlayer: Player = {
-        id: crypto.randomUUID(),
+        id: id ?? crypto.randomUUID(),
         name,
         level,
         active: true,

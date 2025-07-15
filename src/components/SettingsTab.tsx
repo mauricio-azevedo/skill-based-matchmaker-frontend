@@ -36,7 +36,7 @@ export function SettingsTab() {
         partnerCounts: {},
       })),
     )
-    singleToastSuccess('Todas as partidas apagadas!', { duration: 3000 })
+    singleToastSuccess('Todas as partidas apagadas!', { duration: 1000 })
   }
 
   const handleClearAll = () => {
@@ -44,7 +44,7 @@ export function SettingsTab() {
     clearMatches()
     clearCourts()
     updatePlayers(() => [])
-    singleToastSuccess('Todos os dados apagados!', { duration: 3000 })
+    singleToastSuccess('Todos os dados apagados!', { duration: 1000 })
   }
 
   const handleLoadSeed = () => {
@@ -53,11 +53,11 @@ export function SettingsTab() {
 
     const seeds = [...seedPlayers]
     shuffle(seeds)
-    seeds.forEach(({ name, level, preferredPairs = [] }) => {
-      add(name, level, preferredPairs)
+    seeds.forEach(({ id, name, level, preferredPairs = [] }) => {
+      add(name, level, preferredPairs, id)
     })
 
-    singleToastSuccess('Jogadores inicializados a partir do seed!', { duration: 3000 })
+    singleToastSuccess('Jogadores inicializados!', { duration: 1000 })
   }
 
   return (
