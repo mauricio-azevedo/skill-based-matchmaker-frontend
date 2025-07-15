@@ -1,31 +1,14 @@
-import { type ReactNode, useEffect } from 'react'
-import { useMatches } from '@/context/MatchesContext'
-import { useCourts } from '@/context/CourtsContext'
-import { usePlayers } from '@/context/PlayersContext'
+import type { ReactNode } from 'react'
+import { useVersionGuard } from '@/hooks/useVersionGuard'
 
-// Atualize esta constante sempre que quebrar compatibilidade de dados
-const APP_VERSION = '2.0.0'
-const STORAGE_VERSION_KEY = 'appVersion'
+interface VersionGuardProps {
+  children: ReactNode
+}
 
 /**
- Componente que verifica a versão da aplicação e limpa dados se necessário.
+ * Component that checks app version on mount and clears data if outdated.
  */
-export function VersionGuard({ children }: { children: ReactNode }) {
-  const { clearMatches } = useMatches()
-  const { clearCourts } = useCourts()
-  const { updatePlayers } = usePlayers()
-
-  useEffect(() => {
-    const storedVersion = window.localStorage.getItem(STORAGE_VERSION_KEY)
-    if (storedVersion !== APP_VERSION) {
-      // Limpa tudo: dados e versão
-      window.localStorage.clear()
-      clearMatches()
-      clearCourts()
-      updatePlayers(() => [])
-      window.localStorage.setItem(STORAGE_VERSION_KEY, APP_VERSION)
-    }
-  }, [])
-
+export function VersionGuard({ children }: VersionGuardProps) {
+  useVersionGuard()
   return <>{children}</>
 }

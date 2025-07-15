@@ -1,31 +1,22 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
 import { useCourts } from '@/context/CourtsContext'
+import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
-import { seedPlayers } from '@/data/seedPlayers'
-import { shuffle } from '@/utils/shuffle'
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@radix-ui/react-select'
 
 export function SettingsTab() {
-  const [warning, setWarning] = useState<null | 'matches' | 'all' | 'seed'>(null)
+  const [warning, setWarning] = useState<null | 'matches' | 'all'>(null)
 
   const { matches, clearMatches } = useMatches()
   const { courts, clearCourts } = useCourts()
-  const { players, updatePlayers, add } = usePlayers()
-
-  const isSeedLoaded = useMemo(() => {
-    if (players.length !== seedPlayers.length) return false
-    const seedSet = new Set(seedPlayers.map(({ name, level }) => `${name}-${level}`))
-    return players.every(({ name, level }) => seedSet.has(`${name}-${level}`))
-  }, [players])
+  const { updatePlayers } = usePlayers()
 
   const hasMatches = matches.length > 0
-  const hasPlayers = players.length > 0
   const hasCourts = courts.length > 0
-  const noData = !hasMatches && !hasPlayers && !hasCourts
+  const noData = !hasMatches && !hasCourts
 
   const handleClearMatches = () => {
     clearMatches()
@@ -40,24 +31,10 @@ export function SettingsTab() {
   }
 
   const handleClearAll = () => {
-    window.localStorage.clear()
     clearMatches()
     clearCourts()
     updatePlayers(() => [])
     singleToastSuccess('Todos os dados apagados!', { duration: 1000 })
-  }
-
-  const handleLoadSeed = () => {
-    clearMatches()
-    updatePlayers(() => [])
-
-    const seeds = [...seedPlayers]
-    shuffle(seeds)
-    seeds.forEach(({ id, name, level, preferredPairs = [] }) => {
-      add(name, level, preferredPairs, id)
-    })
-
-    singleToastSuccess('Jogadores inicializados!', { duration: 1000 })
   }
 
   return (
@@ -67,15 +44,6 @@ export function SettingsTab() {
       <Separator className="mt-2 mb-0" />
 
       <div className="flex flex-col gap-4 p-4">
-        <Button
-          size="sm"
-          disabled={isSeedLoaded}
-          onClick={() => setWarning('seed')}
-          variant="secondary"
-          className="w-full"
-        >
-          Inicializar jogadores
-        </Button>
         <Button
           size="sm"
           disabled={!hasMatches}
@@ -89,18 +57,8 @@ export function SettingsTab() {
           Limpar tudo
         </Button>
       </div>
+
       {/* Confirm Dialogs */}
-      <ConfirmDialog
-        open={warning === 'seed'}
-        onOpenChange={() => setWarning(null)}
-        title="Inicializar jogadores?"
-        description="Esta ação apagará os registros atuais de jogadores e partidas e carregará os jogadores pré definidos. Deseja continuar?"
-        confirmText="Sim, inicializar jogadores"
-        onConfirm={() => {
-          handleLoadSeed()
-          setWarning(null)
-        }}
-      />
       <ConfirmDialog
         open={warning === 'matches'}
         onOpenChange={() => setWarning(null)}
