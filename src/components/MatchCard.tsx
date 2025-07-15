@@ -116,9 +116,9 @@ export function MatchCard({ match }: { match: Match }) {
   const playerB2 = getById(teamBPlayer2)
 
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center justify-between gap-1">
       {/* Equipe A */}
-      <div className="flex flex-col gap-2 text-right">
+      <div className="flex flex-col gap-2 flex-1">
         {playerA1 && <PlayerEntry name={playerA1.name} />}
         {playerA2 && <PlayerEntry name={playerA2.name} />}
       </div>
@@ -145,7 +145,7 @@ export function MatchCard({ match }: { match: Match }) {
       </div>
 
       {/* Equipe B */}
-      <div className="flex flex-col gap-2 text-left">
+      <div className="flex flex-col gap-2 flex-1">
         {playerB1 && <PlayerEntry name={playerB1.name} reverse />}
         {playerB2 && <PlayerEntry name={playerB2.name} reverse />}
       </div>
