@@ -20,8 +20,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 
-import { Check, ChevronsUpDown, Trash } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Trash } from 'lucide-react'
 import { LEVELS } from '@/consts/levels'
 import { usePlayers } from '@/context/PlayersContext'
 import React, { type FC, type ReactNode, useCallback, useEffect, useState } from 'react'
@@ -31,9 +30,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Badge } from '@/components/ui/badge'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 type Mode = 'add' | 'edit'
 
@@ -53,14 +50,14 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const [name, setName] = useState(player?.name ?? '')
   const [level, setLevel] = useState((player?.level ?? 1).toString())
   const [active, setActive] = useState(player?.active ?? true)
-  const [preferredPairs, setPreferredPairs] = useState<string[]>(player?.preferredPairs ?? [])
+  const [preferredPair, setPreferredPair] = useState<string>(player?.preferredPairs?.[0] ?? '')
 
   // (re)sinc quando abrir outro player
   const resetForm = useCallback(() => {
     setName(player?.name ?? '')
     setLevel((player?.level ?? 1).toString())
     setActive(player?.active ?? true)
-    setPreferredPairs(player?.preferredPairs ?? [])
+    setPreferredPair(player?.preferredPairs?.[0] ?? '')
   }, [player])
 
   useEffect(() => {
@@ -69,18 +66,18 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
   // ----------------------- helpers -----------------------
   const selectablePlayers = players.filter((p) => p.id !== player?.id && p.active)
-  const togglePair = (id: string) =>
-    setPreferredPairs((prev) => (prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]))
 
   // ----------------------- ações -----------------------
   const handleSave = () => {
     if (!name.trim()) return
 
+    const pairs = preferredPair ? [preferredPair] : []
+
     if (mode === 'add') {
-      add(name.trim(), Number(level), preferredPairs)
+      add(name.trim(), Number(level), pairs)
       singleToastSuccess(`${name.trim()} adicionado!`, { position: 'top-center', duration: 1000 })
-      setName(player?.name ?? '')
-      setPreferredPairs(player?.preferredPairs ?? [])
+      setName('')
+      setPreferredPair('')
       nameInputRef.current?.focus()
       return
     }
@@ -88,7 +85,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     // modo edit
     updatePlayers((plrs) =>
       plrs.map((p) =>
-        p.id === player!.id ? { ...p, name: name.trim() || p.name, level: Number(level), active, preferredPairs } : p,
+        p.id === player!.id
+          ? { ...p, name: name.trim() || p.name, level: Number(level), active, preferredPairs: pairs }
+          : p,
       ),
     )
     setOpen(false)
@@ -139,13 +138,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           {/* Nome */}
           <div className="grid gap-3">
             <Label htmlFor="player-name">Nome</Label>
-            <Input
-              id="player-name"
-              ref={nameInputRef}
-              value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-              autoFocus
-            />
+            <Input id="player-name" ref={nameInputRef} value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           {/* Nível */}
@@ -155,7 +148,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
               id="player-level"
               type="single"
               value={level}
-              onValueChange={(val: string) => val && setLevel(val)}
+              onValueChange={(val) => val && setLevel(val)}
               className="flex flex-wrap gap-2 w-full"
             >
               {LEVELS.map(({ value, label }) => (
@@ -166,51 +159,21 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             </ToggleGroup>
           </div>
 
-          {/* Duplas preferidas */}
+          {/* Dupla preferida */}
           <div className="grid gap-3">
-            <Label>Duplas preferidas</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className={cn('w-full justify-between', preferredPairs.length === 0 && 'text-muted-foreground')}
-                >
-                  {preferredPairs.length ? (
-                    <div className="flex gap-1 flex-wrap max-w-[85%] overflow-hidden">
-                      {preferredPairs.map((id) => {
-                        const pl = players.find((p) => p.id === id)
-                        return (
-                          <Badge key={id} variant="secondary" className="truncate">
-                            {pl?.name ?? 'Desconhecido'}
-                          </Badge>
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    'Selecionar parceiros…'
-                  )}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent side="bottom" className="w-[--radix-popover-trigger-width] p-0">
-                <Command>
-                  <CommandInput placeholder="Buscar jogador…" />
-                  <CommandEmpty>Nenhum jogador encontrado.</CommandEmpty>
-                  <CommandGroup>
-                    {selectablePlayers.map((pl) => {
-                      const isSelected = preferredPairs.includes(pl.id)
-                      return (
-                        <CommandItem key={pl.id} onSelect={() => togglePair(pl.id)}>
-                          <Check className={cn('mr-2 h-4 w-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-                          {pl.name}
-                        </CommandItem>
-                      )
-                    })}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <Label htmlFor="preferred-pair">Dupla preferida</Label>
+            <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um parceiro…" />
+              </SelectTrigger>
+              <SelectContent>
+                {selectablePlayers.map((pl) => (
+                  <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2">
+                    {pl.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <DialogFooter className="flex-row justify-between">
@@ -244,13 +207,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             <DialogClose asChild>
               <Button variant="outline">{mode === 'edit' ? 'Cancelar' : 'Voltar'}</Button>
             </DialogClose>
-            {mode === 'edit' ? (
-              <DialogClose asChild>
-                <Button onClick={handleSave}>Salvar</Button>
-              </DialogClose>
-            ) : (
-              <Button onClick={handleSave}>Salvar</Button>
-            )}
+            <Button onClick={handleSave}>{mode === 'edit' ? 'Salvar' : 'Salvar'}</Button>
           </div>
         </DialogFooter>
       </DialogContent>
