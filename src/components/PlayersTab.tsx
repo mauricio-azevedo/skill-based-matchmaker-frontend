@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { usePlayers } from '@/context/PlayersContext'
 import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
-import { singleToastSuccess } from '@/utils/singleToast'
 import PlayerModal from './PlayerModal'
 import { Edit, Users } from 'lucide-react'
 import { itemVariants } from '@/consts/animation'
@@ -42,8 +41,6 @@ export function PlayersTab() {
     seeds.forEach(({ id, name, level, preferredPairs = [] }) => {
       add(name, level, preferredPairs, id)
     })
-
-    singleToastSuccess('Jogadores inicializados!', { duration: 1000 })
   }
 
   return (
