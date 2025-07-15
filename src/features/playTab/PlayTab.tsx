@@ -110,7 +110,6 @@ export function PlayTab() {
                         size="sm"
                         aria-label="Options"
                         className="rounded-r-md rounded-l-none border-l !border-l-neutral-300 !ring-0"
-                        disabled={hasOngoingMatch}
                       >
                         <ChevronDownIcon size={16} aria-hidden="true" />
                       </Button>
