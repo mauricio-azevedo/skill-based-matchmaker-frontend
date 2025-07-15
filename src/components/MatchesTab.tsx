@@ -11,13 +11,15 @@ export function MatchesTab() {
   return (
     <div className="flex flex-col w-full h-full">
       <h2 className="text-lg font-semibold leading-tight m-0 text-center">
-        Partidas concluídas ({completedMatches.length})
+        Partidas concluídas {completedMatches.length > 0 && `(${completedMatches.length})`}
       </h2>
       <Separator className="mt-2 mb-0" />
 
       <div className="flex flex-col pl-4 overflow-hidden">
         {completedMatches.length === 0 ? (
-          <p className="italic text-muted-foreground p-4 text-sm">Nenhuma partida concluída até o momento.</p>
+          <p className="text-muted-foreground py-4 text-sm text-center !pr-4">
+            Nenhuma partida concluída até o momento.
+          </p>
         ) : (
           <div className="flex flex-col pb-8 overflow-auto pt-4">
             {completedMatches.map((match, matchIdx) => (
