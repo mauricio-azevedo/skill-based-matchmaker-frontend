@@ -1,4 +1,4 @@
-import { type FocusEvent, forwardRef, type MouseEvent, useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown, XIcon } from 'lucide-react'
@@ -32,39 +32,27 @@ interface ScoreSelectProps {
   isWinner?: boolean
 }
 
-const ScoreSelect = forwardRef<HTMLInputElement, ScoreSelectProps>(({ value, onChange, label, isWinner }, ref) => {
-  // Quando o input ganha foco, seleciona o conteúdo
-  const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.select()
-  }
-
-  // Impede que o mouse-up (após o click) remova a seleção
-  const handleMouseUp = (e: MouseEvent<HTMLInputElement>) => {
-    e.preventDefault()
-  }
-
-  return (
-    <div className="relative flex flex-col items-center">
-      {isWinner && <Crown className="w-4 h-4 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
-      <Input
-        ref={ref}
-        type="number"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        aria-label={label}
-        value={value === '' ? '' : value}
-        onChange={(e) => {
-          const val = e.currentTarget.value
-          onChange(val === '' ? '' : Number(val))
-        }}
-        onFocus={handleFocus}
-        onMouseUp={handleMouseUp}
-        className="w-10 h-10 text-center p-0"
-        placeholder="-"
-      />
-    </div>
-  )
-})
+const ScoreSelect = forwardRef<HTMLInputElement, ScoreSelectProps>(({ value, onChange, label, isWinner }, ref) => (
+  <div className="relative flex flex-col items-center">
+    {isWinner && <Crown className="w-4 h-4 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
+    <Input
+      ref={ref}
+      type="text"
+      inputMode="numeric"
+      maxLength={1}
+      aria-label={label}
+      value={value === '' ? '' : value}
+      onChange={(e) => {
+        const v = e.currentTarget.value
+        onChange(v === '' ? '' : Number(v))
+      }}
+      onFocus={(e) => e.currentTarget.select()}
+      onMouseUp={(e) => e.preventDefault()}
+      className="w-10 h-10 text-center p-0"
+      placeholder="-"
+    />
+  </div>
+))
 
 ScoreSelect.displayName = 'ScoreSelect'
 
