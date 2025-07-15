@@ -50,14 +50,18 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const [name, setName] = useState(player?.name ?? '')
   const [level, setLevel] = useState((player?.level ?? 1).toString())
   const [active, setActive] = useState(player?.active ?? true)
+
+  // Estado controlado para o Select
+  const [isPairSelectOpen, setPairSelectOpen] = useState(false)
   const [preferredPair, setPreferredPair] = useState<string>(player?.preferredPairs?.[0] ?? '')
 
-  // (re)sinc quando abrir outro player
+  // reset do formulário
   const resetForm = useCallback(() => {
     setName(player?.name ?? '')
     setLevel((player?.level ?? 1).toString())
     setActive(player?.active ?? true)
     setPreferredPair(player?.preferredPairs?.[0] ?? '')
+    setPairSelectOpen(false)
   }, [player])
 
   useEffect(() => {
@@ -95,13 +99,19 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
   const handleDelete = () => remove(player!.id)
 
-  // ----------------------- foco no input para manter teclado aberto -----------------------
-  // Auto‑foca sempre que abrir (tanto add quanto edit)
+  // ----------------------- foco no input -----------------------
   useEffect(() => {
     if (open) {
       setTimeout(() => nameInputRef.current?.focus(), 0)
     }
   }, [open])
+
+  const handleInputBlur = () => {
+    // se, por algum motivo, o input perder foco, refoca
+    if (open) {
+      setTimeout(() => nameInputRef.current?.focus(), 0)
+    }
+  }
 
   // ----------------------- UI -----------------------
   const title = mode === 'add' ? 'Novo jogador' : 'Editar jogador'
@@ -121,16 +131,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
       <DialogContent
         className="top-2 translate-y-2"
         onOpenAutoFocus={(e) => e.preventDefault()}
-        // Em qualquer clique dentro da modal, impedir blur do input e manter foco nele
-        onMouseDown={(e) => {
-          if (nameInputRef.current) {
-            const target = e.target as HTMLElement
-            if (!nameInputRef.current.contains(target)) {
-              e.preventDefault()
-              nameInputRef.current.focus()
-            }
-          }
-        }}
+        // impedir fechamento ao clicar fora
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -140,7 +143,13 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           {/* Nome */}
           <div className="grid gap-3">
             <Label htmlFor="player-name">Nome</Label>
-            <Input id="player-name" ref={nameInputRef} value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              id="player-name"
+              ref={nameInputRef}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={handleInputBlur}
+            />
           </div>
 
           {/* Nível */}
@@ -164,13 +173,38 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           {/* Dupla preferida */}
           <div className="grid gap-3">
             <Label htmlFor="preferred-pair">Dupla preferida</Label>
-            <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
-              <SelectTrigger className="w-full">
+            <Select
+              open={isPairSelectOpen}
+              onOpenChange={(o) => {
+                setPairSelectOpen(o)
+                // garante que o input de nome nunca perca o foco
+                if (o) nameInputRef.current?.focus()
+              }}
+              value={preferredPair}
+              onValueChange={(val) => setPreferredPair(val)}
+            >
+              <SelectTrigger
+                className="w-full"
+                // aqui evitamos que o trigger receba foco
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  setPairSelectOpen(true)
+                }}
+                onClick={(e) => {
+                  e.preventDefault()
+                }}
+              >
                 <SelectValue placeholder="Selecione um parceiro…" />
               </SelectTrigger>
               <SelectContent>
                 {selectablePlayers.map((pl) => (
-                  <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2">
+                  <SelectItem
+                    key={pl.id}
+                    value={pl.id}
+                    className="flex items-center gap-2"
+                    // evitar que os items foquem
+                    onPointerDown={(e) => e.preventDefault()}
+                  >
                     {pl.name}
                   </SelectItem>
                 ))}
@@ -178,6 +212,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             </Select>
           </div>
         </div>
+
         <DialogFooter className="flex-row justify-between">
           {mode === 'edit' && (
             <AlertDialog>
