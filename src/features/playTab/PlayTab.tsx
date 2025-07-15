@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { MatchCard } from '@/components/MatchCard'
 import { useCourts } from '@/context/CourtsContext'
 import { useMatchManager } from '@/hooks/useMatchManager'
@@ -30,35 +30,32 @@ export function PlayTab() {
   )
 
   const handleDeleteCourt = useCallback(
-    (courtId: string) => {
-      if (confirm('Deseja realmente remover essa quadra e suas partidas associadas?')) {
+    (courtId: string, hasOngoingMatch: boolean) => {
+      if (hasOngoingMatch) {
+        if (confirm('Deseja realmente remover essa quadra e suas partidas associadas?')) {
+          removeCourtsAndMatches([courtId], courts.length - 1)
+        }
+      } else {
         removeCourtsAndMatches([courtId], courts.length - 1)
       }
     },
     [removeCourtsAndMatches, courts.length],
   )
 
-  if (courts.length === 0) {
-    return <p className="text-sm text-muted-foreground">Nenhuma quadra cadastrada.</p>
-  }
-
   return (
-    <div className="w-full overflow-hidden">
-      <div className="flex justify-between items-center gap-2 pr-4">
+    <div className="w-full flex flex-col overflow-hidden">
+      <div className="flex justify-between items-center gap-2">
         <h2 className="text-lg font-semibold leading-tight m-0 text-center w-full">Partidas</h2>
       </div>
       <Separator className="mt-2" />
-      {/*<div className="flex justify-end gap-2 pr-4">*/}
-      {/*  <CourtCountSelector />*/}
-      {/*</div>*/}
 
-      <div className="overflow-y-auto pt-4 pl-4 h-full">
+      <div className="flex flex-col items-center overflow-y-auto pt-4 pl-4 h-full">
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
-          const isOngoing = match?.status === 'ongoing'
+          const hasOngoingMatch = match?.status === 'ongoing'
 
           return (
-            <Fragment key={court.id}>
+            <div className="w-full" key={court.id}>
               <div className="pr-4">
                 <div className="flex justify-between items-center">
                   <div className="flex gap-1 items-end-safe">
@@ -76,8 +73,11 @@ export function PlayTab() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem variant="destructive" onSelect={() => handleDeleteCourt(court.id)}>
-                        <TrashIcon className="h-4 w-4" /> Remover quadra {isOngoing && 'e partida'}
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => handleDeleteCourt(court.id, hasOngoingMatch)}
+                      >
+                        <TrashIcon className="h-4 w-4" /> Remover quadra {hasOngoingMatch && 'e partida'}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -85,22 +85,17 @@ export function PlayTab() {
                 {match ? (
                   <MatchCard key={match.id} match={match} />
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-tight text-center mt-4">
-                    Nenhuma partida gerada.
-                  </p>
+                  <p className="text-sm text-muted-foreground leading-tight text-center mt-4">Nenhuma partida ainda.</p>
                 )}
 
                 <div className="w-full mt-6 flex items-center">
                   <Button
                     size="sm"
-                    disabled={isOngoing}
+                    disabled={hasOngoingMatch}
                     onClick={() => handleStart(court.id)}
                     className="rounded-l-md rounded-r-none flex-1 px-2"
                   >
-                    <span>
-                      Gerar nova partida{' '}
-                      {/*<span className="text-sm text-muted-foreground font-normal">({balanceLabel})</span>*/}
-                    </span>
+                    <span>Gerar nova partida</span>
                   </Button>
 
                   <DropdownMenu>
@@ -109,7 +104,7 @@ export function PlayTab() {
                         size="sm"
                         aria-label="Options"
                         className="rounded-r-md rounded-l-none border-l !border-l-neutral-300 !ring-0"
-                        disabled={isOngoing}
+                        disabled={hasOngoingMatch}
                       >
                         <ChevronDownIcon size={16} aria-hidden="true" />
                       </Button>
@@ -125,12 +120,17 @@ export function PlayTab() {
                   </DropdownMenu>
                 </div>
               </div>
-              <Separator className="my-6" />
-            </Fragment>
+              <Separator className="mt-6 mb-4" />
+            </div>
           )
         })}
 
-        <Button>Adicionar quadra</Button>
+        {courts.length === 0 && <p className="text-sm text-muted-foreground pr-4">Nenhuma quadra cadastrada.</p>}
+
+        <div className="pr-4 mt-4">
+          {/*TODO: implement action*/}
+          <Button variant="secondary">Adicionar quadra</Button>
+        </div>
       </div>
     </div>
   )
