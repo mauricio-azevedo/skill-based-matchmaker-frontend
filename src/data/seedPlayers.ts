@@ -55,7 +55,7 @@ export const seedPlayers = [
     preferredPairs: ['654abc59-238b-44db-ae28-3042fab03306'],
   },
   {
-    id: '9d8da099-9ad8-4a85-aaf0-f84d4061563d',
+    id: 'b5e6d9ab-2fac-44c0-a8be-ce01ebf88fa0',
     name: 'Alberto',
     level: 4,
     preferredPairs: ['9d8da099-9ad8-4a85-aaf0-f84d4061563d'],
