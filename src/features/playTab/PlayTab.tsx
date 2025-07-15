@@ -42,13 +42,13 @@ export function PlayTab() {
   )
 
   return (
-    <div className="w-full flex flex-col overflow-hidden">
+    <div className="w-full flex flex-col overflow-hidden h-full relative">
       <div className="flex justify-between items-center gap-2">
         <h2 className="text-lg font-semibold leading-tight m-0 text-center w-full">Partidas</h2>
       </div>
       <Separator className="mt-2" />
 
-      <div className="flex flex-col items-center overflow-y-auto pt-4 pl-4 h-full">
+      <div className="flex flex-col items-center overflow-y-auto py-4 pl-4 h-full">
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const hasOngoingMatch = match?.status === 'ongoing'
@@ -132,9 +132,13 @@ export function PlayTab() {
           )
         })}
 
-        {courts.length === 0 && <p className="text-sm text-muted-foreground pr-4">Nenhuma quadra adicionada ainda.</p>}
+        {courts.length === 0 && (
+          <div className="h-full flex items-center justify-center pr-4">
+            <p className="text-sm text-muted-foreground">Nenhuma quadra adicionada ainda.</p>
+          </div>
+        )}
 
-        <div className="pr-4 my-4">
+        <div className="absolute bottom-4 right-4 shadow-2xl">
           <Button
             size="sm"
             variant="secondary"
