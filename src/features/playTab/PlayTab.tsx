@@ -59,11 +59,11 @@ export function PlayTab() {
                 <div className="flex justify-between items-center">
                   <div className="flex gap-1 items-end-safe">
                     <p className="text-lg font-semibold leading-tight">Quadra {courtIdx + 1}</p>
-                    {court.autoAlternate && (
-                      <p className="text-sm text-muted-foreground leading-tight">
-                        alternada ({translateFormationMode(match?.formationMode ?? court.formationMode)})
-                      </p>
-                    )}
+                    <p className="text-sm text-muted-foreground leading-tight">
+                      {court.autoAlternate
+                        ? `alternada (${translateFormationMode(match?.formationMode ?? court.formationMode)})`
+                        : translateFormationMode(match?.formationMode ?? court.formationMode)}
+                    </p>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
