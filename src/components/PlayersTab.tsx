@@ -7,7 +7,6 @@ import { usePlayers } from '@/context/PlayersContext'
 import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
 import { singleToastSuccess } from '@/utils/singleToast'
-import { ConfirmDialog } from '@/components/ConfirmDialog'
 import PlayerModal from './PlayerModal'
 import { Edit, Users } from 'lucide-react'
 import { itemVariants } from '@/consts/animation'
@@ -18,7 +17,6 @@ import { Separator } from '@/components/ui/separator'
 import { useVersionGuard } from '@/hooks/useVersionGuard'
 
 export function PlayersTab() {
-  const [warning, setWarning] = useState<null | 'seed'>(null)
   const { performVersionCleanup } = useVersionGuard()
   const { players, toggleActive, add } = usePlayers()
 
@@ -62,7 +60,7 @@ export function PlayersTab() {
               variant="secondary"
               className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2"
               disabled={isSeedLoaded}
-              onClick={() => setWarning('seed')}
+              onClick={() => handleLoadSeed()}
             >
               Inicializar pré-definidos
             </Button>
@@ -133,19 +131,6 @@ export function PlayersTab() {
             <Button size="sm">Adicionar jogador</Button>
           </div>
         }
-      />
-
-      {/* ConfirmDialog para seed */}
-      <ConfirmDialog
-        open={warning === 'seed'}
-        onOpenChange={() => setWarning(null)}
-        title="Inicializar jogadores?"
-        description="Esta ação apagará os registros atuais de jogadores e partidas e carregará os jogadores pré-definidos. Deseja continuar?"
-        confirmText="Sim, inicializar jogadores"
-        onConfirm={() => {
-          handleLoadSeed()
-          setWarning(null)
-        }}
       />
     </div>
   )
