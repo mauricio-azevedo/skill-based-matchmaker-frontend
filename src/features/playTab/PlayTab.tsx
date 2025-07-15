@@ -48,7 +48,7 @@ export function PlayTab() {
       </div>
       <Separator className="mt-2" />
 
-      <div className="flex flex-col items-center overflow-y-auto py-4 pl-4 h-full">
+      <div className="flex flex-col items-center overflow-y-auto pt-4 pb-14 pl-4 h-full">
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const hasOngoingMatch = match?.status === 'ongoing'
