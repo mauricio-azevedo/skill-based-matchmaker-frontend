@@ -6,12 +6,14 @@ import { useCourts } from '@/context/CourtsContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
 import { Separator } from '@radix-ui/react-select'
+import { useVersionGuard } from '@/hooks/useVersionGuard'
 
 export function SettingsTab() {
   const [warning, setWarning] = useState<null | 'matches' | 'all'>(null)
 
   const { matches, clearMatches } = useMatches()
-  const { courts, clearCourts } = useCourts()
+  const { courts } = useCourts()
+  const { performVersionCleanup } = useVersionGuard()
   const { updatePlayers } = usePlayers()
 
   const hasMatches = matches.length > 0
@@ -31,9 +33,7 @@ export function SettingsTab() {
   }
 
   const handleClearAll = () => {
-    clearMatches()
-    clearCourts()
-    updatePlayers(() => [])
+    performVersionCleanup()
     singleToastSuccess('Todos os dados apagados!', { duration: 1000 })
   }
 
