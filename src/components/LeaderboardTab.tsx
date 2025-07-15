@@ -3,7 +3,7 @@ import { Info } from 'lucide-react'
 
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
-import type { Match } from '@/types/entities'
+import type { Match, Player } from '@/types/entities'
 
 // shadcn/ui components
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -165,9 +165,8 @@ const LeaderboardTab: FC = () => {
 
   const { rows, showTooltip } = useMemo(() => {
     const { stats, h2h, pair } = accumulate(matches)
-
-    // Build base rows
-    const base: PlayerLBRow[] = players.map((p) => {
+    const playersWithAtLeastOneMatch: Player[] = players.filter((p) => p.matchCount > 0)
+    const base: PlayerLBRow[] = playersWithAtLeastOneMatch.map((p) => {
       const { W, L, GP, GC } = stats.get(p.id) ?? { W: 0, L: 0, GP: 0, GC: 0 }
       return { ...p, P: W * 3, SV: W - L, SG: GP - GC, W, L }
     })
