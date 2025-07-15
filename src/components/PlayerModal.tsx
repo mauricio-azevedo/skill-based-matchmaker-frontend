@@ -95,15 +95,16 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
   const handleDelete = () => remove(player!.id)
 
-  // ----------------------- UI -----------------------
-  const title = mode === 'add' ? 'Novo jogador' : 'Editar jogador'
-
+  // ----------------------- foco no input para manter teclado aberto -----------------------
+  // Auto‑foca sempre que abrir (tanto add quanto edit)
   useEffect(() => {
-    if (open && mode === 'add') {
-      // Dá tempo do componente abrir completamente antes de focar
+    if (open) {
       setTimeout(() => nameInputRef.current?.focus(), 0)
     }
-  }, [open, mode])
+  }, [open])
+
+  // ----------------------- UI -----------------------
+  const title = mode === 'add' ? 'Novo jogador' : 'Editar jogador'
 
   return (
     <Dialog
@@ -120,8 +121,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
       <DialogContent
         className="top-2 translate-y-2"
         onOpenAutoFocus={(e) => e.preventDefault()}
+        // Em qualquer clique dentro da modal, impedir blur do input e manter foco nele
         onMouseDown={(e) => {
-          if (mode === 'add' && nameInputRef.current) {
+          if (nameInputRef.current) {
             const target = e.target as HTMLElement
             if (!nameInputRef.current.contains(target)) {
               e.preventDefault()
