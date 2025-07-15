@@ -15,9 +15,7 @@ export function MatchesTab() {
 
       <div className="flex flex-col pl-4 overflow-hidden">
         {completedMatches.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-sm text-center !pr-4">
-            Nenhuma partida concluída até o momento.
-          </p>
+          <p className="text-muted-foreground py-4 text-sm text-center !pr-4">Nenhuma partida concluída ainda.</p>
         ) : (
           <div className="flex flex-col pb-8 overflow-auto pt-4">
             {completedMatches.map((match, matchIdx) => (
