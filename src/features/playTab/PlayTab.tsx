@@ -132,7 +132,7 @@ export function PlayTab() {
           )
         })}
 
-        {courts.length === 0 && <p className="text-sm text-muted-foreground pr-4">Nenhuma quadra cadastrada ainda.</p>}
+        {courts.length === 0 && <p className="text-sm text-muted-foreground pr-4">Nenhuma quadra adicionada ainda.</p>}
 
         <div className="pr-4 my-4">
           <Button
