@@ -5,7 +5,6 @@ import { Crown } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
 import type { Match } from '@/types/entities'
-import { translateFormationMode } from '@/lib/formationModes'
 
 /* Helpers ---------------------------------------------------------------- */
 const SCORES = ['1', '2', '3', '4', '5', '6'] as const
@@ -110,9 +109,8 @@ export function MatchCard({ match }: Props) {
   const playerB2 = getById(teamBPlayer2)
 
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground leading-tight">{translateFormationMode(match.formationMode)}</p>
-      <div className="flex items-center justify-between gap-4">
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between gap-4 mt-2">
         {/* Equipe A */}
         <div className="flex flex-col gap-2 text-right">
           {playerA1 && <PlayerEntry name={playerA1.name} />}

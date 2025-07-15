@@ -4,13 +4,12 @@ import { useCourts } from '@/context/CourtsContext'
 import { useMatchManager } from '@/hooks/useMatchManager'
 import { useMatches } from '@/context/MatchesContext'
 import { Separator } from '@/components/ui/separator'
-import { CourtCountSelector } from '@/components/CourtCountSelector'
 import { Settings } from '@/components/Settings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { ChevronDownIcon, MoreVertical, TrashIcon } from 'lucide-react'
-import { getNextModeLabel } from '@/lib/formationModes'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
+import { translateFormationMode } from '@/lib/formationModes'
 
 export function PlayTab() {
   const { courtsEntities } = useCourts()
@@ -44,27 +43,32 @@ export function PlayTab() {
   }
 
   return (
-    <div className="w-full pb-8 overflow-hidden">
+    <div className="w-full overflow-hidden">
       <div className="flex justify-between items-center gap-2 pr-4">
         <h2 className="text-lg font-semibold leading-tight m-0 text-center w-full">Partidas</h2>
       </div>
-      <Separator className="my-2" />
-      <div className="flex justify-end gap-2 pr-4">
-        <CourtCountSelector />
-      </div>
+      <Separator className="mt-2" />
+      {/*<div className="flex justify-end gap-2 pr-4">*/}
+      {/*  <CourtCountSelector />*/}
+      {/*</div>*/}
 
-      <div className="h-full overflow-y-auto pt-4 pl-4">
+      <div className="overflow-y-auto pt-4 pl-4 h-full">
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const isOngoing = match?.status === 'ongoing'
-
-          const balanceLabel = getNextModeLabel(match?.formationMode, court.formationMode, court.autoAlternate)
 
           return (
             <Fragment key={court.id}>
               <div className="pr-4">
                 <div className="flex justify-between items-center">
-                  <p className="text-lg font-semibold leading-tight mb-3">Quadra {courtIdx + 1}</p>
+                  <div className="flex gap-1 items-end-safe">
+                    <p className="text-lg font-semibold leading-tight">Quadra {courtIdx + 1}</p>
+                    {court.autoAlternate && (
+                      <p className="text-sm text-muted-foreground leading-tight">
+                        alternada ({translateFormationMode(match?.formationMode ?? court.formationMode)})
+                      </p>
+                    )}
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button size="icon" variant="ghost">
@@ -81,7 +85,9 @@ export function PlayTab() {
                 {match ? (
                   <MatchCard key={match.id} match={match} />
                 ) : (
-                  <p className="text-sm text-muted-foreground leading-tight text-center">Nenhuma partida gerada.</p>
+                  <p className="text-sm text-muted-foreground leading-tight text-center mt-4">
+                    Nenhuma partida gerada.
+                  </p>
                 )}
 
                 <div className="w-full mt-6 flex items-center">
@@ -93,7 +99,7 @@ export function PlayTab() {
                   >
                     <span>
                       Gerar nova partida{' '}
-                      <span className="text-sm text-muted-foreground font-normal">({balanceLabel})</span>
+                      {/*<span className="text-sm text-muted-foreground font-normal">({balanceLabel})</span>*/}
                     </span>
                   </Button>
 
@@ -123,6 +129,8 @@ export function PlayTab() {
             </Fragment>
           )
         })}
+
+        <Button>Adicionar quadra</Button>
       </div>
     </div>
   )
