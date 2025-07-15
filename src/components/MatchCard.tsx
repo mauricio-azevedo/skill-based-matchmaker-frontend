@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { forwardRef, useEffect, useRef, useState } from 'react'
+import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Crown } from 'lucide-react'
+import { Crown, XIcon } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
 import type { Match } from '@/types/entities'
 
 /* Helpers ---------------------------------------------------------------- */
-const SCORES = ['1', '2', '3', '4', '5', '6'] as const
 const avatarUrl = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
 
 const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolean }) => (
@@ -26,83 +25,91 @@ const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolea
   </div>
 )
 
-const ScoreSelect = ({
-  value,
-  onChange,
-  label,
-  isWinner,
-}: {
+interface ScoreSelectProps {
   value: number | ''
   onChange: (v: number | '') => void
   label: string
   isWinner?: boolean
-}) => (
-  <div className="relative flex flex-col items-center">
-    {isWinner && <Crown className="w-4 h-4 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
-    <Select value={value === '' ? '' : String(value)} onValueChange={(v) => onChange(v === '' ? '' : +v)}>
-      <SelectTrigger aria-label={label} className="w-10 h-10 justify-center text-center [&>svg]:hidden">
-        <SelectValue placeholder="-" />
-      </SelectTrigger>
-      <SelectContent side="bottom">
-        {SCORES.map((s) => (
-          <SelectItem key={s} value={s} className="text-sm text-center">
-            {s}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-)
-
-/* MatchCard -------------------------------------------------------------- */
-interface Props {
-  match: Match
 }
 
-export function MatchCard({ match }: Props) {
+const ScoreSelect = forwardRef<HTMLInputElement, ScoreSelectProps>(({ value, onChange, label, isWinner }, ref) => (
+  <div className="relative flex flex-col items-center">
+    {isWinner && <Crown className="w-4 h-4 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
+    <Input
+      ref={ref}
+      type="number"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      aria-label={label}
+      value={value === '' ? '' : value}
+      onChange={(e) => {
+        const val = e.currentTarget.value
+        onChange(val === '' ? '' : Number(val))
+      }}
+      className="w-10 h-10 text-center p-0"
+      placeholder="-"
+    />
+  </div>
+))
+ScoreSelect.displayName = 'ScoreSelect'
+
+export function MatchCard({ match }: { match: Match }) {
   const [gamesA, setGamesA] = useState<number | ''>('')
   const [gamesB, setGamesB] = useState<number | ''>('')
-  const { getById, registerMatch } = usePlayers()
+
+  const { getById } = usePlayers()
   const { updateMatch } = useMatches()
 
-  // Reseta ao trocar de partida
+  const inputARef = useRef<HTMLInputElement>(null)
+  const inputBRef = useRef<HTMLInputElement>(null)
+
+  // 1) Reseta os estados de games A/B SOMENTE quando mudar de partida
   useEffect(() => {
-    setGamesA(match?.gamesA ?? '')
-    setGamesB(match?.gamesB ?? '')
-  }, [match])
+    setGamesA(match.gamesA ?? '')
+    setGamesB(match.gamesB ?? '')
+  }, [match.id])
 
   const filled = gamesA !== '' && gamesB !== ''
-  const dirty = !!match && ((match.gamesA ?? '') !== gamesA || (match.gamesB ?? '') !== gamesB)
+  const dirty = (match.gamesA ?? '') !== gamesA || (match.gamesB ?? '') !== gamesB
 
-  // Salva automaticamente quando mudar o placar e definir vencedor
+  // 2) Auto‐save: só dispara quando o usuário muda gamesA ou gamesB
   useEffect(() => {
-    if (match && filled && dirty && gamesA !== gamesB) {
-      const winnerValue = gamesA > gamesB ? 'A' : 'B'
-      const now = new Date().toISOString()
-
-      // Prepara o payload completo de Match para enviar ao contexto de partidas e de jogadores
-      const updatedMatch: Match = {
-        ...match,
-        gamesA: gamesA as number,
-        gamesB: gamesB as number,
-        winner: winnerValue,
-        status: 'completed',
-        endTime: now,
-      }
-
-      // Atualiza o contexto de partidas
-      updateMatch(match.id, {
-        gamesA: updatedMatch.gamesA,
-        gamesB: updatedMatch.gamesB,
-        winner: updatedMatch.winner,
-        status: updatedMatch.status,
-        endTime: updatedMatch.endTime,
-      })
+    if (
+      !match ||
+      !filled || // precisa ter os dois scores
+      !dirty || // e ser diferente do contexto
+      gamesA === gamesB // e não pode empatar
+    ) {
+      return
     }
-  }, [filled, dirty, gamesA, gamesB, match, updateMatch, registerMatch])
+
+    const winnerValue = gamesA > gamesB ? 'A' : 'B'
+    const now = new Date().toISOString()
+
+    updateMatch(match.id, {
+      gamesA: gamesA as number,
+      gamesB: gamesB as number,
+      winner: winnerValue,
+      status: 'completed',
+      endTime: now,
+    })
+  }, [gamesA, gamesB, filled, dirty, match.id, updateMatch])
+
+  // 3) Se digitar em A e B ainda vazio, foca B, e vice‑versa
+  const handleChangeA = (v: number | '') => {
+    setGamesA(v)
+    if (v !== '' && gamesB === '') {
+      inputBRef.current?.focus()
+    }
+  }
+  const handleChangeB = (v: number | '') => {
+    setGamesB(v)
+    if (v !== '' && gamesA === '') {
+      inputARef.current?.focus()
+    }
+  }
 
   const { teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2, winner } = match
-
   const playerA1 = getById(teamAPlayer1)
   const playerA2 = getById(teamAPlayer2)
   const playerB1 = getById(teamBPlayer1)
@@ -119,9 +126,21 @@ export function MatchCard({ match }: Props) {
       {/* Placar */}
       <div className="flex flex-col items-center gap-1">
         <div className="flex items-center gap-1">
-          <ScoreSelect value={gamesA} onChange={setGamesA} label="Games equipe A" isWinner={winner === 'A'} />
-          <span className="text-muted-foreground">x</span>
-          <ScoreSelect value={gamesB} onChange={setGamesB} label="Games equipe B" isWinner={winner === 'B'} />
+          <ScoreSelect
+            ref={inputARef}
+            value={gamesA}
+            onChange={handleChangeA}
+            label="Games equipe A"
+            isWinner={winner === 'A'}
+          />
+          <XIcon className="text-muted-foreground w-4 h-4" />
+          <ScoreSelect
+            ref={inputBRef}
+            value={gamesB}
+            onChange={handleChangeB}
+            label="Games equipe B"
+            isWinner={winner === 'B'}
+          />
         </div>
       </div>
 
