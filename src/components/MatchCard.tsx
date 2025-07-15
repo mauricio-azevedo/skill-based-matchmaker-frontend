@@ -49,7 +49,6 @@ const ScoreSelect = forwardRef<HTMLInputElement, ScoreSelectProps>(({ value, onC
       onFocus={(e) => e.currentTarget.select()}
       onMouseUp={(e) => e.preventDefault()}
       className="w-10 h-10 text-center p-0"
-      placeholder="-"
     />
   </div>
 ))
