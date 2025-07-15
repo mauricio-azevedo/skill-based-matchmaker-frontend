@@ -19,3 +19,8 @@ export const FORMATION_MODE_LABELS: Record<FormationMode, string> = {
 export function translateFormationMode(mode: FormationMode): string {
   return FORMATION_MODE_LABELS[mode] ?? mode
 }
+
+export function getNextFormationMode(currentMode: FormationMode, autoAlternate: boolean): string {
+  if (autoAlternate) return 'alternada'
+  return translateFormationMode(currentMode)
+}

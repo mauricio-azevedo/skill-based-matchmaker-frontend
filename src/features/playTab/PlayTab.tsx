@@ -9,12 +9,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/components/ui/button'
 import { ChevronDownIcon, MoreVertical, TrashIcon } from 'lucide-react'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
-import { translateFormationMode } from '@/lib/formationModes'
+import { getNextFormationMode, translateFormationMode } from '@/lib/formationModes'
 
 export function PlayTab() {
   const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
-  const { getById } = useMatches()
+  const { getById, matches } = useMatches()
   const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()
 
   const handleStart = useCallback(
@@ -52,6 +52,7 @@ export function PlayTab() {
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const hasOngoingMatch = match?.status === 'ongoing'
+          const matchNumber = matches.findIndex((m) => m.courtId === court.id) + 1
 
           return (
             <div className="w-full" key={court.id}>
@@ -59,9 +60,6 @@ export function PlayTab() {
                 <div className="flex justify-between items-center">
                   <div className="flex gap-1 items-end-safe">
                     <p className="text-lg font-semibold leading-tight">Quadra {courtIdx + 1}</p>
-                    <p className="text-sm text-muted-foreground leading-tight">
-                      {translateFormationMode(match?.formationMode ?? court.formationMode)}
-                    </p>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -80,21 +78,32 @@ export function PlayTab() {
                   </DropdownMenu>
                 </div>
                 {match ? (
-                  <div className="mt-4" key={match.id}>
+                  <div className="mt-4 flex flex-col gap-4" key={match.id}>
+                    <p className="text-sm font-medium leading-tight">
+                      Partida {matchNumber}{' '}
+                      <span className="text-sm text-muted-foreground font-normal leading-tight">
+                        {translateFormationMode(match.formationMode)}
+                      </span>
+                    </p>
                     <MatchCard key={match.id} match={match} />
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground leading-tight text-center mt-4">Nenhuma partida ainda.</p>
                 )}
 
-                <div className="w-full mt-6 flex items-center">
+                <div className="w-full mt-8 flex items-center">
                   <Button
                     size="sm"
                     disabled={hasOngoingMatch}
                     onClick={() => handleStart(court.id)}
                     className="rounded-l-md rounded-r-none flex-1 px-2"
                   >
-                    <span>Gerar nova partida</span>
+                    <p className="leading-tight">
+                      <span>Gerar nova partida</span>{' '}
+                      <span className="text-sm text-muted-foreground font-normal">
+                        ({getNextFormationMode(court.formationMode, court.autoAlternate)})
+                      </span>
+                    </p>
                   </Button>
 
                   <DropdownMenu>
