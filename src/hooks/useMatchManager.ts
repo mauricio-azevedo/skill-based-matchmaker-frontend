@@ -4,26 +4,45 @@ import { usePlayers } from '@/context/PlayersContext'
 import { useCourts } from '@/context/CourtsContext'
 import { generateMatch } from '@/lib/algorithm'
 import { type Match } from '@/types/entities'
-import { useCourtMatches } from '@/hooks/useCourtMatches'
-import { type FormationMode } from '@/types/types'
+import { type CreateMatchPayload, type FormationMode } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
 
 const MIN_PLAYERS = 4
 
-function determineFormationMode(defaultMode: FormationMode, autoAlternate: boolean, matches: Match[]): FormationMode {
+function determineFormationMode(
+  defaultMode: FormationMode,
+  autoAlternate: boolean,
+  matches: Match[],
+  courtId: string,
+): FormationMode {
   if (!autoAlternate) return defaultMode
-  if (matches.length === 0) return FORMATION_MODES.MIXED
 
-  const lastMatch = matches.reduce((prev, curr) => (new Date(prev.startTime) > new Date(curr.startTime) ? prev : curr))
+  // Filtra matches apenas dessa quadra
+  const courtMatches = matches.filter((m) => m.courtId === courtId)
+  if (courtMatches.length === 0) return FORMATION_MODES.MIXED
+
+  const lastMatch = courtMatches.reduce((prev, curr) =>
+    new Date(prev.startTime) > new Date(curr.startTime) ? prev : curr,
+  )
 
   return lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
 }
 
 export function useMatchManager(): { generateAndStartMatch: (courtId: string) => void } {
   const { players } = usePlayers()
-  const { matches } = useMatches()
-  const { courtsEntities } = useCourts()
-  const { addMatchToCourt } = useCourtMatches()
+  const { addMatch, matches } = useMatches()
+  const { courtsEntities, updateCourt } = useCourts()
+
+  const addMatchToCourt = useCallback(
+    (data: CreateMatchPayload): string => {
+      // 1) cria a partida
+      const matchId = addMatch(data)
+      // 2) vincula a quadra, agora passando um objeto de updates
+      updateCourt(data.courtId, { matchId })
+      return matchId
+    },
+    [addMatch, updateCourt],
+  )
 
   const generateAndStartMatch = useCallback(
     (courtId: string): void => {
@@ -45,10 +64,11 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
       )
       const freePlayers = activePlayers.filter((p) => !busyIds.has(p.id))
       if (freePlayers.length < MIN_PLAYERS) {
-        throw new Error(`Não há pelo menos ${MIN_PLAYERS} jogadores disponíveis.`)
+        console.error(`Não há pelo menos ${MIN_PLAYERS} jogadores disponíveis.`)
+        return
       }
 
-      const modeToUse = determineFormationMode(defaultMode, autoAlternate, matches)
+      const modeToUse = determineFormationMode(defaultMode, autoAlternate, matches, courtId)
       const teams = generateMatch(freePlayers, modeToUse)
       const startTime = new Date().toISOString()
 

@@ -1,71 +1,15 @@
 import { useMatches } from '@/context/MatchesContext'
 import { useCourts } from '@/context/CourtsContext'
-import { type CreateMatchPayload } from '@/types/types'
-import type { Match } from '@/types/entities'
+import type { Court } from '@/types/entities'
 import { FORMATION_MODES } from '@/lib/formationModes'
+import { useMatchManager } from '@/hooks/useMatchManager'
+import { useEffect, useRef } from 'react'
 
 export function useCourtMatches() {
-  const { addMatch, deleteMatch, matches } = useMatches()
-  const { courtsEntities, setCourtsEntities, updateCourt } = useCourts()
-
-  /**
-   * Cria uma partida e já vincula nela a quadra informada.
-   * @returns o matchId recém-criado
-   */
-  function addMatchToCourt(data: CreateMatchPayload): string {
-    // 1) cria a partida
-    const matchId = addMatch(data)
-    // 2) vincula a quadra, agora passando um objeto de updates
-    updateCourt(data.courtId, { matchId })
-    return matchId
-  }
-
-  /**
-   * Ajusta o número de quadras (1–6), adicionando ou removendo instâncias.
-   * Não afeta partidas em andamento.
-   */
-  function updateCourtsCount(count: number) {
-    setCourtsEntities((prev) => {
-      const current = prev.length
-      if (count === current) return prev
-
-      const now = new Date().toISOString()
-
-      if (count > current) {
-        // adiciona novas quadras, agora com formationMode e autoAlternate
-        const toAdd = Array.from({ length: count - current }).map(() => ({
-          id: crypto.randomUUID(),
-          matchId: null,
-          formationMode: FORMATION_MODES.MIXED,
-          autoAlternate: true,
-          createdAt: now,
-          updatedAt: now,
-        }))
-        return [...prev, ...toAdd]
-      }
-
-      // count < current: reduz sem tocar nas quadras com partidas em andamento
-      const ongoingCourtIds = prev
-        .filter((c) => {
-          if (!c.matchId) return false
-          const match: Match | undefined = matches.find((m) => m.id === c.matchId)
-          return match?.status === 'ongoing'
-        })
-        .map((c) => c.id)
-
-      if (count < ongoingCourtIds.length) {
-        console.warn(`Não é possível reduzir para ${count} quadras: existem ${ongoingCourtIds.length} em andamento.`)
-        return prev
-      }
-
-      const removable = prev.filter((c) => !ongoingCourtIds.includes(c.id))
-      const keepFromRemovable = removable.slice(0, count - ongoingCourtIds.length).map((c) => c.id)
-
-      return prev
-        .filter((c) => ongoingCourtIds.includes(c.id) || keepFromRemovable.includes(c.id))
-        .map((c) => ({ ...c, updatedAt: now }))
-    })
-  }
+  const { deleteMatch } = useMatches()
+  const { courtsEntities, setCourtsEntities } = useCourts()
+  const { generateAndStartMatch } = useMatchManager()
+  const pendingNewCourtId = useRef<string | null>(null)
 
   /**
    * Remove quadras selecionadas e apaga as partidas associadas,
@@ -90,9 +34,33 @@ export function useCourtMatches() {
     })
   }
 
+  function addCourtWithMatch() {
+    const now = new Date().toISOString()
+    const courtId = crypto.randomUUID()
+    const newCourt: Court = {
+      id: courtId,
+      matchId: null,
+      formationMode: FORMATION_MODES.MIXED,
+      autoAlternate: true,
+      createdAt: now,
+      updatedAt: now,
+    }
+    setCourtsEntities((prev) => [...prev, newCourt])
+    pendingNewCourtId.current = courtId
+  }
+
+  useEffect(() => {
+    if (pendingNewCourtId.current) {
+      const exists = courtsEntities.some((c) => c.id === pendingNewCourtId.current)
+      if (exists) {
+        generateAndStartMatch(pendingNewCourtId.current)
+        pendingNewCourtId.current = null
+      }
+    }
+  }, [courtsEntities, generateAndStartMatch])
+
   return {
-    addMatchToCourt,
-    updateCourtsCount,
     removeCourtsAndMatches,
+    addCourtWithMatch,
   }
 }

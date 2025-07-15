@@ -16,7 +16,7 @@ export function PlayTab() {
   const courts = useMemo(() => Object.values(courtsEntities), [courtsEntities])
   const { generateAndStartMatch } = useMatchManager()
   const { getById } = useMatches()
-  const { removeCourtsAndMatches } = useCourtMatches()
+  const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()
 
   const handleStart = useCallback(
     async (courtId: string) => {
@@ -128,8 +128,14 @@ export function PlayTab() {
         {courts.length === 0 && <p className="text-sm text-muted-foreground pr-4">Nenhuma quadra cadastrada.</p>}
 
         <div className="pr-4 mt-4">
-          {/*TODO: implement action*/}
-          <Button variant="secondary">Adicionar quadra</Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              addCourtWithMatch()
+            }}
+          >
+            Adicionar quadra
+          </Button>
         </div>
       </div>
     </div>
