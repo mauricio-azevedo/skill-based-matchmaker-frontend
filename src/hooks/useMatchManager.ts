@@ -6,6 +6,7 @@ import { generateMatch } from '@/lib/algorithm'
 import { type Match } from '@/types/entities'
 import { type CreateMatchPayload, type FormationMode } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
+import { singleToastError } from '@/utils/singleToast'
 
 const MIN_PLAYERS = 4
 
@@ -52,6 +53,15 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
       const { formationMode: defaultMode, autoAlternate } = court
 
       const activePlayers = players.filter((p) => p.active)
+
+      if (activePlayers.length < MIN_PLAYERS) {
+        const missing = MIN_PLAYERS - activePlayers.length
+        singleToastError(
+          `Falta${missing > 1 ? 'm' : ''} ${missing} jogador${missing > 1 ? 'es' : ''} ativo${missing > 1 ? 's' : ''} para gerar uma nova partida.`,
+        )
+        return
+      }
+
       const busyIds = new Set(
         matches
           .filter((m) => m.status === 'ongoing')
@@ -64,7 +74,12 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
       )
       const freePlayers = activePlayers.filter((p) => !busyIds.has(p.id))
       if (freePlayers.length < MIN_PLAYERS) {
-        console.error(`Não há pelo menos ${MIN_PLAYERS} jogadores disponíveis.`)
+        const missingFree = MIN_PLAYERS - freePlayers.length
+        singleToastError(
+          freePlayers.length === 0
+            ? 'Não há jogadores livres no momento.'
+            : `Apenas ${freePlayers.length} jogador${freePlayers.length > 1 ? 'es' : ''} livre${freePlayers.length > 1 ? 's' : ''}. Faltam ${missingFree} para iniciar uma partida.`,
+        )
         return
       }
 
