@@ -52,7 +52,9 @@ export function PlayTab() {
         {courts.map((court, courtIdx) => {
           const match = court.matchId ? getById(court.matchId) : null
           const hasOngoingMatch = match?.status === 'ongoing'
-          const matchNumber: number = matches.filter((m) => m.id === match?.id).length + 1
+          const matchNumber: number = matches.findIndex((m) => m.id === match?.id) + 1
+
+          console.log({ court: court.id, match: match?.id, matchNumber, matches: matches.length })
 
           return (
             <div className="w-full" key={court.id}>
