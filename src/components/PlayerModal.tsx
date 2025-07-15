@@ -99,15 +99,8 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
   const handleDelete = () => remove(player!.id)
 
-  // ----------------------- foco no input -----------------------
-  useEffect(() => {
-    if (open) {
-      setTimeout(() => nameInputRef.current?.focus(), 0)
-    }
-  }, [open])
-
+  // ----------------------- foco no input (se perder o foco) -----------------------
   const handleInputBlur = () => {
-    // se, por algum motivo, o input perder foco, refoca
     if (open) {
       setTimeout(() => nameInputRef.current?.focus(), 0)
     }
@@ -130,7 +123,12 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
       <DialogContent
         className="top-2 translate-y-2"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        // impedir que Radix faça o foco automático padrão
+        onOpenAutoFocus={(e) => {
+          e.preventDefault()
+          // aqui sim, garantimos o foco assim que o diálogo renderizar
+          nameInputRef.current?.focus()
+        }}
         // impedir fechamento ao clicar fora
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
@@ -179,7 +177,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                 setTimeout(() => {
                   setPairSelectOpen(o)
                 })
-                // garante que o input de nome nunca perca o foco
                 if (o) nameInputRef.current?.focus()
               }}
               value={preferredPair}
@@ -187,40 +184,24 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             >
               <SelectTrigger
                 className="w-full"
-                // aqui evitamos que o trigger receba foco
                 onPointerDown={(e) => {
                   e.preventDefault()
                   setTimeout(() => {
                     setPairSelectOpen(true)
                   })
                 }}
-                onClick={(e) => {
-                  e.preventDefault()
-                }}
+                onClick={(e) => e.preventDefault()}
               >
-                <SelectValue
-                  onClick={(e) => {
-                    e.preventDefault()
-                  }}
-                  placeholder="Selecione um parceiro…"
-                />
+                <SelectValue placeholder="Selecione um parceiro…" />
               </SelectTrigger>
-              <SelectContent
-                side="top"
-                onClick={(e) => {
-                  e.preventDefault()
-                }}
-              >
+              <SelectContent side="top" onClick={(e) => e.preventDefault()}>
                 {selectablePlayers.map((pl) => (
                   <SelectItem
                     key={pl.id}
                     value={pl.id}
                     className="flex items-center gap-2"
-                    // evitar que os items foquem
                     onPointerDown={(e) => e.preventDefault()}
-                    onClick={(e) => {
-                      e.preventDefault()
-                    }}
+                    onClick={(e) => e.preventDefault()}
                   >
                     {pl.name}
                   </SelectItem>
