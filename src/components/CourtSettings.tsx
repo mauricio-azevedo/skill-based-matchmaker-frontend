@@ -79,15 +79,16 @@ export function CourtSettings({ courtId }: SettingsProps) {
               <Label
                 htmlFor={option.id}
                 className={cn(
-                  'flex items-start gap-2 leading-tight py-2',
+                  'flex items-center gap-2 leading-tight py-2',
                   selectedValue === option.value && 'border-primary',
                 )}
               >
                 <RadioGroupItem id={option.id} value={option.value} />
-                <div className="flex flex-col gap-1">
-                  {option.label}
-                  <span className="text-xs text-muted-foreground font-normal">{option.description}</span>
-                </div>
+                <p>
+                  <span className="leading-tight">{option.label}</span>
+                  <br />
+                  <span className="text-xs text-muted-foreground font-normal leading-tight">{option.description}</span>
+                </p>
               </Label>
             </Fragment>
           ))}
