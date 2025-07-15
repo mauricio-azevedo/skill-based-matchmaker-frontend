@@ -77,14 +77,7 @@ export function MatchCard({ match }: { match: Match }) {
 
   // 2) Auto‐save: só dispara quando o usuário muda gamesA ou gamesB
   useEffect(() => {
-    if (
-      !match ||
-      !filled || // precisa ter os dois scores
-      !dirty || // e ser diferente do contexto
-      gamesA === gamesB // e não pode empatar
-    ) {
-      return
-    }
+    if (!filled || !dirty || gamesA === gamesB) return
 
     const winnerValue = gamesA > gamesB ? 'A' : 'B'
     const now = new Date().toISOString()
@@ -100,7 +93,9 @@ export function MatchCard({ match }: { match: Match }) {
 
   // 3) Se digitar em A e B ainda vazio, foca B, e vice‑versa
   // 4) Se ambos preenchidos, desfoca o input atual
+  // 4) Não permite empate
   const handleChangeA = (v: number | '') => {
+    if (v !== '' && v === gamesB) return
     setGamesA(v)
     if (v !== '' && gamesB === '') {
       inputBRef.current?.focus()
@@ -110,6 +105,7 @@ export function MatchCard({ match }: { match: Match }) {
   }
 
   const handleChangeB = (v: number | '') => {
+    if (v !== '' && v === gamesA) return
     setGamesB(v)
     if (v !== '' && gamesA === '') {
       inputARef.current?.focus()
