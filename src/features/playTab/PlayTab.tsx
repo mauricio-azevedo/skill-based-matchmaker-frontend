@@ -54,8 +54,6 @@ export function PlayTab() {
           const hasOngoingMatch = match?.status === 'ongoing'
           const matchNumber: number = matches.findIndex((m) => m.id === match?.id) + 1
 
-          console.log({ court: court.id, match: match?.id, matchNumber, matches: matches.length })
-
           return (
             <div className="w-full" key={court.id}>
               <div className="pr-4">
