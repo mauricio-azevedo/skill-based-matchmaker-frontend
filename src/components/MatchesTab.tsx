@@ -10,9 +10,7 @@ export function MatchesTab() {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <h2 className="text-lg font-semibold leading-tight m-0 text-center">
-        Partidas concluídas {completedMatches.length > 0 && `(${completedMatches.length})`}
-      </h2>
+      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Partidas concluídas</h2>
       <Separator className="mt-2 mb-0" />
 
       <div className="flex flex-col pl-4 overflow-hidden">
