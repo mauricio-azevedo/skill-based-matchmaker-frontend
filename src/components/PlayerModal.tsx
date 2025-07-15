@@ -166,16 +166,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             </ToggleGroup>
           </div>
 
-          {/*/!* Ativo? (somente edição) *!/*/}
-          {/*{mode === 'edit' && (*/}
-          {/*  <div className="flex items-center gap-2">*/}
-          {/*    <Label htmlFor="edit-active" className="text-sm">*/}
-          {/*      Ativo*/}
-          {/*    </Label>*/}
-          {/*    <Switch id="edit-active" checked={active} onCheckedChange={setActive} />*/}
-          {/*  </div>*/}
-          {/*)}*/}
-
           {/* Duplas preferidas */}
           <div className="grid gap-3">
             <Label>Duplas preferidas</Label>
