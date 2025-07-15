@@ -55,10 +55,8 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
       const activePlayers = players.filter((p) => p.active)
 
       if (activePlayers.length < MIN_PLAYERS) {
-        const missing = MIN_PLAYERS - activePlayers.length
-        singleToastError(
-          `Falta${missing > 1 ? 'm' : ''} ${missing} jogador${missing > 1 ? 'es' : ''} ativo${missing > 1 ? 's' : ''} para gerar uma nova partida.`,
-        )
+        const missingActive = MIN_PLAYERS - activePlayers.length
+        singleToastError(getMissingMessage(activePlayers.length, missingActive, 'ativo'))
         return
       }
 
@@ -75,11 +73,7 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
       const freePlayers = activePlayers.filter((p) => !busyIds.has(p.id))
       if (freePlayers.length < MIN_PLAYERS) {
         const missingFree = MIN_PLAYERS - freePlayers.length
-        singleToastError(
-          freePlayers.length === 0
-            ? 'Não há jogadores livres no momento.'
-            : `Apenas ${freePlayers.length} jogador${freePlayers.length > 1 ? 'es' : ''} livre${freePlayers.length > 1 ? 's' : ''}. Faltam ${missingFree} para iniciar uma partida.`,
-        )
+        singleToastError(getMissingMessage(freePlayers.length, missingFree, 'livre'))
         return
       }
 
@@ -103,4 +97,10 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
   )
 
   return { generateAndStartMatch }
+}
+
+function getMissingMessage(playersCount: number, missingCount: number, type: 'livre' | 'ativo') {
+  return playersCount === 0
+    ? 'Não há jogadores livres no momento.'
+    : `Apenas ${playersCount} jogador${playersCount > 1 ? 'es' : ''} ${type}${playersCount > 1 ? 's' : ''}. Faltam ${missingCount} para iniciar uma partida.`
 }
