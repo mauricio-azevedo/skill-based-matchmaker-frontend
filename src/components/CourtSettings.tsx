@@ -4,7 +4,7 @@ import { Separator } from '@/components/ui/separator'
 import { useCourts } from '@/context/CourtsContext'
 import type { FormationMode } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Info } from 'lucide-react'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { cn } from '@/lib/utils'
@@ -30,16 +30,18 @@ export function CourtSettings({ courtId }: SettingsProps) {
           <Label htmlFor="formation-tabs" className="flex-col items-start">
             <div className="flex items-center gap-2">
               Modo de formação
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors" />
-                </TooltipTrigger>
-                <TooltipContent side="top" className="text-sm">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button type="button" className="p-1 rounded-full">
+                    <Info className="w-4 h-4 text-muted-foreground hover:text-primary transition-colors" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="top" className="text-sm w-fit">
                   <strong>Homogêneo:</strong> níveis próximos (5+5 vs 5+5).
                   <br />
-                  <strong>Misto:</strong> maiores diferenças (5+1 vs 5+1).
-                </TooltipContent>
-              </Tooltip>
+                  <strong>Misto:</strong> maior diferença (5+1 vs 5+1).
+                </PopoverContent>
+              </Popover>
             </div>
             <span className="text-xs text-muted-foreground font-normal">
               Define a formação das duplas de acordo com o nível dos jogadores.
