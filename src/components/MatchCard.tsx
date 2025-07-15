@@ -96,16 +96,22 @@ export function MatchCard({ match }: { match: Match }) {
   }, [gamesA, gamesB, filled, dirty, match.id, updateMatch])
 
   // 3) Se digitar em A e B ainda vazio, foca B, e vice‑versa
+  // 4) Se ambos preenchidos, desfoca o input atual
   const handleChangeA = (v: number | '') => {
     setGamesA(v)
     if (v !== '' && gamesB === '') {
       inputBRef.current?.focus()
+    } else if (v !== '' && gamesB !== '') {
+      inputARef.current?.blur()
     }
   }
+
   const handleChangeB = (v: number | '') => {
     setGamesB(v)
     if (v !== '' && gamesA === '') {
       inputARef.current?.focus()
+    } else if (v !== '' && gamesA !== '') {
+      inputBRef.current?.blur()
     }
   }
 
