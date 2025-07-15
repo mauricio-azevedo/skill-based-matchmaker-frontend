@@ -27,44 +27,45 @@ export function PlayersTab() {
       <h2 className="text-lg font-semibold leading-tight m-0 text-center">Jogadores</h2>
       <Separator className="mt-2 mb-0" />
 
-      <div className="pt-4 overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between h-8 mb-2 px-4">
-          <div className="flex gap-1">
-            <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Contador de jogadores ativos */}
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" aria-hidden="true" />
-              <span className="text-sm">
-                {activeCount === total ? (
-                  `${total}`
-                ) : (
-                  <>
-                    {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
-                  </>
-                )}
-              </span>
+      {/* Lista de jogadores */}
+      {players.length === 0 ? (
+        <div className="pl-4 h-full flex items-center justify-center pr-4">
+          <p className="text-sm text-muted-foreground">Nenhum jogador adicionado ainda.</p>
+        </div>
+      ) : (
+        <div className="pt-4 overflow-hidden flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between h-8 mb-2 px-4">
+            <div className="flex gap-1">
+              <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
             </div>
 
-            {/* Botão que abre o dialog de adição */}
-            <PlayerModal
-              mode="add"
-              trigger={
-                <Button className="h-8 w-8" size="icon" variant="default" aria-label="Adicionar jogador">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              }
-            />
-          </div>
-        </div>
+            <div className="flex items-center gap-3">
+              {/* Contador de jogadores ativos */}
+              <div className="flex items-center gap-1">
+                <Users className="h-4 w-4" aria-hidden="true" />
+                <span className="text-sm">
+                  {activeCount === total ? (
+                    `${total}`
+                  ) : (
+                    <>
+                      {activeCount} {plural} <span className="text-muted-foreground">/ {total}</span>
+                    </>
+                  )}
+                </span>
+              </div>
 
-        {/* Lista de jogadores */}
-        {players.length === 0 ? (
-          <p className="text-sm text-muted-foreground flex-1 w-full text-center">Adicione pelo menos 4 jogadores.</p>
-        ) : (
+              {/* Botão que abre o dialog de adição */}
+              <PlayerModal
+                mode="add"
+                trigger={
+                  <Button className="h-8 w-8" size="icon" variant="default" aria-label="Adicionar jogador">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                }
+              />
+            </div>
+          </div>
           <div className="flex w-full flex-col gap-3 flex-1 overflow-auto px-4 pb-4">
             <AnimatePresence initial={false}>
               {sortedPlayers.map((p) => (
@@ -106,8 +107,8 @@ export function PlayersTab() {
               ))}
             </AnimatePresence>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
