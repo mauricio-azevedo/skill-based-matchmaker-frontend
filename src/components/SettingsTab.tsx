@@ -63,7 +63,7 @@ export function SettingsTab() {
         open={warning === 'all'}
         onOpenChange={() => setWarning(null)}
         title="Apagar tudo?"
-        description="Jogadores, quadras e partidas serão permanentemente apagadas. Deseja continuar?"
+        description="Jogadores, quadras e partidas serão permanentemente apagados. Deseja continuar?"
         confirmVariant="destructive"
         confirmText="Apagar tudo"
         onConfirm={() => {
