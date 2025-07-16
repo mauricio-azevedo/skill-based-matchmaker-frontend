@@ -50,10 +50,10 @@ export function SettingsTab() {
       <ConfirmDialog
         open={warning === 'matches'}
         onOpenChange={() => setWarning(null)}
-        title="Apagar partidas?"
-        description="Todas as partidas em andamento e histórico serão permanentemente apagados. Esta ação é irreversível. Tem certeza?"
+        title="Excluir partidas?"
+        description="Partidas em andamento e do histórico serão permanentemente excluídas. Deseja continuar?"
         confirmVariant="destructive"
-        confirmText="Sim, apagar partidas"
+        confirmText="Excluir partidas"
         onConfirm={() => {
           handleClearMatches()
           setWarning(null)
@@ -62,10 +62,10 @@ export function SettingsTab() {
       <ConfirmDialog
         open={warning === 'all'}
         onOpenChange={() => setWarning(null)}
-        title="Apagar tudo?"
-        description="Todos os jogadores, quadras e partidas serão permanentemente apagados. Esta ação é irreversível. Tem certeza?"
+        title="Excluir tudo?"
+        description="Jogadores, quadras e partidas serão permanentemente excluídos. Deseja continuar?"
         confirmVariant="destructive"
-        confirmText="Sim, apagar tudo"
+        confirmText="Excluir tudo"
         onConfirm={() => {
           handleClearAll()
           setWarning(null)

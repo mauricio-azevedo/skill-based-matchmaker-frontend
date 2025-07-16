@@ -105,7 +105,7 @@ export function PlayTab() {
                             variant="destructive"
                             onSelect={() => handleDeleteCourt(court.id, hasOngoingMatch, courtNumber)}
                           >
-                            <TrashIcon className="h-4 w-4" /> Apagar quadra {hasOngoingMatch && 'e partida'}
+                            <TrashIcon className="h-4 w-4" /> Excluir quadra
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -199,11 +199,9 @@ export function PlayTab() {
         onOpenChange={(open) => {
           if (!open) handleCancelDelete()
         }}
-        title={`Apagar quadra ${pendingDelete?.courtNumber}?`}
-        description={
-          'A partida que está em andamento nesta quadra também será apagada. Esta ação é irreversível. Tem certeza?'
-        }
-        confirmText="Sim, apagar"
+        title={`Excluir quadra ${pendingDelete?.courtNumber}?`}
+        description="A quadra e a partida em andamento serão permanentemente excluídas. Deseja continuar?"
+        confirmText="Excluir quadra"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
         confirmVariant="destructive"
