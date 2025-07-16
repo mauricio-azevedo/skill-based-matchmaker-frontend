@@ -33,7 +33,7 @@ type EligibilityResult =
   | { success: true; players: Player[] }
   | { success: false; type: 'cadastrado' | 'ativo' | 'livre'; count: number; missing: number }
 
-// Retorna jogadores livres elegíveis ou falha explícita, exibindo toasts
+// Retorna jogadores livres elegíveis ou falha explícita
 function computeEligibility(allPlayers: Player[], matches: Match[]): EligibilityResult {
   // Total cadastrados
   const total = allPlayers.length
