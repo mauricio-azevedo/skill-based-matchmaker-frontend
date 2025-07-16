@@ -69,7 +69,7 @@ function computeEligibility(allPlayers: Player[], matches: Match[]): Eligibility
 // Exibe toast de erro para um resultado de elegibilidade com falha
 function showEligibilityError(result: Extract<EligibilityResult, { success: false }>) {
   const message = getMissingMessage(result.count, result.missing, result.type)
-  singleToastError(message, { duration: 2000 })
+  singleToastError(message, { duration: 3000 })
 }
 
 // Lógica de alternância de formação de equipes
