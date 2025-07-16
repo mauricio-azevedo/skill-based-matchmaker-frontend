@@ -200,7 +200,7 @@ export function PlayTab() {
           if (!open) handleCancelDelete()
         }}
         title={`Remover quadra ${pendingDelete?.courtNumber}?`}
-        description={'Essa ação removerá também todas as partidas associadas à quadra. Não poderá ser desfeita.'}
+        description={'A partida que está em andamento nesta quadra também será removida. Esta ação é irreversível.'}
         confirmText="Remover"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
