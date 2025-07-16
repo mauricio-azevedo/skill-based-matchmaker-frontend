@@ -154,7 +154,7 @@ export function PlayTab() {
                           <Button
                             variant="secondary"
                             aria-label="Options"
-                            className="rounded-r-md rounded-l-none border-l !border-border !ring-0"
+                            className="rounded-r-md rounded-l-none border-l !border-border !ring-0 data-[state=open]:!ring-1"
                           >
                             <ChevronDownIcon size={16} aria-hidden="true" />
                           </Button>
