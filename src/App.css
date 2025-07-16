@@ -3,13 +3,6 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  overscroll-behavior: none;         /* no scroll chaining, no pull‑to‑refresh */
-  overscroll-behavior-block: none;
-}
-
-html {
-  overscroll-behavior: none;         /* no scroll chaining, no pull‑to‑refresh */
-  overscroll-behavior-block: none;   /* specifically for vertical scroll */
 }
 
 .logo {
