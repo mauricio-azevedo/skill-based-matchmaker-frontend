@@ -82,7 +82,7 @@ export function PlayersTab() {
                 </span>
               </div>
             </div>
-            <div className="flex w-full flex-col gap-3 flex-1 overflow-auto px-4 pb-16">
+            <div className="flex w-full flex-col gap-3 flex-1 overflow-auto px-4 pb-16 overscroll-y-contain">
               <AnimatePresence initial={false}>
                 {sortedPlayers.map((p) => (
                   <motion.li
