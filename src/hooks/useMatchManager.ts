@@ -34,25 +34,20 @@ type EligibilityResult =
   | { success: false; type: 'cadastrado' | 'ativo' | 'livre'; count: number; missing: number }
 
 // Retorna jogadores livres elegíveis ou falha explícita, exibindo toasts
-function getEligiblePlayers(allPlayers: Player[], matches: Match[]): EligibilityResult {
-  // 1) Total cadastrados
+function computeEligibility(allPlayers: Player[], matches: Match[]): EligibilityResult {
+  // Total cadastrados
   const total = allPlayers.length
   if (total < MIN_PLAYERS) {
-    const missing = MIN_PLAYERS - total
-    singleToastError(getMissingMessage(total, missing, 'cadastrado'), { duration: 2000 })
-    return { success: false, type: 'cadastrado', count: total, missing }
+    return { success: false, type: 'cadastrado', count: total, missing: MIN_PLAYERS - total }
   }
 
-  // 2) Ativos
-  const activePlayers = allPlayers.filter((p) => p.active)
-  const activeCount = activePlayers.length
-  if (activeCount < MIN_PLAYERS) {
-    const missing = MIN_PLAYERS - activeCount
-    singleToastError(getMissingMessage(activeCount, missing, 'ativo'), { duration: 2000 })
-    return { success: false, type: 'ativo', count: activeCount, missing }
+  // Ativos
+  const active = allPlayers.filter((p) => p.active)
+  if (active.length < MIN_PLAYERS) {
+    return { success: false, type: 'ativo', count: active.length, missing: MIN_PLAYERS - active.length }
   }
 
-  // 3) Livres
+  // Livres
   const busyIds = new Set(
     matches
       .filter((m) => m.status === 'ongoing')
@@ -63,15 +58,18 @@ function getEligiblePlayers(allPlayers: Player[], matches: Match[]): Eligibility
         teamBPlayer2,
       ]),
   )
-  const freePlayers = activePlayers.filter((p) => !busyIds.has(p.id))
-  const freeCount = freePlayers.length
-  if (freeCount < MIN_PLAYERS) {
-    const missing = MIN_PLAYERS - freeCount
-    singleToastError(getMissingMessage(freeCount, missing, 'livre'), { duration: 2000 })
-    return { success: false, type: 'livre', count: freeCount, missing }
+  const freePlayers = active.filter((p) => !busyIds.has(p.id))
+  if (freePlayers.length < MIN_PLAYERS) {
+    return { success: false, type: 'livre', count: freePlayers.length, missing: MIN_PLAYERS - freePlayers.length }
   }
 
   return { success: true, players: freePlayers }
+}
+
+// Exibe toast de erro para um resultado de elegibilidade com falha
+function showEligibilityError(result: Extract<EligibilityResult, { success: false }>) {
+  const message = getMissingMessage(result.count, result.missing, result.type)
+  singleToastError(message, { duration: 2000 })
 }
 
 // Lógica de alternância de formação de equipes
@@ -116,9 +114,12 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
       if (!court) throw new Error('Quadra não encontrada')
 
       // valida e obtém jogadores livres elegíveis
-      const result = getEligiblePlayers(players, matches)
-      if (!result.success) return
-      const freePlayers = result.players
+      const result = computeEligibility(players, matches)
+      if (!result.success) {
+        showEligibilityError(result)
+        return
+      }
+      const freePlayers: Player[] = result.players
 
       // Gera e inicia partida
       const { formationMode: defaultMode, autoAlternate } = court
