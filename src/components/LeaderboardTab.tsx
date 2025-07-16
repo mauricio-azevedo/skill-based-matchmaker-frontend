@@ -6,7 +6,6 @@ import { useMatches } from '@/context/MatchesContext'
 import type { Match, Player } from '@/types/entities'
 
 // shadcn/ui components
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { PlayerLBRow } from '@/types/types'
 import { Separator } from '@/components/ui/separator'
@@ -247,56 +246,78 @@ const LeaderboardTab: FC = () => {
       ) : (
         <div className="flex flex-col overflow-y-auto overscroll-y-contain pl-4 mt-4">
           <TooltipProvider delayDuration={200}>
-            <Table className="overscroll-y-contain">
-              <TableHeader>
-                <TableRow className="sticky top-0 z-20 bg-background pointer-events-none">
-                  <TableHead>#</TableHead>
-                  <TableHead className="w-full">Jogador</TableHead>
-                  <TableHead>P</TableHead>
-                  <TableHead>V-D</TableHead>
-                  <TableHead>SV</TableHead>
-                  <TableHead>SG</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="overscroll-y-contain">
+            {/* container com display table */}
+            <div role="table" className="table w-full">
+              {/* cabeçalho */}
+              <div role="rowgroup" className="table-header-group">
+                <div role="row" className="table-row sticky top-0 z-20 bg-background font-medium">
+                  <div role="columnheader" className="table-cell px-2">
+                    #
+                  </div>
+                  <div role="columnheader" className="table-cell px-2 w-full">
+                    Jogador
+                  </div>
+                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
+                    P
+                  </div>
+                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
+                    V-D
+                  </div>
+                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
+                    SV
+                  </div>
+                  <div role="columnheader" className="table-cell px-2 text-text-right text-nowrap">
+                    SG
+                  </div>
+                  <div role="columnheader" className={cn(!showTooltip && 'pr-6', 'table-cell px-2')} />
+                </div>
+              </div>
+
+              {/* corpo */}
+              <div role="rowgroup" className="table-row-group">
                 {rows.map((p, idx) => {
                   const showSv = (p.miniSV ?? 0) !== 0
                   const showSg = (p.miniSG ?? 0) !== 0
 
                   return (
-                    <TableRow key={p.id} className="pointer-events-none">
-                      <TableCell>{rankNumbers[idx]}</TableCell>
-                      <TableCell>{p.name}</TableCell>
-                      <TableCell className="text-right">{p.P}</TableCell>
-                      <TableCell className="text-right">
+                    <div key={p.id} role="row" className="table-row">
+                      <div role="cell" className="table-cell p-2">
+                        {rankNumbers[idx]}
+                      </div>
+                      <div role="cell" className="table-cell p-2">
+                        {p.name}
+                      </div>
+                      <div role="cell" className="table-cell p-2 text-right">
+                        {p.P}
+                      </div>
+                      <div role="cell" className="table-cell p-2 text-right">
                         {p.W}-{p.L}
-                      </TableCell>
-                      <TableCell className="text-right">{p.SV}</TableCell>
-                      <TableCell className={cn('text-right', !showTooltip && 'pr-4')}>{p.SG}</TableCell>
+                      </div>
+                      <div role="cell" className="table-cell p-2 text-right">
+                        {p.SV}
+                      </div>
+                      <div role="cell" className={cn('table-cell p-2 text-right', !showTooltip && 'pr-4')}>
+                        {p.SG}
+                      </div>
 
-                      {showTooltip ? (
-                        <TableCell className="text-center pr-4">
-                          {(showSv || showSg) && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="h-4 w-4 opacity-70" />
-                              </TooltipTrigger>
-                              <TooltipContent side="left" className="max-w-xs text-xs space-y-1">
-                                {showSv && <p>{svTip(p, rows)}</p>}
-                                {showSg && <p>{sgTip(p, rows)}</p>}
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </TableCell>
-                      ) : (
-                        <TableCell /> // Align empty cell
-                      )}
-                    </TableRow>
+                      <div role="cell" className="table-cell p-2 text-center">
+                        {showTooltip && (showSv || showSg) && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 opacity-70" />
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-xs text-xs space-y-1">
+                              {showSv && <p>{svTip(p, rows)}</p>}
+                              {showSg && <p>{sgTip(p, rows)}</p>}
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </div>
                   )
                 })}
-              </TableBody>
-            </Table>
+              </div>
+            </div>
           </TooltipProvider>
         </div>
       )}
