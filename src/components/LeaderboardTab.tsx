@@ -9,6 +9,7 @@ import type { Match, Player } from '@/types/entities'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { PlayerLBRow } from '@/types/types'
 import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 
 /* --------------------------------------------------------------------------
  * Types & pure helpers
@@ -250,84 +251,90 @@ const LeaderboardTab: FC = () => {
           <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
         </div>
       ) : (
-        <div className="flex flex-col overflow-y-auto overscroll-y-contain px-4 mt-4">
-          <TooltipProvider delayDuration={200}>
-            {/* container com display table */}
-            <div role="table" className="table w-full">
-              {/* cabeçalho */}
-              <div role="rowgroup" className="table-header-group">
-                <div role="row" className="table-row sticky top-0 z-20 bg-background font-medium">
-                  <div role="columnheader" className="table-cell px-2 border-b">
-                    #
+        <>
+          <div className="flex flex-col overflow-y-auto overscroll-y-contain px-4 mt-4">
+            <TooltipProvider delayDuration={200}>
+              {/* container com display table */}
+              <div role="table" className="table w-full">
+                {/* cabeçalho */}
+                <div role="rowgroup" className="table-header-group">
+                  <div role="row" className="table-row sticky top-0 z-20 bg-background font-medium">
+                    <div role="columnheader" className="table-cell p-2 border-b border-t">
+                      #
+                    </div>
+                    <div role="columnheader" className="table-cell p-2 border-b border-t w-full">
+                      Jogador
+                    </div>
+                    <div role="columnheader" className="table-cell p-2 border-b border-t text-nowrap">
+                      P
+                    </div>
+                    <div role="columnheader" className="table-cell p-2 border-b border-t text-nowrap">
+                      V-D
+                    </div>
+                    <div role="columnheader" className="table-cell p-2 border-b border-t text-nowrap">
+                      SV
+                    </div>
+                    <div role="columnheader" className="table-cell p-2 border-b border-t text-nowrap">
+                      SG
+                    </div>
+                    {showTooltip ? <div role="columnheader" className="table-cell p-2 border-b border-t" /> : null}
                   </div>
-                  <div role="columnheader" className="table-cell px-2 border-b w-full">
-                    Jogador
-                  </div>
-                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
-                    P
-                  </div>
-                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
-                    V-D
-                  </div>
-                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
-                    SV
-                  </div>
-                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
-                    SG
-                  </div>
-                  {showTooltip ? <div role="columnheader" className="table-cell px-2 border-b" /> : null}
+                </div>
+
+                {/* corpo */}
+                <div role="rowgroup" className="table-row-group text-sm divide-y divide-border">
+                  {rows.map((p, idx) => {
+                    const isLastRow = idx === rows.length - 1
+                    const cellClass: string = isLastRow ? 'table-cell p-2' : 'table-cell p-2 border-b'
+
+                    const showSv = (p.miniSV ?? 0) !== 0
+                    const showSg = (p.miniSG ?? 0) !== 0
+
+                    return (
+                      <div key={p.id} role="row" className="table-row">
+                        <div role="cell" className={cn(cellClass)}>
+                          {rankNumbers[idx]}
+                        </div>
+                        <div role="cell" className={cn(cellClass)}>
+                          {p.name}
+                        </div>
+                        <div role="cell" className={cn('text-center', cellClass)}>
+                          {p.P}
+                        </div>
+                        <div role="cell" className={cn('text-center', cellClass)}>
+                          {p.W}-{p.L}
+                        </div>
+                        <div role="cell" className={cn('text-center', cellClass)}>
+                          {p.SV}
+                        </div>
+                        <div role="cell" className={cn('text-center', cellClass)}>
+                          {p.SG}
+                        </div>
+
+                        {showTooltip ? (
+                          <div role="cell" className={cn('text-center', cellClass)}>
+                            {showSv || showSg ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="h-4 w-4 opacity-70" />
+                                </TooltipTrigger>
+                                <TooltipContent side="left" className="max-w-xs text-xs space-y-1">
+                                  {showSv && <p>{svTip(p, rows)}</p>}
+                                  {showSg && <p>{sgTip(p, rows)}</p>}
+                                </TooltipContent>
+                              </Tooltip>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
-
-              {/* corpo */}
-              <div role="rowgroup" className="table-row-group text-sm divide-y divide-border">
-                {rows.map((p, idx) => {
-                  const showSv = (p.miniSV ?? 0) !== 0
-                  const showSg = (p.miniSG ?? 0) !== 0
-
-                  return (
-                    <div key={p.id} role="row" className="table-row">
-                      <div role="cell" className="table-cell p-2 border-b">
-                        {rankNumbers[idx]}
-                      </div>
-                      <div role="cell" className="table-cell p-2 border-b">
-                        {p.name}
-                      </div>
-                      <div role="cell" className="table-cell p-2 text-center border-b">
-                        {p.P}
-                      </div>
-                      <div role="cell" className="table-cell p-2 text-center border-b">
-                        {p.W}-{p.L}
-                      </div>
-                      <div role="cell" className="table-cell p-2 text-center border-b">
-                        {p.SV}
-                      </div>
-                      <div role="cell" className="table-cell p-2 text-center border-b">
-                        {p.SG}
-                      </div>
-
-                      {showTooltip ? (
-                        <div role="cell" className="table-cell p-2 text-center">
-                          {showSv || showSg ? (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info className="h-4 w-4 opacity-70" />
-                              </TooltipTrigger>
-                              <TooltipContent side="left" className="max-w-xs text-xs space-y-1">
-                                {showSv && <p>{svTip(p, rows)}</p>}
-                                {showSg && <p>{sgTip(p, rows)}</p>}
-                              </TooltipContent>
-                            </Tooltip>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </TooltipProvider>
-        </div>
+            </TooltipProvider>
+          </div>
+          <div className="w-[calc(100vw-2rem)] border-b mx-auto"></div>
+        </>
       )}
 
       {rows.length > 0 && (
