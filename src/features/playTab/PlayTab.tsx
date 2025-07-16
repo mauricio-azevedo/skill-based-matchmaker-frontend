@@ -19,10 +19,9 @@ export function PlayTab() {
   const { getById, matches } = useMatches()
   const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()
 
-  // State for confirm dialog
   const [pendingDelete, setPendingDelete] = useState<{
     courtId: string
-    hasOngoingMatch: boolean
+    courtNumber: number
   } | null>(null)
 
   const handleStart = useCallback(
@@ -36,10 +35,20 @@ export function PlayTab() {
     [generateAndStartMatch],
   )
 
-  // Replace window.confirm: trigger our ConfirmDialog
-  const handleDeleteCourt = useCallback((courtId: string, hasOngoingMatch: boolean) => {
-    setPendingDelete({ courtId, hasOngoingMatch })
-  }, [])
+  /**
+   * Delete a court immediately if there's no ongoing match,
+   * otherwise show confirmation dialog.
+   */
+  const handleDeleteCourt = useCallback(
+    (courtId: string, hasOngoing: boolean, courtNumber: number) => {
+      if (hasOngoing) {
+        setPendingDelete({ courtId, courtNumber })
+      } else {
+        removeCourtsAndMatches([courtId], courts.length - 1)
+      }
+    },
+    [removeCourtsAndMatches, courts.length],
+  )
 
   const handleConfirmDelete = useCallback(() => {
     if (!pendingDelete) return
@@ -68,6 +77,7 @@ export function PlayTab() {
               const match = court.matchId ? getById(court.matchId) : null
               const hasOngoingMatch = match?.status === 'ongoing'
               const matchNumber: number = matches.findIndex((m) => m.id === match?.id) + 1
+              const courtNumber = courtIdx + 1
 
               return (
                 <motion.div
@@ -82,7 +92,7 @@ export function PlayTab() {
                   <div className="pr-4">
                     <div className="flex justify-between items-center">
                       <div className="flex gap-1 items-end-safe">
-                        <p className="text-lg font-semibold leading-tight">Quadra {courtIdx + 1}</p>
+                        <p className="text-lg font-semibold leading-tight">Quadra {courtNumber}</p>
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -93,7 +103,7 @@ export function PlayTab() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             variant="destructive"
-                            onSelect={() => handleDeleteCourt(court.id, hasOngoingMatch)}
+                            onSelect={() => handleDeleteCourt(court.id, hasOngoingMatch, courtNumber)}
                           >
                             <TrashIcon className="h-4 w-4" /> Remover quadra {hasOngoingMatch && 'e partida'}
                           </DropdownMenuItem>
@@ -189,16 +199,8 @@ export function PlayTab() {
         onOpenChange={(open) => {
           if (!open) handleCancelDelete()
         }}
-        title={
-          pendingDelete?.hasOngoingMatch
-            ? 'Remover quadra e partida?' // título condicional
-            : 'Remover quadra?'
-        }
-        description={
-          pendingDelete?.hasOngoingMatch
-            ? 'Deseja realmente remover essa quadra e suas partidas associadas?'
-            : 'Deseja realmente remover essa quadra?'
-        }
+        title={`Remover quadra ${pendingDelete?.courtNumber}?`}
+        description={'Essa ação removerá também todas as partidas associadas à quadra. Não poderá ser desfeita.'}
         confirmText="Remover"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
