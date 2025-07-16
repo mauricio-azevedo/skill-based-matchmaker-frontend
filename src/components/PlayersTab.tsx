@@ -13,10 +13,8 @@ import { getLevelLabel } from '@/consts/levels'
 import { type SortBy, usePlayerSort } from '@/hooks/usePlayerSort'
 import PlayerSortDropdown from '@/components/PlayerSortDropdown'
 import { Separator } from '@/components/ui/separator'
-import { useVersionGuard } from '@/hooks/useVersionGuard'
 
 export function PlayersTab() {
-  const { performVersionCleanup } = useVersionGuard()
   const { players, toggleActive, add } = usePlayers()
 
   // Verifica se os seedPlayers já estão carregados
@@ -34,8 +32,6 @@ export function PlayersTab() {
   const plural = activeCount === 1 ? 'ativo' : 'ativos'
 
   const handleLoadSeed = () => {
-    performVersionCleanup()
-
     const seeds = [...seedPlayers]
     shuffle(seeds)
     seeds.forEach(({ id, name, level, preferredPairs = [] }) => {
