@@ -282,7 +282,7 @@ const LeaderboardTab: FC = () => {
                 </div>
 
                 {/* corpo */}
-                <div role="rowgroup" className="table-row-group text-sm divide-y divide-border">
+                <div role="rowgroup" className="table-row-group text-sm ">
                   {rows.map((p, idx) => {
                     const isLastRow = idx === rows.length - 1
                     const cellClass: string = isLastRow ? 'table-cell p-2' : 'table-cell p-2 border-b'
