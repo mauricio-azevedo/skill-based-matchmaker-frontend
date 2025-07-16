@@ -9,7 +9,6 @@ import type { Match, Player } from '@/types/entities'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { PlayerLBRow } from '@/types/types'
 import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/utils'
 
 /* --------------------------------------------------------------------------
  * Types & pure helpers
@@ -281,29 +280,29 @@ const LeaderboardTab: FC = () => {
               </div>
 
               {/* corpo */}
-              <div role="rowgroup" className="table-row-group text-sm">
+              <div role="rowgroup" className="table-row-group text-sm divide-y divide-border">
                 {rows.map((p, idx) => {
                   const showSv = (p.miniSV ?? 0) !== 0
                   const showSg = (p.miniSG ?? 0) !== 0
 
                   return (
                     <div key={p.id} role="row" className="table-row">
-                      <div role="cell" className="table-cell p-2">
+                      <div role="cell" className="table-cell p-2 border-b">
                         {rankNumbers[idx]}
                       </div>
-                      <div role="cell" className="table-cell p-2">
+                      <div role="cell" className="table-cell p-2 border-b">
                         {p.name}
                       </div>
-                      <div role="cell" className="table-cell p-2 text-right">
+                      <div role="cell" className="table-cell p-2 text-right border-b">
                         {p.P}
                       </div>
-                      <div role="cell" className="table-cell p-2 text-right">
+                      <div role="cell" className="table-cell p-2 text-right border-b">
                         {p.W}-{p.L}
                       </div>
-                      <div role="cell" className="table-cell p-2 text-right">
+                      <div role="cell" className="table-cell p-2 text-right border-b">
                         {p.SV}
                       </div>
-                      <div role="cell" className={cn('table-cell p-2 text-right', !showTooltip && 'pr-4')}>
+                      <div role="cell" className="table-cell p-2 text-right border-b">
                         {p.SG}
                       </div>
 
