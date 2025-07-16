@@ -217,22 +217,29 @@ const LeaderboardTab: FC = () => {
     return { rows: base, showTooltip: tooltip }
   }, [players, matches])
 
-  // Generate rank numbers (shared on full ties)
+  // Gera números de posição em dense ranking (1, 2, 2, 2, …, 3, 3, 3, 4, 4)
   const rankNumbers: number[] = []
-  rows.forEach((p, idx) => {
-    if (idx === 0) {
-      rankNumbers.push(1)
-    } else {
-      const prev = rows[idx - 1]
+  let currentRank = 1
+
+  if (rows.length > 0) {
+    rankNumbers.push(currentRank)
+
+    for (let i = 1; i < rows.length; i++) {
+      const prev = rows[i - 1]
+      const curr = rows[i]
       const tied =
-        p.P === prev.P &&
-        p.SV === prev.SV &&
-        p.SG === prev.SG &&
-        (p.miniSV ?? 0) === (prev.miniSV ?? 0) &&
-        (p.miniSG ?? 0) === (prev.miniSG ?? 0)
-      rankNumbers.push(tied ? rankNumbers[idx - 1] : idx + 1)
+        curr.P === prev.P &&
+        curr.SV === prev.SV &&
+        curr.SG === prev.SG &&
+        (curr.miniSV ?? 0) === (prev.miniSV ?? 0) &&
+        (curr.miniSG ?? 0) === (prev.miniSG ?? 0)
+
+      if (!tied) {
+        currentRank += 1
+      }
+      rankNumbers.push(currentRank)
     }
-  })
+  }
 
   return (
     <div className="flex flex-col w-full h-full">
