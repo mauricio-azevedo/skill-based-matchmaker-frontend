@@ -39,10 +39,10 @@ export function SettingsTab() {
 
       <div className="flex flex-col gap-2 p-4">
         <Button size="sm" onClick={() => setWarning('matches')} variant="destructive" className="w-full">
-          Limpar partidas
+          Apagar partidas
         </Button>
         <Button size="sm" onClick={() => setWarning('all')} variant="destructive" className="w-full">
-          Limpar tudo
+          Apagar tudo
         </Button>
       </div>
 
@@ -50,10 +50,10 @@ export function SettingsTab() {
       <ConfirmDialog
         open={warning === 'matches'}
         onOpenChange={() => setWarning(null)}
-        title="Limpar todas as partidas?"
-        description="Esta ação apagará todos os registros de partidas. Você tem certeza?"
+        title="Apagar partidas?"
+        description="Todas as partidas em andamento e histórico serão permanentemente apagados. Esta ação é irreversível. Tem certeza?"
         confirmVariant="destructive"
-        confirmText="Sim, limpar partidas"
+        confirmText="Sim, apagar partidas"
         onConfirm={() => {
           handleClearMatches()
           setWarning(null)
@@ -62,10 +62,10 @@ export function SettingsTab() {
       <ConfirmDialog
         open={warning === 'all'}
         onOpenChange={() => setWarning(null)}
-        title="Limpar todos os dados?"
-        description="Excluir permanentemente jogadores, quadras, partidas e configurações? Esta operação não pode ser desfeita."
+        title="Apagar tudo?"
+        description="Todos os jogadores, quadras e partidas serão permanentemente apagados. Esta ação é irreversível. Tem certeza?"
         confirmVariant="destructive"
-        confirmText="Sim, limpar tudo"
+        confirmText="Sim, apagar tudo"
         onConfirm={() => {
           handleClearAll()
           setWarning(null)
