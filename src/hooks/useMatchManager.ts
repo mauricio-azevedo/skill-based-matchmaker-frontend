@@ -17,7 +17,7 @@ function pluralize(count: number, singular: string, plural?: string): string {
 
 // Mensagem de erro para falta de jogadores
 function getMissingMessage(
-  type: 'cadastrado' | 'ativo_livre',
+  type: 'registered' | 'active_and_free',
   total: number,
   active: number,
   free: number,
@@ -28,10 +28,10 @@ function getMissingMessage(
   const busyCount = active - free
 
   switch (type) {
-    case 'cadastrado':
+    case 'registered':
       return `Cadastre pelo menos ${required} jogadores para iniciar uma partida.`
 
-    case 'ativo_livre': {
+    case 'active_and_free': {
       const details = []
       if (inactiveCount > 0) {
         const inactiveText =
@@ -56,7 +56,7 @@ function getMissingMessage(
 // Resultado da validação de elegibilidade
 type EligibilityResult =
   | { success: true; players: Player[] }
-  | { success: false; type: 'cadastrado' | 'ativo_livre'; total: number; active: number; free: number }
+  | { success: false; type: 'registered' | 'active_and_free'; total: number; active: number; free: number }
 
 // Retorna jogadores livres elegíveis ou falha explícita com todos os contadores
 function computeEligibility(allPlayers: Player[], matches: Match[]): EligibilityResult {
@@ -77,11 +77,11 @@ function computeEligibility(allPlayers: Player[], matches: Match[]): Eligibility
   const freeCount = freeList.length
 
   if (total < MIN_PLAYERS) {
-    return { success: false, type: 'cadastrado', total, active: activeCount, free: freeCount }
+    return { success: false, type: 'registered', total, active: activeCount, free: freeCount }
   }
 
   if (freeCount < MIN_PLAYERS) {
-    return { success: false, type: 'ativo_livre', total, active: activeCount, free: freeCount }
+    return { success: false, type: 'active_and_free', total, active: activeCount, free: freeCount }
   }
 
   return { success: true, players: freeList }
