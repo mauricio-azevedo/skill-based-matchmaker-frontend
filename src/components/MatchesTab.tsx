@@ -18,7 +18,7 @@ export function MatchesTab() {
           <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
         </div>
       ) : (
-        <div className="pl-4 flex flex-col pb-8 overflow-auto pt-4">
+        <div className="pl-4 flex flex-col pb-8 overflow-y-auto overscroll-y-contain pt-4">
           {completedMatches.map((match, matchIdx) => (
             <Fragment key={match.id}>
               <div className="flex gap-1 items-end-safe">

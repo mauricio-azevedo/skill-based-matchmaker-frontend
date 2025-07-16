@@ -245,7 +245,7 @@ const LeaderboardTab: FC = () => {
           <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
         </div>
       ) : (
-        <div className="flex flex-col overflow-y-auto pl-4 mt-4">
+        <div className="flex flex-col overflow-y-auto overscroll-y-contain pl-4 mt-4">
           <TooltipProvider delayDuration={200}>
             <Table>
               <TableHeader>
