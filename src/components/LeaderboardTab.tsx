@@ -257,25 +257,25 @@ const LeaderboardTab: FC = () => {
               {/* cabeçalho */}
               <div role="rowgroup" className="table-header-group">
                 <div role="row" className="table-row sticky top-0 z-20 bg-background font-medium">
-                  <div role="columnheader" className="table-cell px-2">
+                  <div role="columnheader" className="table-cell px-2 border-b">
                     #
                   </div>
-                  <div role="columnheader" className="table-cell px-2 w-full">
+                  <div role="columnheader" className="table-cell px-2 border-b w-full">
                     Jogador
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
                     P
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
                     V-D
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
                     SV
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 border-b text-nowrap">
                     SG
                   </div>
-                  {showTooltip ? <div role="columnheader" className="table-cell px-2" /> : null}
+                  {showTooltip ? <div role="columnheader" className="table-cell px-2 border-b" /> : null}
                 </div>
               </div>
 
