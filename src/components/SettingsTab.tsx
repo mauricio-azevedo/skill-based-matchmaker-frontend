@@ -23,12 +23,12 @@ export function SettingsTab() {
         partnerCounts: {},
       })),
     )
-    singleToastSuccess('Todas as partidas apagadas!', { duration: 1000 })
+    singleToastSuccess('Todas as partidas apagadas', { duration: 1000 })
   }
 
   const handleClearAll = () => {
     performVersionCleanup()
-    singleToastSuccess('Todos os dados apagados!', { duration: 1000 })
+    singleToastSuccess('Todos os dados apagados', { duration: 1000 })
   }
 
   return (

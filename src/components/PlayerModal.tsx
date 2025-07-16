@@ -67,7 +67,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
     if (mode === 'add') {
       add(name.trim(), Number(level), pairs)
-      singleToastSuccess(`${name.trim()} adicionado!`, { position: 'top-center', duration: 1000 })
+      singleToastSuccess(`${name.trim()} adicionado`, { position: 'top-center', duration: 1000 })
       setName('')
       setPreferredPair('')
       nameInputRef.current?.focus()
