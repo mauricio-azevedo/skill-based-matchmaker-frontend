@@ -15,23 +15,16 @@ export function useCourtMatches() {
    * Remove quadras selecionadas e apaga as partidas associadas,
    * depois ajusta ao número final desejado.
    */
-  function removeCourtsAndMatches(courtIds: string[], finalCount: number) {
-    // 1) apagar partidas das quadras selecionadas
-    courts
-      .filter((c) => courtIds.includes(c.id) && c.matchId)
-      .forEach((c) => {
-        if (c.matchId) deleteMatch(c.matchId)
-      })
+  function removeCourtAndMatch(courtId: string): void {
+    // 1) apagar partida da quadra selecionada
+    const court = courts.find((c) => c.id === courtId)
+    if (court?.matchId) {
+      deleteMatch(court.matchId)
+    }
 
-    // 2) atualizar lista de quadras: remove as selecionadas, depois ajusta ao tamanho final
-    setCourts((prev) => {
-      let newList = prev.filter((c) => !courtIds.includes(c.id))
-      if (newList.length > finalCount) {
-        newList = newList.slice(0, finalCount)
-      }
-      const now = new Date().toISOString()
-      return newList.map((c) => ({ ...c, updatedAt: now }))
-    })
+    // 2) atualizar lista de quadras: remove a selecionada e atualiza updatedAt
+    const now = new Date().toISOString()
+    setCourts((prevCourts) => prevCourts.filter((c) => c.id !== courtId).map((c) => ({ ...c, updatedAt: now })))
   }
 
   function addCourtWithMatch() {
@@ -60,7 +53,7 @@ export function useCourtMatches() {
   }, [courts, generateAndStartMatch])
 
   return {
-    removeCourtsAndMatches,
+    removeCourtAndMatch,
     addCourtWithMatch,
   }
 }

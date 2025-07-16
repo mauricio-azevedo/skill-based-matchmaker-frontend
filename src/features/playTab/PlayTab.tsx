@@ -17,7 +17,7 @@ export function PlayTab() {
   const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
   const { getById, matches } = useMatches()
-  const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()
+  const { removeCourtAndMatch, addCourtWithMatch } = useCourtMatches()
 
   const [pendingDelete, setPendingDelete] = useState<{
     courtId: string
@@ -44,17 +44,17 @@ export function PlayTab() {
       if (hasOngoing) {
         setPendingDelete({ courtId, courtNumber })
       } else {
-        removeCourtsAndMatches([courtId], courts.length - 1)
+        removeCourtAndMatch(courtId)
       }
     },
-    [removeCourtsAndMatches, courts.length],
+    [removeCourtAndMatch],
   )
 
   const handleConfirmDelete = useCallback(() => {
     if (!pendingDelete) return
-    removeCourtsAndMatches([pendingDelete.courtId], courts.length - 1)
+    removeCourtAndMatch(pendingDelete.courtId)
     setPendingDelete(null)
-  }, [pendingDelete, removeCourtsAndMatches, courts.length])
+  }, [pendingDelete, removeCourtAndMatch])
 
   const handleCancelDelete = useCallback(() => {
     setPendingDelete(null)
