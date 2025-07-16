@@ -8,18 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
-
 import { Trash } from 'lucide-react'
 import { LEVELS } from '@/consts/levels'
 import { usePlayers } from '@/context/PlayersContext'
@@ -31,6 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 type Mode = 'add' | 'edit'
 
@@ -51,6 +40,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const [level, setLevel] = useState((player?.level ?? 1).toString())
   const [active, setActive] = useState(player?.active ?? true)
   const [preferredPair, setPreferredPair] = useState<string>(player?.preferredPairs?.[0] ?? '')
+
+  // estado para o ConfirmDialog
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   // reset do formulário
   const resetForm = useCallback(() => {
@@ -93,7 +85,10 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     setOpen(false)
   }
 
-  const handleDelete = () => remove(player!.id)
+  const handleDelete = () => {
+    remove(player!.id)
+    setConfirmOpen(false)
+  }
 
   // ----------------------- foco no input (se perder o foco) -----------------------
   const handleInputBlur = () => {
@@ -109,7 +104,10 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     <Dialog
       open={open}
       onOpenChange={(o) => {
-        if (!o) resetForm()
+        if (!o) {
+          resetForm()
+          setConfirmOpen(false)
+        }
         setOpen(o)
       }}
     >
@@ -119,13 +117,10 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
       <DialogContent
         className="top-2 translate-y-2"
-        // impedir que Radix faça o foco automático padrão
         onOpenAutoFocus={(e) => {
           e.preventDefault()
-          // aqui sim, garantimos o foco assim que o diálogo renderizar
           nameInputRef.current?.focus()
         }}
-        // impedir fechamento ao clicar fora
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -133,6 +128,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           <DialogTitle>{title}</DialogTitle>
           {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
         </DialogHeader>
+
         <div className="flex flex-col gap-4">
           {/* Nome */}
           <div className="grid gap-3">
@@ -184,29 +180,26 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
         <DialogFooter className="flex-row justify-between">
           {mode === 'edit' && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" aria-label={`Remover ${player!.name}`}>
-                  <Trash className="text-destructive" size={16} />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja remover <strong>{player!.name}</strong>?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction className="bg-transparent p-0 hover:bg-transparent">
-                    <Button variant="destructive" className="w-full" onClick={handleDelete}>
-                      Excluir
-                    </Button>
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <>
+              {/* Botão que abre o ConfirmDialog */}
+              <Button variant="ghost" aria-label={`Remover ${player!.name}`} onClick={() => setConfirmOpen(true)}>
+                <Trash className="text-destructive" size={16} />
+              </Button>
+
+              {/* ConfirmDialog para exclusão */}
+              <ConfirmDialog
+                open={confirmOpen}
+                onOpenChange={(open) => {
+                  if (!open) setConfirmOpen(false)
+                }}
+                title={`Apagar jogador ${player!.name}?`}
+                description="O jogador e suas estatísticas serão permanentemente apagados. Deseja continuar?"
+                confirmText="Apagar jogador"
+                cancelText="Cancelar"
+                onConfirm={handleDelete}
+                confirmVariant="destructive"
+              />
+            </>
           )}
 
           <div className="flex gap-2 ml-auto">

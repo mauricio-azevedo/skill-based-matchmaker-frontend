@@ -39,10 +39,10 @@ export function SettingsTab() {
 
       <div className="flex flex-col gap-2 p-4">
         <Button size="sm" onClick={() => setWarning('matches')} variant="destructive" className="w-full">
-          Excluir partidas
+          Apagar partidas
         </Button>
         <Button size="sm" onClick={() => setWarning('all')} variant="destructive" className="w-full">
-          Excluir tudo
+          Apagar tudo
         </Button>
       </div>
 
@@ -50,10 +50,10 @@ export function SettingsTab() {
       <ConfirmDialog
         open={warning === 'matches'}
         onOpenChange={() => setWarning(null)}
-        title="Excluir partidas?"
-        description="Partidas em andamento e do histórico serão permanentemente excluídas. Deseja continuar?"
+        title="Apagar partidas?"
+        description="Partidas em andamento e do histórico serão permanentemente apagadas. Deseja continuar?"
         confirmVariant="destructive"
-        confirmText="Excluir partidas"
+        confirmText="Apagar partidas"
         onConfirm={() => {
           handleClearMatches()
           setWarning(null)
@@ -62,10 +62,10 @@ export function SettingsTab() {
       <ConfirmDialog
         open={warning === 'all'}
         onOpenChange={() => setWarning(null)}
-        title="Excluir tudo?"
-        description="Jogadores, quadras e partidas serão permanentemente excluídos. Deseja continuar?"
+        title="Apagar tudo?"
+        description="Jogadores, quadras e partidas serão permanentemente apagadas. Deseja continuar?"
         confirmVariant="destructive"
-        confirmText="Excluir tudo"
+        confirmText="Apagar tudo"
         onConfirm={() => {
           handleClearAll()
           setWarning(null)
