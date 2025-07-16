@@ -3,13 +3,78 @@ import { useMatches } from '@/context/MatchesContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { useCourts } from '@/context/CourtsContext'
 import { generateMatch } from '@/lib/algorithm'
-import { type Match } from '@/types/entities'
+import { type Match, type Player } from '@/types/entities'
 import { type CreateMatchPayload, type FormationMode } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
 import { singleToastError } from '@/utils/singleToast'
 
 const MIN_PLAYERS = 4
 
+// Utilitário genérico de pluralização
+function pluralize(count: number, singular: string, plural?: string): string {
+  return count === 1 ? singular : (plural ?? `${singular}s`)
+}
+
+// Mensagem de erro para falta de jogadores
+function getMissingMessage(playersCount: number, missingCount: number, type: 'cadastrado' | 'ativo' | 'livre'): string {
+  const typeLabel = pluralize(playersCount, type, `${type}s`)
+  if (playersCount === 0) {
+    return `Não há ${pluralize(playersCount, 'jogador', 'jogadores')} ${typeLabel} no momento.`
+  }
+  return `Apenas ${playersCount} ${pluralize(
+    playersCount,
+    'jogador',
+    'jogadores',
+  )} ${typeLabel}. Faltam ${missingCount} para iniciar uma partida.`
+}
+
+// Resultado da validação de elegibilidade
+type EligibilityResult =
+  | { success: true; players: Player[] }
+  | { success: false; type: 'cadastrado' | 'ativo' | 'livre'; count: number; missing: number }
+
+// Retorna jogadores livres elegíveis ou falha explícita, exibindo toasts
+function getEligiblePlayers(allPlayers: Player[], matches: Match[]): EligibilityResult {
+  // 1) Total cadastrados
+  const total = allPlayers.length
+  if (total < MIN_PLAYERS) {
+    const missing = MIN_PLAYERS - total
+    singleToastError(getMissingMessage(total, missing, 'cadastrado'), { duration: 2000 })
+    return { success: false, type: 'cadastrado', count: total, missing }
+  }
+
+  // 2) Ativos
+  const activePlayers = allPlayers.filter((p) => p.active)
+  const activeCount = activePlayers.length
+  if (activeCount < MIN_PLAYERS) {
+    const missing = MIN_PLAYERS - activeCount
+    singleToastError(getMissingMessage(activeCount, missing, 'ativo'), { duration: 2000 })
+    return { success: false, type: 'ativo', count: activeCount, missing }
+  }
+
+  // 3) Livres
+  const busyIds = new Set(
+    matches
+      .filter((m) => m.status === 'ongoing')
+      .flatMap(({ teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 }) => [
+        teamAPlayer1,
+        teamAPlayer2,
+        teamBPlayer1,
+        teamBPlayer2,
+      ]),
+  )
+  const freePlayers = activePlayers.filter((p) => !busyIds.has(p.id))
+  const freeCount = freePlayers.length
+  if (freeCount < MIN_PLAYERS) {
+    const missing = MIN_PLAYERS - freeCount
+    singleToastError(getMissingMessage(freeCount, missing, 'livre'), { duration: 2000 })
+    return { success: false, type: 'livre', count: freeCount, missing }
+  }
+
+  return { success: true, players: freePlayers }
+}
+
+// Lógica de alternância de formação de equipes
 function determineFormationMode(
   defaultMode: FormationMode,
   autoAlternate: boolean,
@@ -50,33 +115,13 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
       const court = courts.find((c) => c.id === courtId)
       if (!court) throw new Error('Quadra não encontrada')
 
+      // valida e obtém jogadores livres elegíveis
+      const result = getEligiblePlayers(players, matches)
+      if (!result.success) return
+      const freePlayers = result.players
+
+      // Gera e inicia partida
       const { formationMode: defaultMode, autoAlternate } = court
-
-      const activePlayers = players.filter((p) => p.active)
-
-      if (activePlayers.length < MIN_PLAYERS) {
-        const missingActive = MIN_PLAYERS - activePlayers.length
-        singleToastError(getMissingMessage(activePlayers.length, missingActive, 'ativo'))
-        return
-      }
-
-      const busyIds = new Set(
-        matches
-          .filter((m) => m.status === 'ongoing')
-          .flatMap(({ teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 }) => [
-            teamAPlayer1,
-            teamAPlayer2,
-            teamBPlayer1,
-            teamBPlayer2,
-          ]),
-      )
-      const freePlayers = activePlayers.filter((p) => !busyIds.has(p.id))
-      if (freePlayers.length < MIN_PLAYERS) {
-        const missingFree = MIN_PLAYERS - freePlayers.length
-        singleToastError(getMissingMessage(freePlayers.length, missingFree, 'livre'))
-        return
-      }
-
       const modeToUse = determineFormationMode(defaultMode, autoAlternate, matches, courtId)
       const teams = generateMatch(freePlayers, modeToUse)
       const startTime = new Date().toISOString()
@@ -97,10 +142,4 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
   )
 
   return { generateAndStartMatch }
-}
-
-function getMissingMessage(playersCount: number, missingCount: number, type: 'livre' | 'ativo') {
-  return playersCount === 0
-    ? 'Não há jogadores livres no momento.'
-    : `Apenas ${playersCount} jogador${playersCount > 1 ? 'es' : ''} ${type}${playersCount > 1 ? 's' : ''}. Faltam ${missingCount} para iniciar uma partida.`
 }
