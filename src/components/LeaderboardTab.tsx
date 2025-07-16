@@ -251,7 +251,7 @@ const LeaderboardTab: FC = () => {
           <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
         </div>
       ) : (
-        <div className="flex flex-col overflow-y-auto overscroll-y-contain pl-4 mt-4">
+        <div className="flex flex-col overflow-y-auto overscroll-y-contain px-4 mt-4">
           <TooltipProvider delayDuration={200}>
             {/* container com display table */}
             <div role="table" className="table w-full">
@@ -273,15 +273,15 @@ const LeaderboardTab: FC = () => {
                   <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
                     SV
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-text-right text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
                     SG
                   </div>
-                  <div role="columnheader" className={cn(!showTooltip && 'pr-6', 'table-cell px-2')} />
+                  {showTooltip ? <div role="columnheader" className="table-cell px-2" /> : null}
                 </div>
               </div>
 
               {/* corpo */}
-              <div role="rowgroup" className="table-row-group">
+              <div role="rowgroup" className="table-row-group text-sm">
                 {rows.map((p, idx) => {
                   const showSv = (p.miniSV ?? 0) !== 0
                   const showSg = (p.miniSG ?? 0) !== 0
@@ -307,19 +307,21 @@ const LeaderboardTab: FC = () => {
                         {p.SG}
                       </div>
 
-                      <div role="cell" className="table-cell p-2 text-center">
-                        {showTooltip && (showSv || showSg) && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Info className="h-4 w-4 opacity-70" />
-                            </TooltipTrigger>
-                            <TooltipContent side="left" className="max-w-xs text-xs space-y-1">
-                              {showSv && <p>{svTip(p, rows)}</p>}
-                              {showSg && <p>{sgTip(p, rows)}</p>}
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
+                      {showTooltip ? (
+                        <div role="cell" className="table-cell p-2 text-center">
+                          {showSv || showSg ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Info className="h-4 w-4 opacity-70" />
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="max-w-xs text-xs space-y-1">
+                                {showSv && <p>{svTip(p, rows)}</p>}
+                                {showSg && <p>{sgTip(p, rows)}</p>}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
                   )
                 })}
