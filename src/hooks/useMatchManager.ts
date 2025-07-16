@@ -16,38 +16,53 @@ function pluralize(count: number, singular: string, plural?: string): string {
 }
 
 // Mensagem de erro para falta de jogadores
-function getMissingMessage(playersCount: number, missingCount: number, type: 'cadastrado' | 'ativo' | 'livre'): string {
-  const typeLabel = pluralize(playersCount, type, `${type}s`)
-  if (playersCount === 0) {
-    return `Não há ${pluralize(playersCount, 'jogador', 'jogadores')} ${typeLabel} no momento.`
+function getMissingMessage(
+  type: 'cadastrado' | 'ativo_livre',
+  total: number,
+  active: number,
+  free: number,
+  required: number,
+): string {
+  const missingFree = required - free
+  const inactiveCount = total - active
+  const busyCount = active - free
+
+  switch (type) {
+    case 'cadastrado':
+      return `Cadastre pelo menos ${required} jogadores para iniciar uma partida.`
+
+    case 'ativo_livre': {
+      const details = []
+      if (inactiveCount > 0) {
+        const inactiveText =
+          inactiveCount === total
+            ? 'todos estão inativos'
+            : `${inactiveCount} ${pluralize(inactiveCount, 'está inativo', 'estão inativos')}`
+        details.push(inactiveText)
+      }
+      if (busyCount > 0) {
+        const busyText =
+          busyCount === active
+            ? 'todos estão ocupados'
+            : `${busyCount} ${pluralize(busyCount, 'está ocupado', 'estão ocupados')}`
+        details.push(busyText)
+      }
+      const detailsMessage = details.length > 0 ? `. Dos ${total} cadastrados, ${details.join(' e ')}` : ''
+      return `Faltam ${missingFree} jogadores para iniciar uma partida${detailsMessage}.`
+    }
   }
-  return `Apenas ${playersCount} ${pluralize(
-    playersCount,
-    'jogador',
-    'jogadores',
-  )} ${typeLabel}. Faltam ${missingCount} para iniciar uma partida.`
 }
 
 // Resultado da validação de elegibilidade
 type EligibilityResult =
   | { success: true; players: Player[] }
-  | { success: false; type: 'cadastrado' | 'ativo' | 'livre'; count: number; missing: number }
+  | { success: false; type: 'cadastrado' | 'ativo_livre'; total: number; active: number; free: number }
 
-// Retorna jogadores livres elegíveis ou falha explícita
+// Retorna jogadores livres elegíveis ou falha explícita com todos os contadores
 function computeEligibility(allPlayers: Player[], matches: Match[]): EligibilityResult {
-  // Total cadastrados
   const total = allPlayers.length
-  if (total < MIN_PLAYERS) {
-    return { success: false, type: 'cadastrado', count: total, missing: MIN_PLAYERS - total }
-  }
-
-  // Ativos
-  const active = allPlayers.filter((p) => p.active)
-  if (active.length < MIN_PLAYERS) {
-    return { success: false, type: 'ativo', count: active.length, missing: MIN_PLAYERS - active.length }
-  }
-
-  // Livres
+  const activeList = allPlayers.filter((p) => p.active)
+  const activeCount = activeList.length
   const busyIds = new Set(
     matches
       .filter((m) => m.status === 'ongoing')
@@ -58,20 +73,26 @@ function computeEligibility(allPlayers: Player[], matches: Match[]): Eligibility
         teamBPlayer2,
       ]),
   )
-  const freePlayers = active.filter((p) => !busyIds.has(p.id))
-  if (freePlayers.length < MIN_PLAYERS) {
-    return { success: false, type: 'livre', count: freePlayers.length, missing: MIN_PLAYERS - freePlayers.length }
+  const freeList = activeList.filter((p) => !busyIds.has(p.id))
+  const freeCount = freeList.length
+
+  if (total < MIN_PLAYERS) {
+    return { success: false, type: 'cadastrado', total, active: activeCount, free: freeCount }
   }
 
-  return { success: true, players: freePlayers }
+  if (freeCount < MIN_PLAYERS) {
+    return { success: false, type: 'ativo_livre', total, active: activeCount, free: freeCount }
+  }
+
+  return { success: true, players: freeList }
 }
 
 // Exibe toast de erro para um resultado de elegibilidade com falha
 function showEligibilityError(result: Extract<EligibilityResult, { success: false }>) {
-  const message = getMissingMessage(result.count, result.missing, result.type)
+  const { type, total, active, free } = result
+  const message = getMissingMessage(type, total, active, free, MIN_PLAYERS)
   singleToastError(message, { duration: 3000 })
 }
-
 // Lógica de alternância de formação de equipes
 function determineFormationMode(
   defaultMode: FormationMode,
