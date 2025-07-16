@@ -63,7 +63,7 @@ export function CourtSettings({ courtId }: SettingsProps) {
               htmlFor={opt.id}
               className={cn(
                 'flex flex-col items-start gap-1 leading-tight py-1 px-2 rounded-sm',
-                selectedValue === opt.value && 'bg-neutral-800',
+                selectedValue === opt.value && 'bg-accent text-accent-foreground',
               )}
             >
               <div className="flex w-full items-center">
