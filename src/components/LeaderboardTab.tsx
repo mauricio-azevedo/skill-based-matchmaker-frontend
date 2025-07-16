@@ -247,7 +247,7 @@ const LeaderboardTab: FC = () => {
       ) : (
         <div className="flex flex-col overflow-y-auto overscroll-y-contain pl-4 mt-4">
           <TooltipProvider delayDuration={200}>
-            <Table>
+            <Table className="overscroll-y-contain">
               <TableHeader>
                 <TableRow className="sticky top-0 z-20 bg-background pointer-events-none">
                   <TableHead>#</TableHead>
@@ -259,7 +259,7 @@ const LeaderboardTab: FC = () => {
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="overscroll-y-contain">
                 {rows.map((p, idx) => {
                   const showSv = (p.miniSV ?? 0) !== 0
                   const showSg = (p.miniSG ?? 0) !== 0
