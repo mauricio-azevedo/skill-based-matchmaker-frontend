@@ -188,7 +188,7 @@ export function PlayTab() {
         </div>
       )}
 
-      <div className="absolute bottom-4 right-4 shadow-2xl">
+      <div className="absolute bottom-4 right-4 shadow-2xl z-20">
         <Button size="sm" onClick={() => addCourtWithMatch()}>
           Adicionar quadra
         </Button>
