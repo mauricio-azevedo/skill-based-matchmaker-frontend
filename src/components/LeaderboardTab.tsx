@@ -263,16 +263,16 @@ const LeaderboardTab: FC = () => {
                   <div role="columnheader" className="table-cell px-2 w-full">
                     Jogador
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 text-nowrap">
                     P
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 text-nowrap">
                     V-D
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 text-nowrap">
                     SV
                   </div>
-                  <div role="columnheader" className="table-cell px-2 text-right text-nowrap">
+                  <div role="columnheader" className="table-cell px-2 text-nowrap">
                     SG
                   </div>
                   {showTooltip ? <div role="columnheader" className="table-cell px-2" /> : null}
@@ -293,16 +293,16 @@ const LeaderboardTab: FC = () => {
                       <div role="cell" className="table-cell p-2 border-b">
                         {p.name}
                       </div>
-                      <div role="cell" className="table-cell p-2 text-right border-b">
+                      <div role="cell" className="table-cell p-2 text-center border-b">
                         {p.P}
                       </div>
-                      <div role="cell" className="table-cell p-2 text-right border-b">
+                      <div role="cell" className="table-cell p-2 text-center border-b">
                         {p.W}-{p.L}
                       </div>
-                      <div role="cell" className="table-cell p-2 text-right border-b">
+                      <div role="cell" className="table-cell p-2 text-center border-b">
                         {p.SV}
                       </div>
-                      <div role="cell" className="table-cell p-2 text-right border-b">
+                      <div role="cell" className="table-cell p-2 text-center border-b">
                         {p.SG}
                       </div>
 
