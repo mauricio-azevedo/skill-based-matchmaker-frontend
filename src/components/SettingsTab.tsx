@@ -39,10 +39,10 @@ export function SettingsTab() {
 
       <div className="flex flex-col gap-2 p-4">
         <Button size="sm" onClick={() => setWarning('matches')} variant="destructive" className="w-full">
-          Apagar partidas
+          Excluir partidas
         </Button>
         <Button size="sm" onClick={() => setWarning('all')} variant="destructive" className="w-full">
-          Apagar tudo
+          Excluir tudo
         </Button>
       </div>
 
