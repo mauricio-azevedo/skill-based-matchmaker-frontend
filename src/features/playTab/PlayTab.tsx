@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { MatchCard } from '@/components/MatchCard'
 import { useCourts } from '@/context/CourtsContext'
 import { useMatchManager } from '@/hooks/useMatchManager'
@@ -10,15 +10,20 @@ import { Button } from '@/components/ui/button'
 import { ChevronDownIcon, MoreVertical, TrashIcon } from 'lucide-react'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
 import { getNextFormationMode, translateFormationMode } from '@/lib/formationModes'
-
-// **Import framer-motion**
 import { AnimatePresence, motion } from 'framer-motion'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 export function PlayTab() {
   const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
   const { getById, matches } = useMatches()
   const { removeCourtsAndMatches, addCourtWithMatch } = useCourtMatches()
+
+  // State for confirm dialog
+  const [pendingDelete, setPendingDelete] = useState<{
+    courtId: string
+    hasOngoingMatch: boolean
+  } | null>(null)
 
   const handleStart = useCallback(
     async (courtId: string) => {
@@ -31,18 +36,20 @@ export function PlayTab() {
     [generateAndStartMatch],
   )
 
-  const handleDeleteCourt = useCallback(
-    (courtId: string, hasOngoingMatch: boolean) => {
-      if (hasOngoingMatch) {
-        if (window.confirm('Deseja realmente remover essa quadra e suas partidas associadas?')) {
-          removeCourtsAndMatches([courtId], courts.length - 1)
-        }
-      } else {
-        removeCourtsAndMatches([courtId], courts.length - 1)
-      }
-    },
-    [removeCourtsAndMatches, courts.length],
-  )
+  // Replace window.confirm: trigger our ConfirmDialog
+  const handleDeleteCourt = useCallback((courtId: string, hasOngoingMatch: boolean) => {
+    setPendingDelete({ courtId, hasOngoingMatch })
+  }, [])
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!pendingDelete) return
+    removeCourtsAndMatches([pendingDelete.courtId], courts.length - 1)
+    setPendingDelete(null)
+  }, [pendingDelete, removeCourtsAndMatches, courts.length])
+
+  const handleCancelDelete = useCallback(() => {
+    setPendingDelete(null)
+  }, [])
 
   return (
     <div className="w-full flex flex-col overflow-hidden h-full relative">
@@ -176,6 +183,27 @@ export function PlayTab() {
           Adicionar quadra
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) handleCancelDelete()
+        }}
+        title={
+          pendingDelete?.hasOngoingMatch
+            ? 'Remover quadra e partida?' // título condicional
+            : 'Remover quadra?'
+        }
+        description={
+          pendingDelete?.hasOngoingMatch
+            ? 'Deseja realmente remover essa quadra e suas partidas associadas?'
+            : 'Deseja realmente remover essa quadra?'
+        }
+        confirmText="Remover"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmDelete}
+        confirmVariant="destructive"
+      />
     </div>
   )
 }
