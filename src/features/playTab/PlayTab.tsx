@@ -160,7 +160,7 @@ export function PlayTab() {
                       )}
                     </AnimatePresence>
 
-                    <div className="w-full mt-4 flex items-center gap-1">
+                    <div className="w-full mt-4 flex items-center gap-2">
                       <Button
                         variant="secondary"
                         className="w-11 h-11"

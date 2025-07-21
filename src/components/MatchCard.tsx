@@ -95,7 +95,7 @@ export function MatchCard({ match }: { match: Match }) {
 
   /* ---------- layout ---------- */
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1 w-full">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full">
       {/* team A (shrinks if names are long) */}
       <div className="flex flex-col gap-2 min-w-0">
         {playerA1 && <PlayerEntry name={playerA1.name} />}
@@ -103,7 +103,7 @@ export function MatchCard({ match }: { match: Match }) {
       </div>
 
       {/* score — strictly centred column */}
-      <div className="flex items-center justify-center gap-1 w-[112px]">
+      <div className="flex items-center justify-center gap-2">
         <ScoreSelect
           ref={inputARef}
           value={gamesA}
@@ -111,7 +111,7 @@ export function MatchCard({ match }: { match: Match }) {
           label="Games equipe A"
           isWinner={winner === 'A'}
         />
-        <XIcon className="text-muted-foreground w-4 h-4" />
+        <XIcon className="text-muted-foreground !w-[18px] !h-[18px]" />
         <ScoreSelect
           ref={inputBRef}
           value={gamesB}
