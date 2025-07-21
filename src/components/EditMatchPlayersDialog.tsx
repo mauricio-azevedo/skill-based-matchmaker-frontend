@@ -1,6 +1,4 @@
-'use client'
-
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Dialog,
   DialogClose,
@@ -27,6 +25,8 @@ export function EditMatchPlayersDialog({ match }: Props) {
   const { players } = usePlayers()
   const { matches, updateMatch } = useMatches()
 
+  const [open, setOpen] = useState(false)
+
   /** IDs of players already tied to another ongoing match (excluding this one) */
   const busyIds: Set<string> = useMemo(() => getBusyPlayerIds(matches, [match.id]), [matches, match.id])
 
@@ -47,6 +47,16 @@ export function EditMatchPlayersDialog({ match }: Props) {
   const [b1, setB1] = useState(match.teamBPlayer1)
   const [b2, setB2] = useState(match.teamBPlayer2)
 
+  /** Whenever the dialog opens, discard any unsaved edits and reload from `match` */
+  useEffect(() => {
+    if (!open) return
+
+    setA1(match.teamAPlayer1)
+    setA2(match.teamAPlayer2)
+    setB1(match.teamBPlayer1)
+    setB2(match.teamBPlayer2)
+  }, [open, match])
+
   const selections = [a1, a2, b1, b2]
   const duplicateIds = selections.filter((id, i) => selections.indexOf(id) !== i)
   const hasDuplicates = duplicateIds.length > 0
@@ -60,10 +70,12 @@ export function EditMatchPlayersDialog({ match }: Props) {
       teamBPlayer1: b1,
       teamBPlayer2: b2,
     })
+
+    setOpen(false)
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="secondary" size="icon">
           <EditIcon />
