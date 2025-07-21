@@ -6,23 +6,32 @@ interface Props {
   /** When true, puts the avatar on the right and text on the left (used for team B columns) */
   reverse?: boolean
   className?: string
+  matchCount?: number
 }
 
 /** Small, reusable “avatar + name” line (truncates at 90px) */
-export function PlayerEntry({ name, reverse = false, className = '' }: Props) {
+export function PlayerEntry({ name, reverse = false, className = '', matchCount }: Props) {
   return (
-    <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-left'} ${className}`}>
-      <Avatar className="w-6 h-6 shrink-0">
-        <AvatarImage src={avatarUrl(name)} alt={name} />
-        <AvatarFallback>
-          {name
-            .split(' ')
-            .slice(0, 2)
-            .map((w) => w[0]?.toUpperCase())
-            .join('')}
-        </AvatarFallback>
-      </Avatar>
-      <p className="truncate max-w-[90px] text-sm">{name}</p>
+    <div className="flex items-center justify-between gap-1">
+      <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-left'} ${className}`}>
+        <Avatar className="w-6 h-6 shrink-0">
+          <AvatarImage src={avatarUrl(name)} alt={name} />
+          <AvatarFallback>
+            {name
+              .split(' ')
+              .slice(0, 2)
+              .map((w) => w[0]?.toUpperCase())
+              .join('')}
+          </AvatarFallback>
+        </Avatar>
+        <p className="truncate max-w-[90px] text-sm">{name}</p>
+      </div>
+
+      {matchCount !== undefined ? (
+        <p className="text-sm text-muted-foreground">
+          {matchCount} partida{matchCount === 1 ? '' : 's'}
+        </p>
+      ) : null}
     </div>
   )
 }

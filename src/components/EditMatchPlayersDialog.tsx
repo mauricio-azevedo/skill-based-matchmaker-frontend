@@ -116,7 +116,7 @@ export function EditMatchPlayersDialog({ match }: Props) {
 interface PlayerSelectProps {
   value: string
   onChange: (v: string) => void
-  options: { id: string; name: string }[]
+  options: Player[]
   invalid?: boolean
 }
 
@@ -134,7 +134,7 @@ const PlayerSelect = ({ value, onChange, options, invalid }: PlayerSelectProps) 
       <SelectContent>
         {options.map((p) => (
           <SelectItem key={p.id} value={p.id}>
-            <PlayerEntry name={p.name} />
+            <PlayerEntry name={p.name} matchCount={p.matchCount} />
           </SelectItem>
         ))}
       </SelectContent>
