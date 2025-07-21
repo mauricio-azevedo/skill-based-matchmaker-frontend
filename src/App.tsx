@@ -32,7 +32,7 @@ export default function App() {
               checked={theme === 'dark'}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
               aria-label="Alternar tema"
-              className="w-[53px] h-[31px] [&>span]:w-[25px] [&>span]:h-[25px]"
+              className="w-[55px] h-[31px] [&>span]:w-[27px] [&>span]:h-[27px]"
             />
             <Moon className="h-4.5 w-4.5 transition-opacity" style={{ opacity: theme === 'dark' ? 1 : 0.25 }} />
           </div>
