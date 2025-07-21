@@ -87,13 +87,13 @@ export function EditMatchPlayersDialog({ match }: Props) {
         <DialogHeader>
           <DialogTitle>Editar jogadores</DialogTitle>
         </DialogHeader>
-        <div className="flex gap-1 items-center justify-between py-2">
-          <div className="flex flex-col gap-2">
+        <div className="flex gap-2 items-center justify-between py-2">
+          <div className="flex flex-col gap-2 flex-1">
             <PlayerSelect value={a1} onChange={setA1} options={options} invalid={duplicateIds.includes(a1)} />
             <PlayerSelect value={b1} onChange={setB1} options={options} invalid={duplicateIds.includes(b1)} />
           </div>
           <XIcon className="text-muted-foreground w-4 h-4" />
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 flex-1">
             <PlayerSelect value={a2} onChange={setA2} options={options} invalid={duplicateIds.includes(a2)} />
             <PlayerSelect value={b2} onChange={setB2} options={options} invalid={duplicateIds.includes(b2)} />
           </div>
@@ -126,7 +126,7 @@ const PlayerSelect = ({ value, onChange, options, invalid }: PlayerSelectProps) 
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger
-        className={cn('w-full', invalid && 'border-destructive focus:ring-destructive focus:border-destructive')}
+        className={cn('w-full !ring-0 !border-border', invalid && '!border-destructive !ring-destructive')}
       >
         {selected ? <PlayerEntry name={selected.name} /> : null}
       </SelectTrigger>
