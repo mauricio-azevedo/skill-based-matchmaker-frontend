@@ -174,7 +174,7 @@ export function PlayTab() {
                         <EditMatchPlayersDialog key={match.id} match={match} matchNumber={matchNumber} />
                       ) : (
                         <Button variant="secondary" className="w-11 h-11" disabled>
-                          <EditIcon />
+                          <EditIcon className="!w-4.5 !h-4.5" />
                         </Button>
                       )}
 
