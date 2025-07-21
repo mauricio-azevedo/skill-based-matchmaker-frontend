@@ -111,7 +111,7 @@ export function MatchCard({ match }: { match: Match }) {
           label="Games equipe A"
           isWinner={winner === 'A'}
         />
-        <XIcon className="text-muted-foreground !w-4.5 !h-4.5" />
+        <XIcon className="text-muted-foreground !w-4 !h-4" />
         <ScoreSelect
           ref={inputBRef}
           value={gamesB}
