@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { CourtSettings } from '@/components/CourtSettings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { EditIcon, MoreVertical, ShuffleIcon, TrashIcon } from 'lucide-react'
+import { EditIcon, MoreVertical, PlusIcon, ShuffleIcon, TrashIcon } from 'lucide-react'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -80,9 +80,12 @@ export function PlayTab() {
   }, [])
 
   return (
-    <div className="w-full flex flex-col overflow-hidden h-full relative">
-      <div className="w-full border-b border-border h-11 flex items-center justify-center">
+    <div className="w-full flex flex-col overflow-hidden h-full">
+      <div className="w-full border-b border-border min-h-11 max-h-11 flex items-center justify-center relative">
         <h2 className="text-lg font-semibold leading-tight m-0">Quadras</h2>
+        <Button variant="ghost" className="w-11 h-11 absolute right-4 bottom-0" onClick={() => addCourtWithMatch()}>
+          <PlusIcon className="!w-4.5 !h-4.5" />
+        </Button>
       </div>
 
       {courts.length === 0 ? (
@@ -195,12 +198,6 @@ export function PlayTab() {
           </AnimatePresence>
         </div>
       )}
-
-      <div className="absolute bg-neutral-950 bottom-4 right-4 shadow-2xl z-50 rounded-md">
-        <Button className="h-11 bg-blue-600" variant="outline" onClick={() => addCourtWithMatch()}>
-          <p className="text-md">Adicionar quadra</p>
-        </Button>
-      </div>
 
       <ConfirmDialog
         open={Boolean(pendingDelete)}
