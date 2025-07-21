@@ -9,7 +9,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/components/ui/button'
 import { EditIcon, MoreVertical, ShuffleIcon, TrashIcon } from 'lucide-react'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
-import { translateFormationMode } from '@/lib/formationModes'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { EditMatchPlayersDialog } from '@/components/EditMatchPlayersDialog'
@@ -141,14 +140,8 @@ export function PlayTab() {
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="mt-4 flex flex-col gap-2"
+                          className="my-6 flex flex-col"
                         >
-                          <p className="text-md font-normal leading-tight">
-                            Partida {matchNumber}{' '}
-                            <span className="text-md font-light text-muted-foreground leading-tight">
-                              {translateFormationMode(match.formationMode)}
-                            </span>
-                          </p>
                           <MatchCard key={match.id} match={match} />
                         </motion.div>
                       ) : (
