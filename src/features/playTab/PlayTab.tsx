@@ -110,8 +110,8 @@ export function PlayTab() {
                 >
                   <div className="pr-4">
                     <div className="flex justify-between items-center">
-                      <div className="flex gap-1 items-center">
-                        <p className="text-lg font-semibold leading-tight">Quadra {courtNumber}</p>
+                      <div className="flex gap-2 items-center">
+                        <p className="text-xl font-semibold leading-tight">Quadra {courtNumber}</p>
                         <CourtSettings courtId={court.id} />
                       </div>
                       <DropdownMenu>

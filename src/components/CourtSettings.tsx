@@ -57,7 +57,7 @@ export function CourtSettings({ courtId }: SettingsProps) {
           }
         }}
       >
-        <SelectTrigger className="w-full !h-11 px-4 !ring-0 !border-border">{currentLabel}</SelectTrigger>
+        <SelectTrigger className="w-full !h-11 !ring-0 !border-border">{currentLabel}</SelectTrigger>
 
         <SelectContent>
           {FORMATION_OPTIONS.map((opt) => (
