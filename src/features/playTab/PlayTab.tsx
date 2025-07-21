@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { CourtSettings } from '@/components/CourtSettings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { EditIcon, MoreVertical, TrashIcon } from 'lucide-react'
+import { EditIcon, MoreVertical, ShuffleIcon, TrashIcon } from 'lucide-react'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
 import { translateFormationMode } from '@/lib/formationModes'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -146,6 +146,9 @@ export function PlayTab() {
                     </AnimatePresence>
 
                     <div className="w-full mt-4 flex items-center gap-1">
+                      <Button variant="secondary" size="icon">
+                        <ShuffleIcon />
+                      </Button>
                       <Button variant="secondary" size="icon">
                         <EditIcon />
                       </Button>
