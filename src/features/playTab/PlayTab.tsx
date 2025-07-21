@@ -124,7 +124,7 @@ export function PlayTab() {
                         >
                           <p className="text-sm font-normal leading-tight">
                             Partida {matchNumber}{' '}
-                            <span className="text-xs font-light text-muted-foreground leading-tight capitalize">
+                            <span className="text-xs font-light text-muted-foreground leading-tight">
                               {translateFormationMode(match.formationMode)}
                             </span>
                           </p>

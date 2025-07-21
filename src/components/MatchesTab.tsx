@@ -23,7 +23,7 @@ export function MatchesTab() {
             <Fragment key={match.id}>
               <div className="flex gap-1 items-end-safe">
                 <p className="text-md font-semibold leading-tight">Partida {matchIdx + 1}</p>
-                <p className="text-sm text-muted-foreground leading-tight capitalize">
+                <p className="text-sm text-muted-foreground leading-tight">
                   {translateFormationMode(match.formationMode)}
                 </p>
               </div>
