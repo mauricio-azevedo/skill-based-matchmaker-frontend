@@ -12,6 +12,7 @@ import { useCourtMatches } from '@/hooks/useCourtMatches'
 import { translateFormationMode } from '@/lib/formationModes'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { EditMatchPlayersDialog } from '@/components/EditMatchPlayersDialog'
 
 export function PlayTab() {
   const { courts } = useCourts()
@@ -149,9 +150,15 @@ export function PlayTab() {
                       <Button variant="secondary" size="icon">
                         <ShuffleIcon />
                       </Button>
-                      <Button variant="secondary" size="icon">
-                        <EditIcon />
-                      </Button>
+
+                      {match ? (
+                        <EditMatchPlayersDialog key={match.id} match={match} />
+                      ) : (
+                        <Button variant="secondary" size="icon" disabled>
+                          <EditIcon />
+                        </Button>
+                      )}
+
                       <Button
                         className="flex-1"
                         variant="default"
