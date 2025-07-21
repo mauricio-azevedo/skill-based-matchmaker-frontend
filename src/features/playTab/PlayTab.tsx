@@ -81,7 +81,7 @@ export function PlayTab() {
 
   return (
     <div className="w-full flex flex-col overflow-hidden h-full relative">
-      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Partidas</h2>
+      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Quadras</h2>
       <Separator className="mt-2" />
 
       {courts.length === 0 ? (
