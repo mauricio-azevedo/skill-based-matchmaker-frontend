@@ -1,29 +1,10 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Crown, XIcon } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
 import type { Match } from '@/types/entities'
-
-/* Helpers ---------------------------------------------------------------- */
-const avatarUrl = (name: string) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
-
-const PlayerEntry = ({ name, reverse = false }: { name: string; reverse?: boolean }) => (
-  <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-right'}`}>
-    <Avatar className="w-6 h-6 shrink-0">
-      <AvatarImage src={avatarUrl(name)} alt={name} />
-      <AvatarFallback>
-        {name
-          .split(' ')
-          .slice(0, 2)
-          .map((w) => w[0]?.toUpperCase())
-          .join('')}
-      </AvatarFallback>
-    </Avatar>
-    <p className="truncate max-w-[90px] text-sm">{name}</p>
-  </div>
-)
+import { PlayerEntry } from '@/components/PlayerEntry'
 
 interface ScoreSelectProps {
   value: number | ''

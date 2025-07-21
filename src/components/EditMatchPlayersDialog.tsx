@@ -16,7 +16,9 @@ import { useMatches } from '@/context/MatchesContext'
 import type { Match, Player } from '@/types/entities'
 import { cn } from '@/lib/utils'
 import { getBusyPlayerIds } from '@/lib/matchUtils'
+import { PlayerEntry } from '@/components/PlayerEntry'
 
+/* Dialog ----------------------------------------------------------------- */
 interface Props {
   match: Match
 }
@@ -59,9 +61,8 @@ export function EditMatchPlayersDialog({ match }: Props) {
 
   const selections = [a1, a2, b1, b2]
   const duplicateIds = selections.filter((id, i) => selections.indexOf(id) !== i)
-  const hasDuplicates = duplicateIds.length > 0
   const allChosen = selections.every(Boolean)
-  const canSave = allChosen && !hasDuplicates
+  const canSave = allChosen && duplicateIds.length === 0
 
   const save = () => {
     updateMatch(match.id, {
@@ -144,19 +145,25 @@ interface PlayerSelectProps {
   invalid?: boolean
 }
 
-const PlayerSelect = ({ label, value, onChange, options, invalid }: PlayerSelectProps) => (
-  <Select value={value} onValueChange={onChange}>
-    <SelectTrigger
-      className={cn('w-full', invalid && 'border-destructive focus:ring-destructive focus:border-destructive')}
-    >
-      <SelectValue placeholder={label} />
-    </SelectTrigger>
-    <SelectContent>
-      {options.map((p) => (
-        <SelectItem key={p.id} value={p.id}>
-          {p.name}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-)
+const PlayerSelect = ({ label, value, onChange, options, invalid }: PlayerSelectProps) => {
+  const selected = options.find((p) => p.id === value)
+
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger
+        className={cn('w-full', invalid && 'border-destructive focus:ring-destructive focus:border-destructive')}
+      >
+        {selected ? <PlayerEntry name={selected.name} /> : <SelectValue placeholder={label} />}
+      </SelectTrigger>
+
+      <SelectContent>
+        {options.map((p) => (
+          <SelectItem key={p.id} value={p.id}>
+            {/* left‑aligned list item */}
+            <PlayerEntry name={p.name} />
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  )
+}
