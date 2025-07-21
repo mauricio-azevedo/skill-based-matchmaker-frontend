@@ -25,6 +25,11 @@ export function PlayTab() {
     courtNumber: number
   } | null>(null)
 
+  const [pendingShuffle, setPendingShuffle] = useState<{
+    courtId: string
+    courtNumber: number
+  } | null>(null)
+
   const handleStart = useCallback(
     async (courtId: string) => {
       try {
@@ -59,6 +64,20 @@ export function PlayTab() {
 
   const handleCancelDelete = useCallback(() => {
     setPendingDelete(null)
+  }, [])
+
+  const handleRequestShuffle = useCallback((courtId: string, courtNumber: number) => {
+    setPendingShuffle({ courtId, courtNumber }) // abre ConfirmDialog
+  }, [])
+
+  const handleConfirmShuffle = useCallback(() => {
+    if (!pendingShuffle) return
+    shuffleMatch(pendingShuffle.courtId) // executa shuffle
+    setPendingShuffle(null)
+  }, [pendingShuffle, shuffleMatch])
+
+  const handleCancelShuffle = useCallback(() => {
+    setPendingShuffle(null) // apenas fecha diálogo
   }, [])
 
   return (
@@ -151,7 +170,7 @@ export function PlayTab() {
                         variant="secondary"
                         size="icon"
                         disabled={!hasOngoingMatch}
-                        onClick={() => hasOngoingMatch && shuffleMatch(court.id)}
+                        onClick={() => hasOngoingMatch && handleRequestShuffle(court.id, courtNumber)}
                       >
                         <ShuffleIcon />
                       </Button>
@@ -199,6 +218,18 @@ export function PlayTab() {
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
         confirmVariant="destructive"
+      />
+
+      <ConfirmDialog
+        open={Boolean(pendingShuffle)}
+        onOpenChange={(open) => {
+          if (!open) handleCancelShuffle()
+        }}
+        title={`Embaralhar partida da quadra ${pendingShuffle?.courtNumber}?`}
+        description="Uma nova combinação de jogadores será gerada. Deseja continuar?"
+        confirmText="Embaralhar"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmShuffle}
       />
     </div>
   )
