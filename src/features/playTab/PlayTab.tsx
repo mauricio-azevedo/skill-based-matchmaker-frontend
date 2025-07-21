@@ -147,11 +147,11 @@ export function PlayTab() {
                     </AnimatePresence>
 
                     <div className="w-full mt-4 flex items-center gap-1">
-                      <Button variant="secondary" size="icon">
+                      <Button variant="secondary" size="icon" disabled={!hasOngoingMatch}>
                         <ShuffleIcon />
                       </Button>
 
-                      {match ? (
+                      {hasOngoingMatch ? (
                         <EditMatchPlayersDialog key={match.id} match={match} />
                       ) : (
                         <Button variant="secondary" size="icon" disabled>
