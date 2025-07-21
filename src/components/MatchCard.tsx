@@ -16,7 +16,7 @@ interface ScoreSelectProps {
 
 const ScoreSelect = forwardRef<HTMLInputElement, ScoreSelectProps>(({ value, onChange, label, isWinner }, ref) => (
   <div className="relative flex flex-col items-center">
-    {isWinner && <Crown className="!w-[18px] !h-[18px] text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
+    {isWinner && <Crown className="!w-4.5 !h-4.5 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
     <Input
       ref={ref}
       type="text"
@@ -111,7 +111,7 @@ export function MatchCard({ match }: { match: Match }) {
           label="Games equipe A"
           isWinner={winner === 'A'}
         />
-        <XIcon className="text-muted-foreground !w-[18px] !h-[18px]" />
+        <XIcon className="text-muted-foreground !w-4.5 !h-4.5" />
         <ScoreSelect
           ref={inputBRef}
           value={gamesB}

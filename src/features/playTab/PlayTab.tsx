@@ -118,7 +118,7 @@ export function PlayTab() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button className="!h-11 !w-11" variant="ghost">
-                            <MoreVertical className="!w-[18px] !h-[18px]" />
+                            <MoreVertical className="!w-4.5 !h-4.5" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -127,7 +127,7 @@ export function PlayTab() {
                             className="text-md"
                             onSelect={() => handleDeleteCourt(court.id, hasOngoingMatch, courtNumber)}
                           >
-                            <TrashIcon className="!w-[18px] !h-[18px]" /> Apagar quadra
+                            <TrashIcon className="!w-4.5 !h-4.5" /> Apagar quadra
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -167,7 +167,7 @@ export function PlayTab() {
                         disabled={!hasOngoingMatch}
                         onClick={() => hasOngoingMatch && handleRequestShuffle(court.id, courtNumber)}
                       >
-                        <ShuffleIcon className="!w-[18px] !h-[18px]" />
+                        <ShuffleIcon className="!w-4.5 !h-4.5" />
                       </Button>
 
                       {hasOngoingMatch ? (

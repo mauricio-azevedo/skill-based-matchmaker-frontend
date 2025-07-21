@@ -61,19 +61,19 @@ export default function App() {
         <div className="flex w-full px-4 justify-center">
           <TabsList className="h-fit w-full">
             <TabsTrigger className="!h-11 m-0 p-0" value="setup" aria-label="Configuração">
-              <SettingsIcon className="!w-[18px] !h-[18px]" />
+              <SettingsIcon className="!w-4.5 !h-4.5" />
             </TabsTrigger>
             <TabsTrigger className="!h-11 m-0 p-0" value="players" aria-label="Jogadores">
-              <Users className="!w-[18px] !h-[18px]" />
+              <Users className="!w-4.5 !h-4.5" />
             </TabsTrigger>
             <TabsTrigger className="!h-11 m-0 p-0" value="play" aria-label="Jogar">
-              <Play className="!w-[18px] !h-[18px]" />
+              <Play className="!w-4.5 !h-4.5" />
             </TabsTrigger>
             <TabsTrigger className="!h-11 m-0 p-0" value="history" aria-label="Histórico">
-              <Clock className="!w-[18px] !h-[18px]" />
+              <Clock className="!w-4.5 !h-4.5" />
             </TabsTrigger>
             <TabsTrigger className="!h-11 m-0 p-0" value="leaderboard" aria-label="Leaderboard">
-              <Trophy className="!w-[18px] !h-[18px]" />
+              <Trophy className="!w-4.5 !h-4.5" />
             </TabsTrigger>
           </TabsList>
         </div>
