@@ -19,7 +19,7 @@ export default function App() {
   }, [theme])
 
   return (
-    <div className="flex flex-col h-dvh overflow-hidden gap-2 pb-2">
+    <div className="flex flex-col h-dvh overflow-hidden pb-2">
       {/* Header */}
       <header className="flex items-center border-b px-4 py-2">
         <h1 className="text-xl font-semibold tracking-tight">PLAY!</h1>

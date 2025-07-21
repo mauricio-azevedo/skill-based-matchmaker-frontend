@@ -81,8 +81,9 @@ export function PlayTab() {
 
   return (
     <div className="w-full flex flex-col overflow-hidden h-full relative">
-      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Quadras</h2>
-      <Separator className="mt-2" />
+      <div className="w-full border-b border-border h-11 flex items-center justify-center">
+        <h2 className="text-lg font-semibold leading-tight m-0">Quadras</h2>
+      </div>
 
       {courts.length === 0 ? (
         <div className="h-full flex items-center justify-center">
