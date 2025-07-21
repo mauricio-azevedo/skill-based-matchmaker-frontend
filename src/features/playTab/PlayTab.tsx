@@ -7,9 +7,9 @@ import { Separator } from '@/components/ui/separator'
 import { CourtSettings } from '@/components/CourtSettings'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { ChevronDownIcon, MoreVertical, TrashIcon } from 'lucide-react'
+import { MoreVertical, TrashIcon } from 'lucide-react'
 import { useCourtMatches } from '@/hooks/useCourtMatches'
-import { getNextFormationMode, translateFormationMode } from '@/lib/formationModes'
+import { translateFormationMode } from '@/lib/formationModes'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 
@@ -91,8 +91,9 @@ export function PlayTab() {
                 >
                   <div className="pr-4">
                     <div className="flex justify-between items-center">
-                      <div className="flex gap-1 items-end-safe">
+                      <div className="flex gap-1 items-center">
                         <p className="text-lg font-semibold leading-tight">Quadra {courtNumber}</p>
+                        <CourtSettings courtId={court.id} />
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -146,38 +147,13 @@ export function PlayTab() {
 
                     <div className="w-full mt-4 flex items-center">
                       <Button
+                        className="w-full"
                         variant="secondary"
                         disabled={hasOngoingMatch}
                         onClick={() => handleStart(court.id)}
-                        className="rounded-l-md rounded-r-none flex-1 px-2"
                       >
-                        <p className="leading-tight">
-                          <span>Gerar nova partida</span>{' '}
-                          <span className="text-xs text-muted-foreground font-normal leading-tight">
-                            ({getNextFormationMode(court.formationMode, court.autoAlternate)})
-                          </span>
-                        </p>
+                        <p className="leading-tight">Gerar nova partida</p>
                       </Button>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="secondary"
-                            aria-label="Options"
-                            className="rounded-r-md rounded-l-none border-l !border-border !ring-0 ring-border data-[state=open]:!ring-1 z-10"
-                          >
-                            <ChevronDownIcon size={16} aria-hidden="true" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          className="max-w-[calc(100vw-4rem)] md:max-w-xs p-0"
-                          side="bottom"
-                          sideOffset={4}
-                          align="end"
-                        >
-                          <CourtSettings courtId={court.id} />
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
                   </div>
                   <Separator className="mt-6 mb-4" />
