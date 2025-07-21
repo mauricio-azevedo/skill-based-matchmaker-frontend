@@ -82,9 +82,9 @@ export function PlayTab() {
   return (
     <div className="w-full flex flex-col overflow-hidden h-full">
       <div className="w-full border-b border-border min-h-11 max-h-11 flex items-center justify-center relative">
-        <h2 className="text-lg font-semibold leading-tight m-0">Quadras</h2>
+        <h2 className="text-2xl font-semibold leading-tight m-0">Quadras</h2>
         <Button variant="ghost" className="w-11 h-11 absolute right-4 bottom-0" onClick={() => addCourtWithMatch()}>
-          <PlusIcon className="!w-4.5 !h-4.5" />
+          <PlusIcon className="!w-5 !h-5" />
         </Button>
       </div>
 
