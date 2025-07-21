@@ -90,11 +90,11 @@ export function EditMatchPlayersDialog({ match }: Props) {
         <div className="flex gap-2 items-center justify-between py-2">
           <div className="flex flex-col gap-2 flex-1">
             <PlayerSelect value={a1} onChange={setA1} options={options} invalid={duplicateIds.includes(a1)} />
-            <PlayerSelect value={b1} onChange={setB1} options={options} invalid={duplicateIds.includes(b1)} />
+            <PlayerSelect value={a2} onChange={setA2} options={options} invalid={duplicateIds.includes(a2)} />
           </div>
           <XIcon className="text-muted-foreground w-4 h-4" />
           <div className="flex flex-col gap-2 flex-1">
-            <PlayerSelect value={a2} onChange={setA2} options={options} invalid={duplicateIds.includes(a2)} />
+            <PlayerSelect value={b1} onChange={setB1} options={options} invalid={duplicateIds.includes(b1)} />
             <PlayerSelect value={b2} onChange={setB2} options={options} invalid={duplicateIds.includes(b2)} />
           </div>
         </div>

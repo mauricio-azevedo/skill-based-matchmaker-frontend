@@ -12,8 +12,10 @@ interface Props {
 /** Small, reusable “avatar + name” line (truncates at 90px) */
 export function PlayerEntry({ name, reverse = false, className = '', matchCount }: Props) {
   return (
-    <div className="flex items-center justify-between gap-1">
-      <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-left'} ${className}`}>
+    <div
+      className={`flex items-center justify-between gap-1 ${reverse ? 'flex-row-reverse text-left' : 'text-left'} ${className}`}
+    >
+      <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-left'}`}>
         <Avatar className="w-6 h-6 shrink-0">
           <AvatarImage src={avatarUrl(name)} alt={name} />
           <AvatarFallback>
