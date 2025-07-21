@@ -15,8 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { EditIcon } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
-import type { Match } from '@/types/entities'
+import type { Match, Player } from '@/types/entities'
 import { cn } from '@/lib/utils'
+import { getBusyPlayerIds } from '@/lib/matchUtils'
 
 interface Props {
   match: Match
@@ -27,20 +28,10 @@ export function EditMatchPlayersDialog({ match }: Props) {
   const { matches, updateMatch } = useMatches()
 
   /** IDs of players already tied to another ongoing match (excluding this one) */
-  const busyIds = useMemo(() => {
-    const ids = new Set<string>()
-    matches.forEach((m) => {
-      if (m.status !== 'ongoing' || m.id === match.id) return
-      ids.add(m.teamAPlayer1)
-      ids.add(m.teamAPlayer2)
-      ids.add(m.teamBPlayer1)
-      ids.add(m.teamBPlayer2)
-    })
-    return ids
-  }, [matches, match.id])
+  const busyIds: Set<string> = useMemo(() => getBusyPlayerIds(matches, [match.id]), [matches, match.id])
 
   /** Active + free players, plus the four players currently on this match */
-  const options = useMemo(
+  const options: Player[] = useMemo(
     () =>
       players.filter(
         (p) =>

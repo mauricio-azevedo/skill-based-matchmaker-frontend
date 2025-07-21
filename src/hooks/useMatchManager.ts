@@ -7,6 +7,7 @@ import { type Match, type Player } from '@/types/entities'
 import { type CreateMatchPayload, type FormationMode } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
 import { singleToastError } from '@/utils/singleToast'
+import { getBusyPlayerIds } from '@/lib/matchUtils'
 
 const MIN_PLAYERS = 4
 
@@ -63,16 +64,7 @@ function computeEligibility(allPlayers: Player[], matches: Match[]): Eligibility
   const total = allPlayers.length
   const activeList = allPlayers.filter((p) => p.active)
   const activeCount = activeList.length
-  const busyIds = new Set(
-    matches
-      .filter((m) => m.status === 'ongoing')
-      .flatMap(({ teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2 }) => [
-        teamAPlayer1,
-        teamAPlayer2,
-        teamBPlayer1,
-        teamBPlayer2,
-      ]),
-  )
+  const busyIds: Set<string> = getBusyPlayerIds(matches)
   const freeList = activeList.filter((p) => !busyIds.has(p.id))
   const freeCount = freeList.length
 
