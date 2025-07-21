@@ -125,9 +125,7 @@ const PlayerSelect = ({ value, onChange, options, invalid }: PlayerSelectProps) 
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger
-        className={cn('w-full !ring-0 !border-border', invalid && '!border-destructive !ring-destructive')}
-      >
+      <SelectTrigger className={cn('w-full !ring-0 !border-border', invalid && '!ring-2 !ring-destructive')}>
         {selected ? <PlayerEntry name={selected.name} /> : null}
       </SelectTrigger>
 
