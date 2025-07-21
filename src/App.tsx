@@ -58,22 +58,22 @@ export default function App() {
           </TabsContent>
         </main>
 
-        <div className="px-4">
-          <TabsList className="w-full self-center space-x-2 h-fit">
-            <TabsTrigger className="h-11" value="setup" aria-label="Configuração">
-              <SettingsIcon />
+        <div className="flex w-full px-4 justify-center">
+          <TabsList className="h-fit w-full">
+            <TabsTrigger className="!h-11 m-0 p-0" value="setup" aria-label="Configuração">
+              <SettingsIcon className="!w-[18px] !h-[18px]" />
             </TabsTrigger>
-            <TabsTrigger className="h-11" value="players" aria-label="Jogadores">
-              <Users />
+            <TabsTrigger className="!h-11 m-0 p-0" value="players" aria-label="Jogadores">
+              <Users className="!w-[18px] !h-[18px]" />
             </TabsTrigger>
-            <TabsTrigger className="h-11" value="play" aria-label="Jogar">
-              <Play />
+            <TabsTrigger className="!h-11 m-0 p-0" value="play" aria-label="Jogar">
+              <Play className="!w-[18px] !h-[18px]" />
             </TabsTrigger>
-            <TabsTrigger className="h-11" value="history" aria-label="Histórico">
-              <Clock />
+            <TabsTrigger className="!h-11 m-0 p-0" value="history" aria-label="Histórico">
+              <Clock className="!w-[18px] !h-[18px]" />
             </TabsTrigger>
-            <TabsTrigger className="h-11" value="leaderboard" aria-label="Leaderboard">
-              <Trophy />
+            <TabsTrigger className="!h-11 m-0 p-0" value="leaderboard" aria-label="Leaderboard">
+              <Trophy className="!w-[18px] !h-[18px]" />
             </TabsTrigger>
           </TabsList>
         </div>
