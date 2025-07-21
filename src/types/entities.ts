@@ -26,6 +26,13 @@ export interface Match {
   gamesB: number | null // Number of games won by Team B, or null if match is ongoing
   winner: 'A' | 'B' | null // The winner of the match ('A', 'B', or null if ongoing)
   formationMode: FormationMode // The formation mode ('homogeneous' or 'mixed')
+  shuffleHistory: {
+    // History used for not repeating combinations while shuffling
+    teamAPlayer1: string
+    teamAPlayer2: string
+    teamBPlayer1: string
+    teamBPlayer2: string
+  }[]
   createdAt: string // Timestamp of when the match was created
   updatedAt: string // Timestamp of when the match was last updated
 }

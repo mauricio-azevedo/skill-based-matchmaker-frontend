@@ -16,7 +16,7 @@ import { EditMatchPlayersDialog } from '@/components/EditMatchPlayersDialog'
 
 export function PlayTab() {
   const { courts } = useCourts()
-  const { generateAndStartMatch } = useMatchManager()
+  const { generateAndStartMatch, shuffleMatch } = useMatchManager()
   const { getById, matches } = useMatches()
   const { removeCourtAndMatch, addCourtWithMatch } = useCourtMatches()
 
@@ -147,7 +147,12 @@ export function PlayTab() {
                     </AnimatePresence>
 
                     <div className="w-full mt-4 flex items-center gap-1">
-                      <Button variant="secondary" size="icon" disabled={!hasOngoingMatch}>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        disabled={!hasOngoingMatch}
+                        onClick={() => hasOngoingMatch && shuffleMatch(court.id)}
+                      >
                         <ShuffleIcon />
                       </Button>
 

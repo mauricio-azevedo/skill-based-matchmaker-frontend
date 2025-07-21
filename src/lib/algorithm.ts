@@ -48,6 +48,13 @@ function buildPreferredSet(players: readonly Player[]): ReadonlyArray<Set<string
   return players.map((p) => new Set(p.preferredPairs ?? []))
 }
 
+function buildComboKey(a1: string, a2: string, b1: string, b2: string): string {
+  const teamA = [a1, a2].sort().join('|')
+  const teamB = [b1, b2].sort().join('|')
+  // Ordena as duas equipes para que A/B invertidos gerem a mesma chave
+  return [teamA, teamB].sort().join('#') // chave canônica
+}
+
 /* ────────────────────── Cálculo do score normalizado ─────────────────────── */
 
 function calculateMatchScore(
@@ -127,39 +134,49 @@ function generateAllMatches(players: readonly Player[], formationMode: Formation
   return matches
 }
 
-/* ─────────────────────────── Seleção final ───────────────────────────────── */
-
-function selectBestMatch(matches: InternalMatch[]): InternalMatch {
-  // Ordena por score crescente; usa random como tie-break (estável).
-  matches.sort((m1, m2) => {
-    if (m1.score !== m2.score) return m1.score - m2.score
-    return Math.random() - 0.5
-  })
-
-  if (matches.length === 0) {
-    throw new Error('Nenhuma combinação possível de partidas.')
-  }
-
-  return matches[0] // a melhor (menor score) já respeita o critério.
-}
-
 /* ─────────────────────────── API pública ─────────────────────────────────── */
 
 export function generateMatch(
   players: readonly Player[],
   formationMode: FormationMode,
-): { teamAPlayer1: string; teamAPlayer2: string; teamBPlayer1: string; teamBPlayer2: string } {
+  excludedCombos: Set<string> = new Set(),
+): {
+  teamAPlayer1: string
+  teamAPlayer2: string
+  teamBPlayer1: string
+  teamBPlayer2: string
+} {
   if (players.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
   const allMatches = generateAllMatches(players, formationMode)
-  const best = selectBestMatch(allMatches)
+
+  // Já vem ordenado por score ascendente (empates → aleatório)
+  allMatches.sort((m1, m2) => (m1.score !== m2.score ? m1.score - m2.score : Math.random() - 0.5))
+
+  let chosen: InternalMatch | undefined
+  for (const m of allMatches) {
+    const key = buildComboKey(
+      players[m.teamA[0]].id,
+      players[m.teamA[1]].id,
+      players[m.teamB[0]].id,
+      players[m.teamB[1]].id,
+    )
+    if (!excludedCombos.has(key)) {
+      chosen = m
+      break
+    }
+  }
+
+  if (!chosen) {
+    throw new Error('Não há novas combinações disponíveis.')
+  }
 
   return {
-    teamAPlayer1: players[best.teamA[0]].id,
-    teamAPlayer2: players[best.teamA[1]].id,
-    teamBPlayer1: players[best.teamB[0]].id,
-    teamBPlayer2: players[best.teamB[1]].id,
+    teamAPlayer1: players[chosen.teamA[0]].id,
+    teamAPlayer2: players[chosen.teamA[1]].id,
+    teamBPlayer1: players[chosen.teamB[0]].id,
+    teamBPlayer2: players[chosen.teamB[1]].id,
   }
 }

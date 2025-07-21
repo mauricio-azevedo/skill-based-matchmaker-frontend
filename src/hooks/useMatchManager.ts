@@ -106,9 +106,12 @@ function determineFormationMode(
   return lastMatch.formationMode === FORMATION_MODES.HOMOGENEOUS ? FORMATION_MODES.MIXED : FORMATION_MODES.HOMOGENEOUS
 }
 
-export function useMatchManager(): { generateAndStartMatch: (courtId: string) => void } {
+export function useMatchManager(): {
+  generateAndStartMatch: (courtId: string) => void
+  shuffleMatch: (courtId: string) => void
+} {
   const { players } = usePlayers()
-  const { addMatch, matches } = useMatches()
+  const { addMatch, matches, getById, updateMatch } = useMatches()
   const { courts, updateCourt } = useCourts()
 
   const addMatchToCourt = useCallback(
@@ -156,5 +159,67 @@ export function useMatchManager(): { generateAndStartMatch: (courtId: string) =>
     [players, matches, courts, addMatchToCourt],
   )
 
-  return { generateAndStartMatch }
+  const shuffleMatch = useCallback(
+    (courtId: string): void => {
+      const court = courts.find((c) => c.id === courtId)
+      if (!court) throw new Error('Quadra não encontrada')
+      if (!court.matchId) {
+        singleToastError('Nenhuma partida em andamento nesta quadra.')
+        return
+      }
+
+      const currentMatch = getById(court.matchId)
+      if (!currentMatch) {
+        singleToastError('Partida não encontrada.')
+        return
+      }
+
+      const formationMode: FormationMode = court.autoAlternate ? currentMatch.formationMode : court.formationMode
+
+      // joga­dores elegíveis (ativos e livres exceto o match atual)
+      const busyIds = getBusyPlayerIds(matches.filter((m) => m.id !== currentMatch.id))
+      const freePlayers = players.filter((p) => p.active && !busyIds.has(p.id))
+      if (freePlayers.length < MIN_PLAYERS) {
+        singleToastError('Jogadores suficientes não disponíveis.')
+        return
+      }
+
+      // combinações a evitar (histórico + atual)
+      const excluded = new Set<string>()
+      const addKey = (m: { teamAPlayer1: string; teamAPlayer2: string; teamBPlayer1: string; teamBPlayer2: string }) =>
+        excluded.add(
+          [[m.teamAPlayer1, m.teamAPlayer2].sort().join('|'), [m.teamBPlayer1, m.teamBPlayer2].sort().join('|')]
+            .sort()
+            .join('#'),
+        )
+
+      addKey(currentMatch)
+      currentMatch.shuffleHistory.forEach(addKey)
+
+      let newTeams
+      try {
+        newTeams = generateMatch(freePlayers, formationMode, excluded)
+      } catch (err) {
+        singleToastError(err instanceof Error ? err.message : 'Erro ao gerar combinação.')
+        return
+      }
+
+      updateMatch(currentMatch.id, {
+        ...newTeams,
+        formationMode,
+        shuffleHistory: [
+          ...currentMatch.shuffleHistory,
+          {
+            teamAPlayer1: currentMatch.teamAPlayer1,
+            teamAPlayer2: currentMatch.teamAPlayer2,
+            teamBPlayer1: currentMatch.teamBPlayer1,
+            teamBPlayer2: currentMatch.teamBPlayer2,
+          },
+        ],
+      })
+    },
+    [courts, matches, players, getById, updateMatch],
+  )
+
+  return { generateAndStartMatch, shuffleMatch }
 }
