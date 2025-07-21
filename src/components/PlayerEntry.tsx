@@ -3,19 +3,18 @@ import { avatarUrl } from '@/lib/utils'
 
 interface Props {
   name: string
-  /** When true, puts the avatar on the right and text on the left (used for team B columns) */
+  /** When true, avatar goes on the right and text on the left (used for team B entries) */
   reverse?: boolean
   className?: string
   matchCount?: number
 }
 
-/** Small, reusable “avatar + name” line (truncates at 90px) */
+/** Compact “avatar + name” line — text truncates cleanly when space is tight */
 export function PlayerEntry({ name, reverse = false, className = '', matchCount }: Props) {
   return (
-    <div
-      className={`flex items-center justify-between gap-1 ${reverse ? 'flex-row-reverse text-left' : 'text-left'} ${className}`}
-    >
-      <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse text-left' : 'text-left'}`}>
+    <div className={`flex items-center ${reverse ? 'justify-end' : 'justify-between'} gap-1 ${className}`}>
+      {/* avatar + name (shrinks if needed) */}
+      <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse' : ''} min-w-0`}>
         <Avatar className="w-6 h-6 shrink-0">
           <AvatarImage src={avatarUrl(name)} alt={name} />
           <AvatarFallback>
@@ -26,14 +25,15 @@ export function PlayerEntry({ name, reverse = false, className = '', matchCount 
               .join('')}
           </AvatarFallback>
         </Avatar>
-        <p className="truncate max-w-[90px] text-md">{name}</p>
+        <p className="truncate whitespace-nowrap overflow-hidden text-md max-w-[90px]">{name}</p>
       </div>
 
-      {matchCount !== undefined ? (
-        <p className="text-md text-muted-foreground">
+      {/* optional match‑count badge */}
+      {matchCount !== undefined && (
+        <p className="text-md text-muted-foreground shrink-0">
           {matchCount} partida{matchCount === 1 ? '' : 's'}
         </p>
-      ) : null}
+      )}
     </div>
   )
 }
