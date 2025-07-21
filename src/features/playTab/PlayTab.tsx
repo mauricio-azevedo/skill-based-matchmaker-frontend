@@ -117,7 +117,7 @@ export function PlayTab() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button className="!h-11 !w-11" variant="ghost">
+                          <Button size="icon" variant="ghost">
                             <MoreVertical />
                           </Button>
                         </DropdownMenuTrigger>
@@ -141,11 +141,11 @@ export function PlayTab() {
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="mt-4 flex flex-col gap-2"
+                          className="mt-2 flex flex-col gap-2"
                         >
-                          <p className="text-md font-normal leading-tight">
+                          <p className="text-sm font-normal leading-tight">
                             Partida {matchNumber}{' '}
-                            <span className="text-md font-light text-muted-foreground leading-tight">
+                            <span className="text-xs font-light text-muted-foreground leading-tight">
                               {translateFormationMode(match.formationMode)}
                             </span>
                           </p>
@@ -168,7 +168,7 @@ export function PlayTab() {
                     <div className="w-full mt-4 flex items-center gap-1">
                       <Button
                         variant="secondary"
-                        className="w-11 h-11"
+                        size="icon"
                         disabled={!hasOngoingMatch}
                         onClick={() => hasOngoingMatch && handleRequestShuffle(court.id, courtNumber)}
                       >
@@ -178,18 +178,18 @@ export function PlayTab() {
                       {hasOngoingMatch ? (
                         <EditMatchPlayersDialog key={match.id} match={match} matchNumber={matchNumber} />
                       ) : (
-                        <Button variant="secondary" className="w-11 h-11" disabled>
+                        <Button variant="secondary" size="icon" disabled>
                           <EditIcon />
                         </Button>
                       )}
 
                       <Button
-                        className="flex-1 h-11"
+                        className="flex-1"
                         variant="default"
                         disabled={hasOngoingMatch}
                         onClick={() => handleStart(court.id)}
                       >
-                        <p className="text-md">Gerar nova partida</p>
+                        <p className="leading-tight">Gerar nova partida</p>
                       </Button>
                     </div>
                   </div>
@@ -201,9 +201,9 @@ export function PlayTab() {
         </div>
       )}
 
-      <div className="absolute bg-neutral-950 bottom-4 right-4 shadow-2xl z-50 rounded-md">
-        <Button className="h-11 bg-blue-600" variant="outline" onClick={() => addCourtWithMatch()}>
-          <p className="text-md">Adicionar quadra</p>
+      <div className="absolute bottom-4 right-4 shadow-2xl z-20">
+        <Button size="sm" onClick={() => addCourtWithMatch()}>
+          Adicionar quadra
         </Button>
       </div>
 

@@ -81,7 +81,7 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="secondary" className="w-11 h-11">
+        <Button variant="secondary" size="icon">
           <EditIcon />
         </Button>
       </DialogTrigger>

@@ -26,11 +26,11 @@ export function PlayerEntry({ name, reverse = false, className = '', matchCount 
               .join('')}
           </AvatarFallback>
         </Avatar>
-        <p className="truncate max-w-[90px] text-md">{name}</p>
+        <p className="truncate max-w-[90px] text-sm">{name}</p>
       </div>
 
       {matchCount !== undefined ? (
-        <p className="text-md text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {matchCount} partida{matchCount === 1 ? '' : 's'}
         </p>
       ) : null}

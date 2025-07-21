@@ -58,25 +58,23 @@ export default function App() {
           </TabsContent>
         </main>
 
-        <div className="px-4">
-          <TabsList className="w-full self-center space-x-2 h-fit">
-            <TabsTrigger className="h-11" value="setup" aria-label="Configuração">
-              <SettingsIcon />
-            </TabsTrigger>
-            <TabsTrigger className="h-11" value="players" aria-label="Jogadores">
-              <Users />
-            </TabsTrigger>
-            <TabsTrigger className="h-11" value="play" aria-label="Jogar">
-              <Play />
-            </TabsTrigger>
-            <TabsTrigger className="h-11" value="history" aria-label="Histórico">
-              <Clock />
-            </TabsTrigger>
-            <TabsTrigger className="h-11" value="leaderboard" aria-label="Leaderboard">
-              <Trophy />
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="self-center space-x-2">
+          <TabsTrigger value="setup" aria-label="Configuração">
+            <SettingsIcon className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="players" aria-label="Jogadores">
+            <Users className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="play" aria-label="Jogar">
+            <Play className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="history" aria-label="Histórico">
+            <Clock className="!w-8" />
+          </TabsTrigger>
+          <TabsTrigger value="leaderboard" aria-label="Leaderboard">
+            <Trophy className="!w-8" />
+          </TabsTrigger>
+        </TabsList>
       </Tabs>
     </div>
   )
