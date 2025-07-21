@@ -9,8 +9,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { EditIcon } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
+import { EditIcon, XIcon } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
 import { useMatches } from '@/context/MatchesContext'
 import type { Match, Player } from '@/types/entities'
@@ -87,44 +87,20 @@ export function EditMatchPlayersDialog({ match }: Props) {
         <DialogHeader>
           <DialogTitle>Editar jogadores</DialogTitle>
         </DialogHeader>
-
-        <div className="grid grid-cols-2 gap-4">
-          <PlayerSelect
-            label="Equipe A – Jogador 1"
-            value={a1}
-            onChange={setA1}
-            options={options}
-            invalid={duplicateIds.includes(a1)}
-          />
-
-          <PlayerSelect
-            label="Equipe B – Jogador 1"
-            value={b1}
-            onChange={setB1}
-            options={options}
-            invalid={duplicateIds.includes(b1)}
-          />
-
-          <PlayerSelect
-            label="Equipe A – Jogador 2"
-            value={a2}
-            onChange={setA2}
-            options={options}
-            invalid={duplicateIds.includes(a2)}
-          />
-
-          <PlayerSelect
-            label="Equipe B – Jogador 2"
-            value={b2}
-            onChange={setB2}
-            options={options}
-            invalid={duplicateIds.includes(b2)}
-          />
+        <div className="flex gap-1 items-center justify-between py-2">
+          <div className="flex flex-col gap-2">
+            <PlayerSelect value={a1} onChange={setA1} options={options} invalid={duplicateIds.includes(a1)} />
+            <PlayerSelect value={b1} onChange={setB1} options={options} invalid={duplicateIds.includes(b1)} />
+          </div>
+          <XIcon className="text-muted-foreground w-4 h-4" />
+          <div className="flex flex-col gap-2">
+            <PlayerSelect value={a2} onChange={setA2} options={options} invalid={duplicateIds.includes(a2)} />
+            <PlayerSelect value={b2} onChange={setB2} options={options} invalid={duplicateIds.includes(b2)} />
+          </div>
         </div>
-
-        <DialogFooter>
+        <DialogFooter className="flex flex-row justify-end gap-2">
           <DialogClose asChild>
-            <Button type="button" variant="outline" className="mr-2">
+            <Button type="button" variant="outline">
               Cancelar
             </Button>
           </DialogClose>
@@ -138,14 +114,13 @@ export function EditMatchPlayersDialog({ match }: Props) {
 }
 
 interface PlayerSelectProps {
-  label: string
   value: string
   onChange: (v: string) => void
   options: { id: string; name: string }[]
   invalid?: boolean
 }
 
-const PlayerSelect = ({ label, value, onChange, options, invalid }: PlayerSelectProps) => {
+const PlayerSelect = ({ value, onChange, options, invalid }: PlayerSelectProps) => {
   const selected = options.find((p) => p.id === value)
 
   return (
@@ -153,7 +128,7 @@ const PlayerSelect = ({ label, value, onChange, options, invalid }: PlayerSelect
       <SelectTrigger
         className={cn('w-full', invalid && 'border-destructive focus:ring-destructive focus:border-destructive')}
       >
-        {selected ? <PlayerEntry name={selected.name} /> : <SelectValue placeholder={label} />}
+        {selected ? <PlayerEntry name={selected.name} /> : null}
       </SelectTrigger>
 
       <SelectContent>
