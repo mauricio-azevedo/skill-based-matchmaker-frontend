@@ -93,7 +93,7 @@ export function PlayTab() {
           <p className="text-sm text-muted-foreground">Nenhuma quadra adicionada ainda.</p>
         </div>
       ) : (
-        <div className="flex flex-col items-center overflow-y-auto overscroll-y-contain pt-4 pb-14 pl-4 h-full">
+        <div className="flex flex-col items-center overflow-y-auto overscroll-y-contain pt-4 pl-4 h-full">
           {/* AnimatePresence wraps the list to animate court add/remove */}
           <AnimatePresence initial={false} mode="popLayout">
             {courts.map((court, courtIdx) => {
