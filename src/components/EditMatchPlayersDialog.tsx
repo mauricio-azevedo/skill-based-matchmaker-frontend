@@ -159,7 +159,6 @@ const PlayerSelect = ({ label, value, onChange, options, invalid }: PlayerSelect
       <SelectContent>
         {options.map((p) => (
           <SelectItem key={p.id} value={p.id}>
-            {/* left‑aligned list item */}
             <PlayerEntry name={p.name} />
           </SelectItem>
         ))}
