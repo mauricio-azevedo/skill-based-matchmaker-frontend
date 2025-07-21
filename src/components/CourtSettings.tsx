@@ -57,14 +57,14 @@ export function CourtSettings({ courtId }: SettingsProps) {
           }
         }}
       >
-        <SelectTrigger className="w-full !h-11 !ring-0 !border-border">{currentLabel}</SelectTrigger>
+        <SelectTrigger className="w-full !h-11 !ring-0 !border-border text-md">{currentLabel}</SelectTrigger>
 
         <SelectContent>
           {FORMATION_OPTIONS.map((opt) => (
             <SelectItem key={opt.id} value={opt.value}>
               <div className="flex flex-col">
-                <span>{opt.label}</span>
-                <span className="text-xs text-muted-foreground">{opt.description}</span>
+                <span className="!text-md">{opt.label}</span>
+                <span className="!text-sm text-muted-foreground">{opt.description}</span>
               </div>
             </SelectItem>
           ))}
