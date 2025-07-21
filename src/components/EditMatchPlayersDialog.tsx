@@ -21,9 +21,10 @@ import { PlayerEntry } from '@/components/PlayerEntry'
 /* Dialog ----------------------------------------------------------------- */
 interface Props {
   match: Match
+  matchNumber: number
 }
 
-export function EditMatchPlayersDialog({ match }: Props) {
+export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
   const { players } = usePlayers()
   const { matches, updateMatch } = useMatches()
 
@@ -85,7 +86,7 @@ export function EditMatchPlayersDialog({ match }: Props) {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Editar jogadores</DialogTitle>
+          <DialogTitle>Editar partida {matchNumber}</DialogTitle>
         </DialogHeader>
         <div className="flex gap-2 items-center justify-between py-2">
           <div className="flex flex-col gap-2 flex-1">

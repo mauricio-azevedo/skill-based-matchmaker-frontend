@@ -152,7 +152,7 @@ export function PlayTab() {
                       </Button>
 
                       {hasOngoingMatch ? (
-                        <EditMatchPlayersDialog key={match.id} match={match} />
+                        <EditMatchPlayersDialog key={match.id} match={match} matchNumber={matchNumber} />
                       ) : (
                         <Button variant="secondary" size="icon" disabled>
                           <EditIcon />
