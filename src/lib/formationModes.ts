@@ -3,6 +3,7 @@ import { type FormationMode } from '@/types/types'
 export const FORMATION_MODES = {
   HOMOGENEOUS: 'homogeneous',
   MIXED: 'mixed',
+  MANUAL: 'manual',
 } as const
 
 /**
@@ -11,6 +12,7 @@ export const FORMATION_MODES = {
 export const FORMATION_MODE_LABELS: Record<FormationMode, string> = {
   [FORMATION_MODES.HOMOGENEOUS]: 'nivelada',
   [FORMATION_MODES.MIXED]: 'mista',
+  [FORMATION_MODES.MANUAL]: 'manual',
 }
 
 /**

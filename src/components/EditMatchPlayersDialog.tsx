@@ -17,6 +17,7 @@ import type { Match, Player } from '@/types/entities'
 import { cn } from '@/lib/utils'
 import { getBusyPlayerIds } from '@/lib/matchUtils'
 import { PlayerEntry } from '@/components/PlayerEntry'
+import { FORMATION_MODES } from '@/lib/formationModes'
 
 /* Dialog ----------------------------------------------------------------- */
 interface Props {
@@ -71,6 +72,7 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
       teamAPlayer2: a2,
       teamBPlayer1: b1,
       teamBPlayer2: b2,
+      formationMode: FORMATION_MODES.MANUAL,
     })
 
     setOpen(false)
