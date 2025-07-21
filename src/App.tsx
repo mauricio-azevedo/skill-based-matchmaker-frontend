@@ -26,14 +26,15 @@ export default function App() {
         <div className="ml-auto flex items-center gap-4">
           {/* Tema */}
           <div className="flex items-center gap-2">
-            <Sun className="h-4 w-4 transition-opacity" style={{ opacity: theme === 'light' ? 1 : 0.35 }} />
+            <Sun className="h-4.5 w-4.5 transition-opacity" style={{ opacity: theme === 'light' ? 1 : 0.35 }} />
             <Switch
               id="theme-toggle"
               checked={theme === 'dark'}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
               aria-label="Alternar tema"
+              className="w-[53px] h-[31px] [&>span]:w-[25px] [&>span]:h-[25px]"
             />
-            <Moon className="h-4 w-4 transition-opacity" style={{ opacity: theme === 'dark' ? 1 : 0.25 }} />
+            <Moon className="h-4.5 w-4.5 transition-opacity" style={{ opacity: theme === 'dark' ? 1 : 0.25 }} />
           </div>
         </div>
       </header>
