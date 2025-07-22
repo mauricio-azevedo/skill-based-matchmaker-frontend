@@ -12,6 +12,7 @@ import { itemVariants } from '@/consts/animation'
 import { getLevelLabel } from '@/consts/levels'
 import { type SortBy, usePlayerSort } from '@/hooks/usePlayerSort'
 import PlayerSortDropdown from '@/components/PlayerSortDropdown'
+import { Separator } from '@/components/ui/separator'
 
 export function PlayersTab() {
   const { players, toggleActive, add } = usePlayers()
@@ -73,7 +74,7 @@ export function PlayersTab() {
           <div className="overflow-hidden flex flex-col h-full">
             <div className="flex items-center justify-between h-11 px-4">
               <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <Users className="text-muted-foreground h-4 w-4" aria-hidden="true" />
                 <span className="text-md">
                   {activeCount === total ? (
@@ -86,7 +87,7 @@ export function PlayersTab() {
                 </span>
               </div>
             </div>
-            <div className="flex w-full flex-col gap-3 flex-1 overflow-y-auto overscroll-y-contain px-4">
+            <div className="flex w-full flex-col flex-1 overflow-y-auto overscroll-y-contain px-4">
               <AnimatePresence initial={false}>
                 {sortedPlayers.map((p) => (
                   <motion.li
@@ -96,26 +97,34 @@ export function PlayersTab() {
                     initial="initial"
                     animate="animate"
                     exit="exit"
-                    className="flex items-center gap-1"
+                    className="flex flex-col"
                   >
-                    <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
-                      <div className="flex items-center gap-4">
-                        <p className="font-medium text-md">{p.name}</p>
-                        <Badge variant="secondary" className="ml-2 text-sm">
-                          {getLevelLabel(p.level)}
-                        </Badge>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <p className="font-medium text-md">{p.name}</p>
+                          <Badge variant="secondary" className="ml-2 text-sm">
+                            {getLevelLabel(p.level)}
+                          </Badge>
+                        </div>
+                        <Switch
+                          id={`active-${p.id}`}
+                          className="w-[55px] h-[31px] [&>span]:w-[27px] [&>span]:h-[27px]"
+                          checked={p.active}
+                          onCheckedChange={() => toggleActive(p.id)}
+                        />
                       </div>
-                      <Switch id={`active-${p.id}`} checked={p.active} onCheckedChange={() => toggleActive(p.id)} />
+                      <PlayerModal
+                        mode="edit"
+                        player={p}
+                        trigger={
+                          <Button className="h-11 w-11" variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
+                            <Edit className="!h-4.5 !w-4.5" />
+                          </Button>
+                        }
+                      />
                     </div>
-                    <PlayerModal
-                      mode="edit"
-                      player={p}
-                      trigger={
-                        <Button className="h-11 w-11" variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
-                          <Edit className="!h-4.5 !w-4.5" />
-                        </Button>
-                      }
-                    />
+                    <Separator className="my-2" />
                   </motion.li>
                 ))}
               </AnimatePresence>
