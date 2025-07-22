@@ -103,11 +103,11 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
         </div>
         <DialogFooter className="flex flex-row justify-end gap-2">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" size="lg" className="h-11 text-md">
               Cancelar
             </Button>
           </DialogClose>
-          <Button type="button" disabled={!canSave} onClick={save}>
+          <Button type="button" disabled={!canSave} onClick={save} size="lg" className="h-11 text-md">
             Salvar
           </Button>
         </DialogFooter>
