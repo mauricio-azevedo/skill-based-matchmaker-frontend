@@ -118,7 +118,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
+          {mode === 'edit' && <DialogDescription className="text-md">{player!.name}</DialogDescription>}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -181,8 +181,13 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             {mode === 'edit' && (
               <>
                 {/* Botão que abre o ConfirmDialog */}
-                <Button variant="ghost" aria-label={`Remover ${player!.name}`} onClick={() => setConfirmOpen(true)}>
-                  <Trash className="text-destructive" size={16} />
+                <Button
+                  variant="ghost"
+                  className="w-11 h-11"
+                  aria-label={`Remover ${player!.name}`}
+                  onClick={() => setConfirmOpen(true)}
+                >
+                  <Trash className="text-destructive !w-4.5 !h-4.5" />
                 </Button>
 
                 {/* ConfirmDialog para exclusão */}
