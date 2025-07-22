@@ -124,12 +124,13 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
             {/* Nome */}
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="player-name" className="text-md">
                 Nome
               </Label>
               <Input
                 id="player-name"
+                className="h-11"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus={mode === 'add'}
@@ -137,7 +138,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             </div>
 
             {/* Nível */}
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="player-level" className="text-md">
                 Nível
               </Label>
@@ -146,10 +147,10 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                 type="single"
                 value={level}
                 onValueChange={(val) => val && setLevel(val)}
-                className="flex flex-wrap gap-2 w-full"
+                className="flex flex-wrap gap-2 w-full h-11"
               >
                 {LEVELS.map(({ value, label }) => (
-                  <ToggleGroupItem key={value} value={value.toString()} className="w-8 justify-center">
+                  <ToggleGroupItem key={value} value={value.toString()} className="h-11 justify-center">
                     {label}
                   </ToggleGroupItem>
                 ))}
@@ -157,17 +158,17 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
             </div>
 
             {/* Dupla preferida */}
-            <div className="grid gap-3">
+            <div className="grid gap-2">
               <Label htmlFor="preferred-pair" className="text-md">
                 Dupla preferida
               </Label>
               <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full !h-11">
                   <SelectValue placeholder="Selecione um parceiro…" />
                 </SelectTrigger>
                 <SelectContent side="top">
                   {selectablePlayers.map((pl) => (
-                    <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2">
+                    <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2 h-11">
                       {pl.name}
                     </SelectItem>
                   ))}
@@ -207,9 +208,13 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
             <div className="flex gap-2 ml-auto">
               <DialogClose asChild>
-                <Button variant="outline">{mode === 'edit' ? 'Cancelar' : 'Voltar'}</Button>
+                <Button size="lg" className="h-11" variant="outline">
+                  {mode === 'edit' ? 'Cancelar' : 'Voltar'}
+                </Button>
               </DialogClose>
-              <Button type="submit">{mode === 'edit' ? 'Salvar' : 'Salvar'}</Button>
+              <Button size="lg" className="h-11" type="submit">
+                {mode === 'edit' ? 'Salvar' : 'Salvar'}
+              </Button>
             </div>
           </DialogFooter>
         </form>
