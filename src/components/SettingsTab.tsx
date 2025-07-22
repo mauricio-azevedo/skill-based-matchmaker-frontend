@@ -5,7 +5,6 @@ import { useMatches } from '@/context/MatchesContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { singleToastSuccess } from '@/utils/singleToast'
 import { useVersionGuard } from '@/hooks/useVersionGuard'
-import { Separator } from '@/components/ui/separator'
 
 export function SettingsTab() {
   const [warning, setWarning] = useState<null | 'matches' | 'all'>(null)
@@ -32,16 +31,18 @@ export function SettingsTab() {
   }
 
   return (
-    <div className="flex flex-col w-full">
-      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Configurações</h2>
+    <div className="flex flex-col w-full h-full justify-between items-center">
+      <div className="w-full border-b border-border min-h-11 max-h-11 flex items-center justify-center relative">
+        <h2 className="text-xl font-semibold leading-tight m-0">Configurações</h2>
+      </div>
 
-      <Separator className="mt-2 mb-0" />
+      <p className="text-md text-muted-foreground">Mais configurações em breve...</p>
 
-      <div className="flex flex-col gap-2 p-4">
-        <Button size="sm" onClick={() => setWarning('matches')} variant="destructive" className="w-full">
+      <div className="flex flex-col gap-2 px-4 w-full mb-4">
+        <Button onClick={() => setWarning('matches')} variant="destructive" className="w-full h-11 text-md">
           Apagar partidas
         </Button>
-        <Button size="sm" onClick={() => setWarning('all')} variant="destructive" className="w-full">
+        <Button onClick={() => setWarning('all')} variant="destructive" className="w-full h-11 text-md">
           Apagar tudo
         </Button>
       </div>
