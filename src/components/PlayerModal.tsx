@@ -150,7 +150,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                 className="flex flex-wrap gap-2 w-full h-11"
               >
                 {LEVELS.map(({ value, label }) => (
-                  <ToggleGroupItem key={value} value={value.toString()} className="h-11 justify-center">
+                  <ToggleGroupItem key={value} value={value.toString()} className="h-11 justify-center text-md">
                     {label}
                   </ToggleGroupItem>
                 ))}
@@ -163,12 +163,12 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                 Dupla preferida
               </Label>
               <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
-                <SelectTrigger className="w-full !h-11">
+                <SelectTrigger className="w-full !h-11 text-md">
                   <SelectValue placeholder="Selecione um parceiro…" />
                 </SelectTrigger>
                 <SelectContent side="top">
                   {selectablePlayers.map((pl) => (
-                    <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2 h-11">
+                    <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2 h-11 text-md">
                       {pl.name}
                     </SelectItem>
                   ))}
