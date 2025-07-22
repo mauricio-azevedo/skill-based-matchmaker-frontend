@@ -115,6 +115,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
         onOpenAutoFocus={(event) => {
           if (mode === 'edit') event.preventDefault()
         }}
+        className="!p-6"
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
