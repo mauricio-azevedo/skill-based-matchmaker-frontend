@@ -7,8 +7,8 @@ export const MIN_PLAYERS = 4 as const
 
 /** Pesos usados na função de pontuação. */
 const WEIGHT = {
-  SKILL_IMBALANCE: 80,
-  WITHIN_TEAM_VARIATION: 70,
+  SKILL_IMBALANCE: 100,
+  WITHIN_TEAM_VARIATION: 90,
   PARTNER_COUNT: 50,
   PREFERRED_PAIR: 35,
 } as const
