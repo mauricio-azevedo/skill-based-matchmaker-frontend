@@ -51,7 +51,12 @@ export function SettingsTab() {
         open={warning === 'matches'}
         onOpenChange={() => setWarning(null)}
         title="Apagar partidas?"
-        description="Partidas em andamento e do histórico serão permanentemente apagadas. Deseja continuar?"
+        description={
+          <p>
+            Partidas em andamento e do histórico serão permanentemente apagadas.{' '}
+            <span className="text-nowrap">Deseja continuar?</span>
+          </p>
+        }
         confirmVariant="destructive"
         confirmText="Apagar partidas"
         onConfirm={() => {
@@ -63,7 +68,12 @@ export function SettingsTab() {
         open={warning === 'all'}
         onOpenChange={() => setWarning(null)}
         title="Apagar tudo?"
-        description="Jogadores, quadras e partidas serão permanentemente apagados. Deseja continuar?"
+        description={
+          <p>
+            Jogadores, quadras e partidas serão permanentemente apagados.{' '}
+            <span className="text-nowrap">Deseja continuar?</span>
+          </p>
+        }
         confirmVariant="destructive"
         confirmText="Apagar tudo"
         onConfirm={() => {

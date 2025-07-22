@@ -193,7 +193,12 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
                   if (!open) setConfirmOpen(false)
                 }}
                 title={`Apagar jogador ${player!.name}?`}
-                description="O jogador e suas estatísticas serão permanentemente apagados. Deseja continuar?"
+                description={
+                  <p>
+                    O jogador e suas estatísticas serão permanentemente apagados.{' '}
+                    <span className="text-nowrap">Deseja continuar?</span>
+                  </p>
+                }
                 confirmText="Apagar jogador"
                 cancelText="Cancelar"
                 onConfirm={handleDelete}
