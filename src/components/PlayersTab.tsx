@@ -101,9 +101,9 @@ export function PlayersTab() {
                   >
                     <div className="flex items-center gap-2">
                       <div className="flex-1 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                           <p className="font-medium text-md">{p.name}</p>
-                          <Badge variant="secondary" className="ml-2 text-sm">
+                          <Badge variant="secondary" className="text-sm">
                             {getLevelLabel(p.level)}
                           </Badge>
                         </div>
