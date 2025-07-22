@@ -9,12 +9,14 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
 
 export interface ConfirmDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: string
-  description: string
+  description: ReactNode | string
   confirmText?: string
   cancelText?: string
   onConfirm: () => void
@@ -33,14 +35,17 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent className="p-4">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription className="text-md">{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction className={buttonVariants({ variant: confirmVariant })} onClick={onConfirm}>
+        <AlertDialogFooter className="flex-row justify-end gap-2">
+          <AlertDialogCancel className="h-11 flex-1">{cancelText}</AlertDialogCancel>
+          <AlertDialogAction
+            className={cn(buttonVariants({ variant: confirmVariant }), 'h-11 flex-1')}
+            onClick={onConfirm}
+          >
             {confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>

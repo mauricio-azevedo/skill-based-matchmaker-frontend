@@ -205,7 +205,12 @@ export function PlayTab() {
           if (!open) handleCancelDelete()
         }}
         title={`Apagar quadra ${pendingDelete?.courtNumber}?`}
-        description="A quadra e a partida em andamento serão permanentemente apagadas. Deseja continuar?"
+        description={
+          <p>
+            A quadra e a partida em andamento serão permanentemente apagadas.{' '}
+            <span className="text-nowrap">Deseja continuar?</span>
+          </p>
+        }
         confirmText="Apagar quadra"
         cancelText="Cancelar"
         onConfirm={handleConfirmDelete}
@@ -218,7 +223,11 @@ export function PlayTab() {
           if (!open) handleCancelShuffle()
         }}
         title={`Embaralhar partida da quadra ${pendingShuffle?.courtNumber}?`}
-        description="Uma nova combinação de jogadores será gerada. Deseja continuar?"
+        description={
+          <p>
+            Uma nova combinação de jogadores será gerada. <span className="text-nowrap">Deseja continuar?</span>
+          </p>
+        }
         confirmText="Embaralhar"
         cancelText="Cancelar"
         onConfirm={handleConfirmShuffle}
