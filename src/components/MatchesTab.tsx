@@ -15,7 +15,7 @@ export function MatchesTab() {
 
       {completedMatches.length === 0 ? (
         <div className="pl-4 h-full flex items-center justify-center pr-4">
-          <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
+          <p className="text-md text-muted-foreground">Nenhuma partida concluída ainda.</p>
         </div>
       ) : (
         <div className="pl-4 flex flex-col pb-8 overflow-y-auto overscroll-y-contain pt-4">

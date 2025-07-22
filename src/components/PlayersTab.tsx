@@ -46,7 +46,7 @@ export function PlayersTab() {
 
       {players.length === 0 ? (
         <div className="pl-4 h-full flex items-center justify-center pr-4">
-          <p className="text-sm text-muted-foreground relative">
+          <p className="text-md text-muted-foreground relative">
             Nenhum jogador adicionado ainda.
             <Button
               size="sm"

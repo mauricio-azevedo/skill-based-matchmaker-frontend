@@ -248,7 +248,7 @@ const LeaderboardTab: FC = () => {
 
       {rows.length === 0 ? (
         <div className="h-full flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Nenhuma partida concluída ainda.</p>
+          <p className="text-md text-muted-foreground">Nenhuma partida concluída ainda.</p>
         </div>
       ) : (
         <>

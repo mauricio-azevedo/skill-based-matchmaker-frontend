@@ -90,7 +90,7 @@ export function PlayTab() {
 
       {courts.length === 0 ? (
         <div className="h-full flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">Nenhuma quadra adicionada ainda.</p>
+          <p className="text-md text-muted-foreground">Nenhuma quadra adicionada ainda.</p>
         </div>
       ) : (
         <div className="flex flex-col items-center overflow-y-auto overscroll-y-contain pt-4 pl-4 h-full">
@@ -156,7 +156,7 @@ export function PlayTab() {
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0 }}
-                          className="text-sm text-muted-foreground leading-tight text-center mt-4"
+                          className="text-md text-muted-foreground leading-tight text-center mt-4"
                         >
                           Nenhuma partida ainda.
                         </motion.p>
