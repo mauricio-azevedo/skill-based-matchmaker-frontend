@@ -23,7 +23,7 @@ const LABELS = {
 const PlayerSortDropdown: React.FC<Props> = ({ sortBy, setSortBy }) => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
-      <Button variant="ghost" size="sm" className="flex items-center gap-1 text-sm !p-0 h-7">
+      <Button variant="ghost" size="lg" className="flex items-center gap-1 text-sm !p-0 h-11 text-md">
         <ArrowDownWideNarrow className="!h-4 !w-4 text-muted-foreground" />
         {LABELS[sortBy]}
       </Button>

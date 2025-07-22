@@ -70,12 +70,12 @@ export function PlayersTab() {
       ) : (
         <>
           {/* Lista existente de jogadores */}
-          <div className="pt-4 overflow-hidden flex flex-col h-full">
-            <div className="flex items-center justify-between h-8 px-4">
+          <div className="overflow-hidden flex flex-col h-full">
+            <div className="flex items-center justify-between h-11 px-4">
               <PlayerSortDropdown sortBy={sortBy} setSortBy={setSortBy} />
               <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" aria-hidden="true" />
-                <span className="text-sm">
+                <Users className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+                <span className="text-md">
                   {activeCount === total ? (
                     `${total}`
                   ) : (
@@ -100,8 +100,8 @@ export function PlayersTab() {
                   >
                     <div className="flex-1 flex items-center justify-between rounded-lg border px-3 py-2">
                       <div className="flex items-center gap-4">
-                        <p className="font-medium text-sm">{p.name}</p>
-                        <Badge variant="secondary" className="ml-2 text-xs">
+                        <p className="font-medium text-md">{p.name}</p>
+                        <Badge variant="secondary" className="ml-2 text-sm">
                           {getLevelLabel(p.level)}
                         </Badge>
                       </div>
