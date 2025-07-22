@@ -7,10 +7,10 @@ export const MIN_PLAYERS = 4 as const
 
 /** Pesos usados na função de pontuação. */
 const WEIGHT = {
-  SKILL_IMBALANCE: 8, // equilíbrio entre as equipes é rei
-  WITHIN_TEAM_VARIATION: 3, // heterogêneo: bônus p/ forte+fraco (vira –3 no cálculo)
-  PARTNER_COUNT: 1, // penalidade suave a cada repetição
-  PREFERRED_PAIR: 2, // bônus pequeno; não atropela Fair Play
+  SKILL_IMBALANCE: 8,
+  WITHIN_TEAM_VARIATION: 3, // vira -3 no modo nivelado
+  PREFERRED_PAIR: 2,
+  PARTNER_COUNT: 1,
 } as const
 
 /* ──────────────── Tipos ──────────────── */
