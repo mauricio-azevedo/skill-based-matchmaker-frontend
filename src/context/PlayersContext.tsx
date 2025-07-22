@@ -13,18 +13,24 @@ type Ctx = {
 
 const PlayersContext = createContext<Ctx | undefined>(undefined)
 
+/* ───────── helpers ───────── */
+const lowestActiveRefCount = (list: Player[]): number => {
+  const actives = list.filter((p) => p.active)
+  return actives.length ? Math.min(...actives.map((p) => p.referenceMatchCount)) : 0
+}
+
 /* ───────── Provider ───────── */
 export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [players, setPlayers] = useState<Player[]>(() => {
     try {
       const raw = JSON.parse(localStorage.getItem('sbm_players') || '[]') as Partial<Player>[]
-      // normaliza e garante createdAt/updatedAt
       return raw.map((p) => ({
         id: p.id!,
         name: p.name!,
         level: p.level!,
         active: p.active !== false,
         preferredPairs: p.preferredPairs ?? [],
+        referenceMatchCount: p.referenceMatchCount ?? 0,
         createdAt: p.createdAt ?? new Date().toISOString(),
         updatedAt: p.updatedAt ?? new Date().toISOString(),
       }))
@@ -48,6 +54,7 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
         level,
         active: true,
         preferredPairs,
+        referenceMatchCount: lowestActiveRefCount(prev),
         createdAt: now,
         updatedAt: now,
       }
@@ -60,12 +67,14 @@ export const PlayersProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const toggleActive = (id: string) =>
     setPlayers((prev) => {
       const now = new Date().toISOString()
+      const minRef = lowestActiveRefCount(prev)
       return prev.map((pl) => {
         if (pl.id !== id) return pl
         const willActivate = !pl.active
         return {
           ...pl,
           active: willActivate,
+          referenceMatchCount: willActivate ? minRef : pl.referenceMatchCount,
           updatedAt: now,
         }
       })

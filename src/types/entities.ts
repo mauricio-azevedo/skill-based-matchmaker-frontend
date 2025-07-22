@@ -6,6 +6,7 @@ export interface Player {
   level: number // Level of the player (higher = better)
   active: boolean // Whether the player is currently active
   preferredPairs: string[] // List of player IDs that the player prefers to pair with
+  referenceMatchCount: number // Virtual match count used by the algorithm
   createdAt: string // Timestamp of when the player was created
   updatedAt: string // Timestamp of when the player was last updated
 }
