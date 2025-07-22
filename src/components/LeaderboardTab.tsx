@@ -135,9 +135,9 @@ const svTip = (p: PlayerLBRow, all: PlayerLBRow[]): string => {
 
   if (oppMini.length === 1) {
     const oppName = all.find((x) => x.id === oppMini[0])?.name ?? 'adversário'
-    return `Contra ${oppName}, você ${txt}`
+    return `Contra ${oppName}, ${p.name} ${txt}`
   }
-  return `Na mini-liga, você ${txt}`
+  return `Na mini-liga, ${p.name} ${txt}`
 }
 
 const sgTip = (p: PlayerLBRow, all: PlayerLBRow[]): string => {
@@ -151,9 +151,9 @@ const sgTip = (p: PlayerLBRow, all: PlayerLBRow[]): string => {
 
   if (oppMini.length === 1) {
     const oppName = all.find((x) => x.id === oppMini[0])?.name ?? 'adversário'
-    return `Contra ${oppName}, você ${txt}`
+    return `Contra ${oppName}, ${p.name} ${txt}`
   }
-  return `Na mini-liga, você ${txt}`
+  return `Na mini-liga, ${p.name} ${txt}`
 }
 
 /* --------------------------------------------------------------------------
