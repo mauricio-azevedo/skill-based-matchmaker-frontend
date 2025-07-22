@@ -6,10 +6,11 @@ import { useMatches } from '@/context/MatchesContext'
 import type { Match, Player } from '@/types/entities'
 
 // shadcn/ui components
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import type { PlayerLBRow } from '@/types/types'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 /* --------------------------------------------------------------------------
  * Types & pure helpers
@@ -314,15 +315,16 @@ const LeaderboardTab: FC = () => {
                         {showTooltip ? (
                           <div role="cell" className={cn('text-center', cellClass)}>
                             {showSv || showSg ? (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-4 w-4 opacity-70" />
-                                </TooltipTrigger>
-                                <TooltipContent side="left" className="max-w-xs text-xs space-y-1">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Info className="h-4 w-4 opacity-70 cursor-pointer" />
+                                </PopoverTrigger>
+
+                                <PopoverContent side="left" align="center" className="max-w-xs text-xs space-y-1">
                                   {showSv && <p>{svTip(p, rows)}</p>}
                                   {showSg && <p>{sgTip(p, rows)}</p>}
-                                </TooltipContent>
-                              </Tooltip>
+                                </PopoverContent>
+                              </Popover>
                             ) : null}
                           </div>
                         ) : null}
