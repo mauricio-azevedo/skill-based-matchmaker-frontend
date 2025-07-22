@@ -191,7 +191,8 @@ export function PlayTab() {
                       </Button>
                     </div>
                   </div>
-                  <Separator className="mt-6 mb-4" />
+                  {/* TODO: if this separator is in the last item, it should not have margin bottom*/}
+                  <Separator className="mt-4 mb-4" />
                 </motion.div>
               )
             })}
