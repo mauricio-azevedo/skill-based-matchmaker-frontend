@@ -118,13 +118,17 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
         <div className="flex flex-col gap-4">
           {/* Nome */}
           <div className="grid gap-3">
-            <Label htmlFor="player-name">Nome</Label>
+            <Label htmlFor="player-name" className="text-md">
+              Nome
+            </Label>
             <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           {/* Nível */}
           <div className="grid gap-3">
-            <Label htmlFor="player-level">Nível</Label>
+            <Label htmlFor="player-level" className="text-md">
+              Nível
+            </Label>
             <ToggleGroup
               id="player-level"
               type="single"
@@ -142,7 +146,9 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
           {/* Dupla preferida */}
           <div className="grid gap-3">
-            <Label htmlFor="preferred-pair">Dupla preferida</Label>
+            <Label htmlFor="preferred-pair" className="text-md">
+              Dupla preferida
+            </Label>
             <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione um parceiro…" />
