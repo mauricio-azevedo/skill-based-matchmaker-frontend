@@ -213,11 +213,11 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
 
             <div className="flex gap-2 ml-auto">
               <DialogClose asChild>
-                <Button size="lg" className="h-11" variant="outline">
+                <Button size="lg" className="h-11 text-md" variant="outline">
                   {mode === 'edit' ? 'Cancelar' : 'Voltar'}
                 </Button>
               </DialogClose>
-              <Button size="lg" className="h-11" type="submit">
+              <Button size="lg" className="h-11 text-md" type="submit">
                 {mode === 'edit' ? 'Salvar' : 'Salvar'}
               </Button>
             </div>

@@ -182,12 +182,12 @@ export function PlayTab() {
                       )}
 
                       <Button
-                        className="flex-1 h-11"
+                        className="flex-1 h-11 text-md"
                         variant="default"
                         disabled={hasOngoingMatch}
                         onClick={() => handleStart(court.id)}
                       >
-                        <p className="text-md">Gerar nova partida</p>
+                        Gerar nova partida
                       </Button>
                     </div>
                   </div>

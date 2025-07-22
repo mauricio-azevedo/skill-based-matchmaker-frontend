@@ -58,9 +58,9 @@ export function PlayersTab() {
           <p className="text-md text-muted-foreground relative">
             Nenhum jogador adicionado ainda.
             <Button
-              size="sm"
+              size="lg"
               variant="secondary"
-              className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2"
+              className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 h-11 text-md"
               disabled={isSeedLoaded}
               onClick={() => handleLoadSeed()}
             >

@@ -35,15 +35,15 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="p-4">
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription className="text-md">{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-row justify-end gap-2">
-          <AlertDialogCancel className="h-11 flex-1">{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel className="h-11 flex-1 text-md">{cancelText}</AlertDialogCancel>
           <AlertDialogAction
-            className={cn(buttonVariants({ variant: confirmVariant }), 'h-11 flex-1')}
+            className={cn(buttonVariants({ variant: confirmVariant }), 'h-11 flex-1 text-md')}
             onClick={onConfirm}
           >
             {confirmText}
