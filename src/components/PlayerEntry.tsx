@@ -12,7 +12,7 @@ interface Props {
 /** Compact “avatar + name” line — text truncates cleanly when space is tight */
 export function PlayerEntry({ name, reverse = false, className = '', matchCount }: Props) {
   return (
-    <div className={`flex items-center ${reverse ? 'justify-end' : 'justify-between'} gap-2 ${className}`}>
+    <div className={`flex items-center ${reverse ? 'justify-end' : 'justify-between'} gap-1 ${className}`}>
       {/* avatar + name (shrinks if needed) */}
       <div className={`flex items-center gap-2 ${reverse ? 'flex-row-reverse' : ''} min-w-0`}>
         <Avatar className="w-6 h-6 shrink-0">
