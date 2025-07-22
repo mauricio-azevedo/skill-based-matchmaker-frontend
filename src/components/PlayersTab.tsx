@@ -111,8 +111,8 @@ export function PlayersTab() {
                       mode="edit"
                       player={p}
                       trigger={
-                        <Button className="h-8 w-8" variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
-                          <Edit size={16} />
+                        <Button className="h-11 w-11" variant="ghost" size="icon" aria-label={`Editar ${p.name}`}>
+                          <Edit className="!h-4.5 !w-4.5" />
                         </Button>
                       }
                     />
