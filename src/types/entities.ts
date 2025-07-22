@@ -5,8 +5,6 @@ export interface Player {
   name: string // Name of the player
   level: number // Level of the player (higher = better)
   active: boolean // Whether the player is currently active
-  matchCount: number // How many matches the player has played
-  partnerCounts: Record<string, number> // How many times the player has played with each partner (partnerId → times played together)
   preferredPairs: string[] // List of player IDs that the player prefers to pair with
   createdAt: string // Timestamp of when the player was created
   updatedAt: string // Timestamp of when the player was last updated

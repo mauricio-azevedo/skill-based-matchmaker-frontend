@@ -3,15 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import LeaderboardTab from './components/LeaderboardTab'
 import { Clock, Moon, Play, SettingsIcon, Sun, Trophy, Users } from 'lucide-react'
-import { usePlayerMatchSync } from '@/hooks/usePlayerMatchSync'
 import { PlayersTab } from '@/components/PlayersTab'
 import { SettingsTab } from '@/components/SettingsTab'
 import { MatchesTab } from '@/components/MatchesTab'
 import { PlayTab } from '@/features/playTab/PlayTab'
 
 export default function App() {
-  usePlayerMatchSync()
-
   const [theme, setTheme] = useState<'light' | 'dark'>('dark')
 
   useEffect(() => {

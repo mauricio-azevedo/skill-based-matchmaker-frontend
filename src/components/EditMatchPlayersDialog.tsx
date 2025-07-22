@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import { getBusyPlayerIds } from '@/lib/matchUtils'
 import { PlayerEntry } from '@/components/PlayerEntry'
 import { FORMATION_MODES } from '@/lib/formationModes'
+import { buildStats } from '@/lib/stats'
 
 /* ------------------------------------------------------------------------ */
 interface Props {
@@ -132,6 +133,8 @@ interface PlayerSelectProps {
 
 const PlayerSelect = ({ value, onChange, options, invalid }: PlayerSelectProps) => {
   const selected = options.find((p) => p.id === value)
+  const { matches } = useMatches()
+  const { matchCounts } = useMemo(() => buildStats(matches), [matches])
 
   return (
     <Select value={value} onValueChange={onChange}>
@@ -150,7 +153,7 @@ const PlayerSelect = ({ value, onChange, options, invalid }: PlayerSelectProps) 
       <SelectContent>
         {options.map((p) => (
           <SelectItem key={p.id} value={p.id} className="h-11 text-md">
-            <PlayerEntry name={p.name} matchCount={p.matchCount} />
+            <PlayerEntry name={p.name} matchCount={matchCounts[p.id] ?? 0} />
           </SelectItem>
         ))}
       </SelectContent>

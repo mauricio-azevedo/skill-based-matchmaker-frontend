@@ -165,7 +165,7 @@ const LeaderboardTab: FC = () => {
 
   const { rows, showTooltip } = useMemo(() => {
     const { stats, h2h, pair } = accumulate(matches)
-    const playersWithAtLeastOneMatch: Player[] = players.filter((p) => p.matchCount > 0)
+    const playersWithAtLeastOneMatch: Player[] = players.filter((p) => stats.has(p.id))
     const base: PlayerLBRow[] = playersWithAtLeastOneMatch.map((p) => {
       const { W, L, GP, GC } = stats.get(p.id) ?? { W: 0, L: 0, GP: 0, GC: 0 }
       return { ...p, P: W * 3, SV: W - L, SG: GP - GC, W, L }
