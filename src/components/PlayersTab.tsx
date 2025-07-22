@@ -7,11 +7,12 @@ import { usePlayers } from '@/context/PlayersContext'
 import { seedPlayers } from '@/data/seedPlayers'
 import { shuffle } from '@/utils/shuffle'
 import PlayerModal from './PlayerModal'
-import { Edit, PlusIcon, Users } from 'lucide-react'
+import { Edit, Users } from 'lucide-react'
 import { itemVariants } from '@/consts/animation'
 import { getLevelLabel } from '@/consts/levels'
 import { type SortBy, usePlayerSort } from '@/hooks/usePlayerSort'
 import PlayerSortDropdown from '@/components/PlayerSortDropdown'
+import { Separator } from '@/components/ui/separator'
 
 export function PlayersTab() {
   const { players, toggleActive, add } = usePlayers()
@@ -40,17 +41,8 @@ export function PlayersTab() {
 
   return (
     <div className="w-full h-full flex flex-col relative">
-      <div className="w-full border-b border-border min-h-11 max-h-11 flex items-center justify-center relative">
-        <h2 className="text-xl font-semibold leading-tight m-0">Jogadores</h2>
-        <PlayerModal
-          mode="add"
-          trigger={
-            <Button variant="ghost" className="w-11 h-11 absolute right-4 bottom-0">
-              <PlusIcon className="!w-[24px] !h-[24px]" />
-            </Button>
-          }
-        />
-      </div>
+      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Jogadores</h2>
+      <Separator className="mt-2 mb-0" />
 
       {players.length === 0 ? (
         <div className="pl-4 h-full flex items-center justify-center pr-4">
@@ -86,7 +78,7 @@ export function PlayersTab() {
                 </span>
               </div>
             </div>
-            <div className="flex w-full flex-col gap-3 flex-1 overflow-y-auto overscroll-y-contain px-4">
+            <div className="flex w-full flex-col gap-3 flex-1 overflow-y-auto overscroll-y-contain px-4 pb-16">
               <AnimatePresence initial={false}>
                 {sortedPlayers.map((p) => (
                   <motion.li
@@ -123,6 +115,16 @@ export function PlayersTab() {
           </div>
         </>
       )}
+
+      {/* Botão de adicionar */}
+      <PlayerModal
+        mode="add"
+        trigger={
+          <div className="absolute bottom-4 right-4 shadow-2xl">
+            <Button size="sm">Adicionar jogador</Button>
+          </div>
+        }
+      />
     </div>
   )
 }
