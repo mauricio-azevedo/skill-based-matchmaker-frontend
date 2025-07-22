@@ -11,7 +11,7 @@ import {
 import { Trash } from 'lucide-react'
 import { LEVELS } from '@/consts/levels'
 import { usePlayers } from '@/context/PlayersContext'
-import React, { type FC, type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type FC, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { singleToastSuccess } from '@/utils/singleToast'
 import type { Player } from '@/types/entities'
 import { Button } from '@/components/ui/button'
@@ -31,8 +31,6 @@ interface PlayerModalProps {
 
 const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const { players, add, updatePlayers, remove } = usePlayers()
-
-  const nameInputRef = React.useRef<HTMLInputElement>(null)
 
   // ----------------------- estado local -----------------------
   const [open, setOpen] = useState(false)
@@ -70,7 +68,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
       singleToastSuccess(`${name.trim()} adicionado`, { position: 'top-center', duration: 1000 })
       setName('')
       setPreferredPair('')
-      nameInputRef.current?.focus()
       return
     }
 
@@ -88,13 +85,6 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
   const handleDelete = () => {
     remove(player!.id)
     setConfirmOpen(false)
-  }
-
-  // ----------------------- foco no input (se perder o foco) -----------------------
-  const handleInputBlur = () => {
-    if (open) {
-      setTimeout(() => nameInputRef.current?.focus(), 0)
-    }
   }
 
   // ----------------------- UI -----------------------
@@ -115,15 +105,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
         {trigger}
       </DialogTrigger>
 
-      <DialogContent
-        className="top-2 translate-y-2"
-        onOpenAutoFocus={(e) => {
-          e.preventDefault()
-          nameInputRef.current?.focus()
-        }}
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
@@ -133,13 +115,7 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           {/* Nome */}
           <div className="grid gap-3">
             <Label htmlFor="player-name">Nome</Label>
-            <Input
-              id="player-name"
-              ref={nameInputRef}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={handleInputBlur}
-            />
+            <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
           {/* Nível */}
