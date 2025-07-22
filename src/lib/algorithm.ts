@@ -1,131 +1,207 @@
-import type { Match, Player } from '@/types/entities'
+import type { Player } from '@/types/entities'
+import { type FormationMode } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
-import type { FormationMode } from '@/types/types'
-import { buildStats } from '@/lib/stats'
 
+/** Número mínimo de jogadores para formar duas duplas. */
 export const MIN_PLAYERS = 4 as const
 
-/* ─────────────────── Pesos originais ─────────────────── */
-const W = {
-  MATCH_SUM: 100,
-  MATCH_IMB: 100,
-  SKILL_IMB: 80,
-  WITHIN_VAR: 70,
-  PARTNER: 50,
-  PREF: 35,
+/** Pesos usados na função de pontuação. */
+const WEIGHT = {
+  SKILL_IMBALANCE: 80,
+  WITHIN_TEAM_VARIATION: 70,
+  PARTNER_COUNT: 50,
+  PREFERRED_PAIR: 35,
 } as const
 
-/* ─────────────────── Helpers ─────────────────── */
-type Pair = readonly [number, number]
-const prefSets = (ps: readonly Player[]) => ps.map((p) => new Set(p.preferredPairs ?? []))
-const comboKey = (a1: string, a2: string, b1: string, b2: string) =>
-  [[a1, a2].sort().join('|'), [b1, b2].sort().join('|')].sort().join('#')
+/* ──────────────── Tipos ──────────────── */
+type PlayerIdx = number
+type DoublesPair = readonly [PlayerIdx, PlayerIdx]
 
-/* ─────────────────── Score ─────────────────── */
-function score(
-  pl: readonly Player[],
-  pref: ReadonlyArray<Set<string>>,
-  counts: Record<string, number>,
-  partners: Record<string, Record<string, number>>,
-  a1: number,
-  a2: number,
-  b1: number,
-  b2: number,
+/** Histórico de parcerias: partnerCounts[idA][idB] → vezes que jogaram juntos. */
+export type PartnerCounts = Record<string, Record<string, number>>
+
+interface ScoredMatch {
+  teamA: DoublesPair
+  teamB: DoublesPair
+  score: number
+}
+
+/* ──────────────── Utilidades ──────────────── */
+
+/** Combinações (n choose 2) de índices dos jogadores. */
+const indexPairs = (n: number): DoublesPair[] =>
+  Array.from({ length: n }, (_, i) => Array.from({ length: n - i - 1 }, (_, j) => [i, i + j + 1] as DoublesPair)).flat()
+
+const timesPartnered = (counts: PartnerCounts, a: string, b: string) => counts[a]?.[b] ?? 0
+const preferredPairSets = (players: readonly Player[]) => players.map((p) => new Set(p.preferredPairs ?? []))
+
+/** Chave única para impedir combinações repetidas, independente da ordem. */
+const comboKey = (...ids: [string, string, string, string]) =>
+  [[ids[0], ids[1]].sort().join('|'), [ids[2], ids[3]].sort().join('|')].sort().join('#')
+
+/* ──────────────── Pontuação ──────────────── */
+
+function scoreMatch(
+  players: readonly Player[],
+  prefSets: ReadonlyArray<Set<string>>,
+  teamA: DoublesPair,
+  teamB: DoublesPair,
   mode: FormationMode,
+  partnerCounts: PartnerCounts,
 ): number {
-  const P = [pl[a1], pl[a2], pl[b1], pl[b2]] as const
-  const getCnt = (id: string) => counts[id] || 0
-  const getPart = (x: string, y: string) => partners[x]?.[y] ?? 0
+  const [a1, a2] = teamA
+  const [b1, b2] = teamB
+  const [pA1, pA2, pB1, pB2] = [players[a1], players[a2], players[b1], players[b2]]
 
-  /* habilidade */
-  const diff1 = Math.abs(P[0].level - P[2].level) + Math.abs(P[1].level - P[3].level)
-  const diff2 = Math.abs(P[0].level - P[3].level) + Math.abs(P[1].level - P[2].level)
-  const skillPair = Math.min(diff1, diff2)
-  const teamImb = Math.abs(P[0].level + P[1].level - (P[2].level + P[3].level))
-  const withinVar = Math.abs(P[0].level - P[1].level) + Math.abs(P[2].level - P[3].level)
-  const withinW = mode === FORMATION_MODES.HOMOGENEOUS ? W.WITHIN_VAR : -W.WITHIN_VAR
+  // Diferença de nível considerando cruzamentos possíveis.
+  const diffOpposite = Math.abs(pA1.level - pB1.level) + Math.abs(pA2.level - pB2.level)
+  const diffDiagonal = Math.abs(pA1.level - pB2.level) + Math.abs(pA2.level - pB1.level)
+  const skillPairImbalance = Math.min(diffOpposite, diffDiagonal)
 
-  /* partidas */
-  const cnts = P.map((p) => getCnt(p.id))
-  const playedSum = cnts.reduce((s, n) => s + n, 0)
-  const matchImb = Math.max(...cnts) - Math.min(...cnts)
+  // Balanço entre equipes e variações internas.
+  const teamImbalance = Math.abs(pA1.level + pA2.level - (pB1.level + pB2.level))
+  const withinTeamVariation = Math.abs(pA1.level - pA2.level) + Math.abs(pB1.level - pB2.level)
+  const withinWeight =
+    mode === FORMATION_MODES.HOMOGENEOUS ? WEIGHT.WITHIN_TEAM_VARIATION : -WEIGHT.WITHIN_TEAM_VARIATION
 
-  /* parceria + preferência */
-  const pastPair = getPart(P[0].id, P[1].id) + getPart(P[2].id, P[3].id)
-  const prefBonus =
-    Number(pref[a1].has(P[1].id)) +
-    Number(pref[a2].has(P[0].id)) +
-    Number(pref[b1].has(P[3].id)) +
-    Number(pref[b2].has(P[2].id))
+  // Penalidade por já terem sido parceiros.
+  const pastPairPenalty = timesPartnered(partnerCounts, pA1.id, pA2.id) + timesPartnered(partnerCounts, pB1.id, pB2.id)
+
+  // Bônus (negativo) para parceiros preferidos.
+  const preferredBonus =
+    +prefSets[a1].has(pA2.id) + +prefSets[a2].has(pA1.id) + +prefSets[b1].has(pB2.id) + +prefSets[b2].has(pB1.id)
 
   return (
-    skillPair +
-    W.SKILL_IMB * teamImb +
-    W.MATCH_IMB * matchImb +
-    W.MATCH_SUM * playedSum +
-    W.PARTNER * pastPair -
-    W.PREF * prefBonus +
-    withinW * withinVar
+    skillPairImbalance +
+    WEIGHT.SKILL_IMBALANCE * teamImbalance +
+    WEIGHT.PARTNER_COUNT * pastPairPenalty -
+    WEIGHT.PREFERRED_PAIR * preferredBonus +
+    withinWeight * withinTeamVariation
   )
 }
 
-/* ─────────────────── API ─────────────────── */
+/* ──────────────── Geração de partidas ──────────────── */
+
+function enumerateMatches(
+  players: readonly Player[],
+  mode: FormationMode,
+  partnerCounts: PartnerCounts,
+): ScoredMatch[] {
+  const pairs = indexPairs(players.length)
+  const prefSets = preferredPairSets(players)
+
+  const matches: ScoredMatch[] = []
+
+  for (let i = 0; i < pairs.length; i++) {
+    for (let j = i + 1; j < pairs.length; j++) {
+      const teamA = pairs[i]
+      const teamB = pairs[j]
+
+      // Ignora sobreposição de jogadores.
+      if (new Set([...teamA, ...teamB]).size < 4) continue
+
+      matches.push({
+        teamA,
+        teamB,
+        score: scoreMatch(players, prefSets, teamA, teamB, mode, partnerCounts),
+      })
+    }
+  }
+
+  return matches
+}
+
+function selectNextMatch(
+  matches: ScoredMatch[],
+  players: readonly Player[],
+  excluded: Set<string>,
+): ScoredMatch | undefined {
+  for (const match of matches) {
+    const key = comboKey(
+      players[match.teamA[0]].id,
+      players[match.teamA[1]].id,
+      players[match.teamB[0]].id,
+      players[match.teamB[1]].id,
+    )
+    if (!excluded.has(key)) return match
+  }
+  return undefined
+}
+
+/**
+ * IDs of players whose `referenceMatchCount` is lower than the current maximum.
+ *
+ * @param players – full list of players.
+ * @returns list of player IDs that still have fewer reference matches than the most-played player(s).
+ */
+export function playersBelowMaxReferenceCount(players: readonly Player[]): string[] {
+  if (players.length === 0) return []
+
+  const maxCount = players.reduce((max, p) => (p.referenceMatchCount > max ? p.referenceMatchCount : max), 0)
+  return players.filter((p) => p.referenceMatchCount < maxCount).map((p) => p.id)
+}
+
+/**
+ * Keep only the matches that involve the players with the lowest
+ * `referenceMatchCount`, according to the rule below:
+ *
+ * • If there are ≥ 4 such players, return matches made **exclusively** by any
+ *   four of them (i.e. all four slots are filled by low-count players).
+ * • If there are < 4, return matches that include **all** of them (plus whoever
+ *   else is needed to complete the four players).
+ *
+ * Assumes `matches` were built from the same `players` array.
+ */
+export function filterMatchesForLowRefPlayers(
+  matches: readonly ScoredMatch[],
+  players: readonly Player[],
+): ScoredMatch[] {
+  const lowRefIds = playersBelowMaxReferenceCount(players)
+  if (lowRefIds.length === 0) return matches as ScoredMatch[]
+
+  const lowRefSet = new Set(lowRefIds)
+  const requiredCount = Math.min(4, lowRefIds.length)
+
+  return matches.filter((m) => {
+    const ids = [players[m.teamA[0]].id, players[m.teamA[1]].id, players[m.teamB[0]].id, players[m.teamB[1]].id]
+    const present = ids.reduce((sum, id) => sum + (lowRefSet.has(id) ? 1 : 0), 0)
+    return present === requiredCount
+  })
+}
+
+/* ──────────────── API pública ──────────────── */
+
 export function generateMatch(
   players: readonly Player[],
-  matches: readonly Match[],
-  mode: FormationMode,
-  excluded = new Set<string>(),
-) {
-  if (players.length < MIN_PLAYERS) throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores.`)
-
-  const { matchCounts, partnerCounts } = buildStats(matches as Match[])
-
-  /* ----------- 1) filtrar pelo piso dinâmico ----------- */
-  const freeCnts = players.map((p) => matchCounts[p.id] || 0)
-  let threshold = Math.min(...freeCnts)
-  while (players.filter((p) => (matchCounts[p.id] || 0) <= threshold).length < MIN_PLAYERS) {
-    threshold++
+  formationMode: FormationMode,
+  partnerCounts: PartnerCounts,
+  excludedCombos: Set<string> = new Set(),
+): {
+  teamAPlayer1: string
+  teamAPlayer2: string
+  teamBPlayer1: string
+  teamBPlayer2: string
+} {
+  if (players.length < MIN_PLAYERS) {
+    throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
-  const eligibleIdx = players
-    .map((p, idx) => ({ idx, cnt: matchCounts[p.id] || 0 }))
-    .filter((x) => x.cnt <= threshold)
-    .map((x) => x.idx)
+  const orderedMatches = enumerateMatches(players, formationMode, partnerCounts).sort((a, b) =>
+    a.score !== b.score ? a.score - b.score : Math.random() - 0.5,
+  )
 
-  /* ----------- 2) gerar partidas dentro do subconjunto ----------- */
-  const pref = prefSets(players)
-  const cand: { a: Pair; b: Pair; s: number }[] = []
+  const eligibleMatches = filterMatchesForLowRefPlayers(orderedMatches, players)
 
-  for (let i = 0; i < eligibleIdx.length - 1; i++) {
-    for (let j = i + 1; j < eligibleIdx.length; j++) {
-      const [a1, a2] = [eligibleIdx[i], eligibleIdx[j]]
+  const chosen = selectNextMatch(eligibleMatches, players, excludedCombos)
+  if (!chosen) throw new Error('Não há novas combinações disponíveis.')
 
-      for (let k = 0; k < eligibleIdx.length - 1; k++) {
-        for (let l = k + 1; l < eligibleIdx.length; l++) {
-          const [b1, b2] = [eligibleIdx[k], eligibleIdx[l]]
-          if (a1 === b1 || a1 === b2 || a2 === b1 || a2 === b2) continue
+  const [a1, a2] = chosen.teamA
+  const [b1, b2] = chosen.teamB
 
-          const s = score(players, pref, matchCounts, partnerCounts, a1, a2, b1, b2, mode)
-          cand.push({ a: [a1, a2], b: [b1, b2], s })
-        }
-      }
-    }
+  return {
+    teamAPlayer1: players[a1].id,
+    teamAPlayer2: players[a2].id,
+    teamBPlayer1: players[b1].id,
+    teamBPlayer2: players[b2].id,
   }
-
-  if (!cand.length) throw new Error('Combinação elegível não encontrada.')
-
-  cand.sort((x, y) => (x.s !== y.s ? x.s - y.s : Math.random() - 0.5))
-
-  for (const c of cand) {
-    const key = comboKey(players[c.a[0]].id, players[c.a[1]].id, players[c.b[0]].id, players[c.b[1]].id)
-    if (!excluded.has(key)) {
-      return {
-        teamAPlayer1: players[c.a[0]].id,
-        teamAPlayer2: players[c.a[1]].id,
-        teamBPlayer1: players[c.b[0]].id,
-        teamBPlayer2: players[c.b[1]].id,
-      }
-    }
-  }
-  throw new Error('Não há novas combinações disponíveis.')
 }

@@ -35,10 +35,10 @@ export const MatchesProvider: FC<{ children: ReactNode }> = ({ children }) => {
     localStorage.setItem(MATCHES_KEY, JSON.stringify(matchesById))
   }, [matchesById])
 
-  const addMatch = (data: Omit<Match, 'id' | 'createdAt' | 'updatedAt' | 'shuffleHistory'>): string => {
+  const addMatch = (data: CreateMatchPayload): string => {
     const id = crypto.randomUUID()
     const now = new Date().toISOString()
-    setMatchesById((prev) => ({ ...prev, [id]: { id, createdAt: now, updatedAt: now, shuffleHistory: [], ...data } }))
+    setMatchesById((prev) => ({ ...prev, [id]: { id, createdAt: now, updatedAt: now, ...data } }))
     return id
   }
 
