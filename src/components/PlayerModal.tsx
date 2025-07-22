@@ -11,7 +11,7 @@ import {
 import { Trash } from 'lucide-react'
 import { LEVELS } from '@/consts/levels'
 import { usePlayers } from '@/context/PlayersContext'
-import { type FC, type ReactNode, useCallback, useEffect, useState } from 'react'
+import { type FC, type FormEvent, type ReactNode, useCallback, useEffect, useState } from 'react'
 import { singleToastSuccess } from '@/utils/singleToast'
 import type { Player } from '@/types/entities'
 import { Button } from '@/components/ui/button'
@@ -87,6 +87,12 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
     setConfirmOpen(false)
   }
 
+  // submit do formulário (Enter)
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    handleSave()
+  }
+
   // ----------------------- UI -----------------------
   const title = mode === 'add' ? 'Novo jogador' : 'Editar jogador'
 
@@ -115,91 +121,98 @@ const PlayerModal: FC<PlayerModalProps> = ({ mode, trigger, player }) => {
           {mode === 'edit' && <DialogDescription>{player!.name}</DialogDescription>}
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          {/* Nome */}
-          <div className="grid gap-3">
-            <Label htmlFor="player-name" className="text-md">
-              Nome
-            </Label>
-            <Input id="player-name" value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-
-          {/* Nível */}
-          <div className="grid gap-3">
-            <Label htmlFor="player-level" className="text-md">
-              Nível
-            </Label>
-            <ToggleGroup
-              id="player-level"
-              type="single"
-              value={level}
-              onValueChange={(val) => val && setLevel(val)}
-              className="flex flex-wrap gap-2 w-full"
-            >
-              {LEVELS.map(({ value, label }) => (
-                <ToggleGroupItem key={value} value={value.toString()} className="w-8 justify-center">
-                  {label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-
-          {/* Dupla preferida */}
-          <div className="grid gap-3">
-            <Label htmlFor="preferred-pair" className="text-md">
-              Dupla preferida
-            </Label>
-            <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione um parceiro…" />
-              </SelectTrigger>
-              <SelectContent side="top">
-                {selectablePlayers.map((pl) => (
-                  <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2">
-                    {pl.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <DialogFooter className="flex-row justify-between">
-          {mode === 'edit' && (
-            <>
-              {/* Botão que abre o ConfirmDialog */}
-              <Button variant="ghost" aria-label={`Remover ${player!.name}`} onClick={() => setConfirmOpen(true)}>
-                <Trash className="text-destructive" size={16} />
-              </Button>
-
-              {/* ConfirmDialog para exclusão */}
-              <ConfirmDialog
-                open={confirmOpen}
-                onOpenChange={(open) => {
-                  if (!open) setConfirmOpen(false)
-                }}
-                title={`Apagar jogador ${player!.name}?`}
-                description={
-                  <p>
-                    O jogador e suas estatísticas serão permanentemente apagados.{' '}
-                    <span className="text-nowrap">Deseja continuar?</span>
-                  </p>
-                }
-                confirmText="Apagar jogador"
-                cancelText="Cancelar"
-                onConfirm={handleDelete}
-                confirmVariant="destructive"
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
+            {/* Nome */}
+            <div className="grid gap-3">
+              <Label htmlFor="player-name" className="text-md">
+                Nome
+              </Label>
+              <Input
+                id="player-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoFocus={mode === 'add'}
               />
-            </>
-          )}
+            </div>
 
-          <div className="flex gap-2 ml-auto">
-            <DialogClose asChild>
-              <Button variant="outline">{mode === 'edit' ? 'Cancelar' : 'Voltar'}</Button>
-            </DialogClose>
-            <Button onClick={handleSave}>{mode === 'edit' ? 'Salvar' : 'Salvar'}</Button>
+            {/* Nível */}
+            <div className="grid gap-3">
+              <Label htmlFor="player-level" className="text-md">
+                Nível
+              </Label>
+              <ToggleGroup
+                id="player-level"
+                type="single"
+                value={level}
+                onValueChange={(val) => val && setLevel(val)}
+                className="flex flex-wrap gap-2 w-full"
+              >
+                {LEVELS.map(({ value, label }) => (
+                  <ToggleGroupItem key={value} value={value.toString()} className="w-8 justify-center">
+                    {label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+
+            {/* Dupla preferida */}
+            <div className="grid gap-3">
+              <Label htmlFor="preferred-pair" className="text-md">
+                Dupla preferida
+              </Label>
+              <Select value={preferredPair} onValueChange={(val) => setPreferredPair(val)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione um parceiro…" />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {selectablePlayers.map((pl) => (
+                    <SelectItem key={pl.id} value={pl.id} className="flex items-center gap-2">
+                      {pl.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </DialogFooter>
+
+          <DialogFooter className="flex-row justify-between">
+            {mode === 'edit' && (
+              <>
+                {/* Botão que abre o ConfirmDialog */}
+                <Button variant="ghost" aria-label={`Remover ${player!.name}`} onClick={() => setConfirmOpen(true)}>
+                  <Trash className="text-destructive" size={16} />
+                </Button>
+
+                {/* ConfirmDialog para exclusão */}
+                <ConfirmDialog
+                  open={confirmOpen}
+                  onOpenChange={(open) => {
+                    if (!open) setConfirmOpen(false)
+                  }}
+                  title={`Apagar jogador ${player!.name}?`}
+                  description={
+                    <p>
+                      O jogador e suas estatísticas serão permanentemente apagados.{' '}
+                      <span className="text-nowrap">Deseja continuar?</span>
+                    </p>
+                  }
+                  confirmText="Apagar jogador"
+                  cancelText="Cancelar"
+                  onConfirm={handleDelete}
+                  confirmVariant="destructive"
+                />
+              </>
+            )}
+
+            <div className="flex gap-2 ml-auto">
+              <DialogClose asChild>
+                <Button variant="outline">{mode === 'edit' ? 'Cancelar' : 'Voltar'}</Button>
+              </DialogClose>
+              <Button type="submit">{mode === 'edit' ? 'Salvar' : 'Salvar'}</Button>
+            </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
