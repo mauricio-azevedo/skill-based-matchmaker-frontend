@@ -25,7 +25,7 @@ export function PlayerEntry({ name, reverse = false, className = '', matchCount 
               .join('')}
           </AvatarFallback>
         </Avatar>
-        <p className="truncate whitespace-nowrap overflow-hidden text-md max-w-[90px]">{name}</p>
+        <p className="truncate whitespace-nowrap overflow-hidden text-md">{name}</p>
       </div>
 
       {/* optional match‑count badge */}

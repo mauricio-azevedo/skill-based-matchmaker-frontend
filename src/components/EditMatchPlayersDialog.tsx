@@ -19,7 +19,7 @@ import { getBusyPlayerIds } from '@/lib/matchUtils'
 import { PlayerEntry } from '@/components/PlayerEntry'
 import { FORMATION_MODES } from '@/lib/formationModes'
 
-/* Dialog ----------------------------------------------------------------- */
+/* ------------------------------------------------------------------------ */
 interface Props {
   match: Match
   matchNumber: number
@@ -31,10 +31,10 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
 
   const [open, setOpen] = useState(false)
 
-  /** IDs of players already tied to another ongoing match (excluding this one) */
+  /** IDs já ocupados em outras partidas (exceto esta) */
   const busyIds: Set<string> = useMemo(() => getBusyPlayerIds(matches, [match.id]), [matches, match.id])
 
-  /** Active + free players, plus the four players currently on this match */
+  /** Jogadores ativos e livres + os quatro já nesta partida */
   const options: Player[] = useMemo(
     () =>
       players.filter(
@@ -51,10 +51,9 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
   const [b1, setB1] = useState(match.teamBPlayer1)
   const [b2, setB2] = useState(match.teamBPlayer2)
 
-  /** Whenever the dialog opens, discard any unsaved edits and reload from `match` */
+  /** Recarrega seleções quando o diálogo abre */
   useEffect(() => {
     if (!open) return
-
     setA1(match.teamAPlayer1)
     setA2(match.teamAPlayer2)
     setB1(match.teamBPlayer1)
@@ -74,7 +73,6 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
       teamBPlayer2: b2,
       formationMode: FORMATION_MODES.MANUAL,
     })
-
     setOpen(false)
   }
 
@@ -90,17 +88,25 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
         <DialogHeader>
           <DialogTitle>Editar partida {matchNumber}</DialogTitle>
         </DialogHeader>
-        <div className="flex gap-2 items-center justify-between py-2">
-          <div className="flex flex-col gap-2 flex-1">
+
+        {/* ---------- layout: 3‑col grid (1fr‑auto‑1fr) ---------- */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 py-2">
+          {/* Equipe A */}
+          <div className="flex flex-col gap-2 min-w-0">
             <PlayerSelect value={a1} onChange={setA1} options={options} invalid={duplicateIds.includes(a1)} />
             <PlayerSelect value={a2} onChange={setA2} options={options} invalid={duplicateIds.includes(a2)} />
           </div>
+
+          {/* Separador */}
           <XIcon className="text-muted-foreground w-4 h-4" />
-          <div className="flex flex-col gap-2 flex-1">
+
+          {/* Equipe B */}
+          <div className="flex flex-col gap-2 min-w-0">
             <PlayerSelect value={b1} onChange={setB1} options={options} invalid={duplicateIds.includes(b1)} />
             <PlayerSelect value={b2} onChange={setB2} options={options} invalid={duplicateIds.includes(b2)} />
           </div>
         </div>
+
         <DialogFooter className="flex flex-row justify-end gap-2">
           <DialogClose asChild>
             <Button type="button" variant="outline" size="lg" className="h-11 text-md">
@@ -116,6 +122,7 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
   )
 }
 
+/* ------------------------------------------------------------------------ */
 interface PlayerSelectProps {
   value: string
   onChange: (v: string) => void
@@ -128,13 +135,21 @@ const PlayerSelect = ({ value, onChange, options, invalid }: PlayerSelectProps) 
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className={cn('w-full !ring-0 !border-border', invalid && '!ring-2 !ring-destructive')}>
-        {selected ? <PlayerEntry name={selected.name} /> : null}
+      <SelectTrigger
+        className={cn(
+          // full‑width flex row: left=content (can shrink), right=caret (fixed)
+          'w-full min-w-0 flex items-center justify-between gap-2 !ring-0 !border-border !h-11 text-md p-2',
+          invalid && '!ring-2 !ring-destructive',
+        )}
+      >
+        {/* content takes all free space and can truncate */}
+        <div className="min-w-0 flex-1">{selected && <PlayerEntry name={selected.name} className="min-w-0" />}</div>
+        {/* the caret icon is rendered by shadcn internally – no change needed */}
       </SelectTrigger>
 
       <SelectContent>
         {options.map((p) => (
-          <SelectItem key={p.id} value={p.id}>
+          <SelectItem key={p.id} value={p.id} className="h-11 text-md">
             <PlayerEntry name={p.name} matchCount={p.matchCount} />
           </SelectItem>
         ))}
