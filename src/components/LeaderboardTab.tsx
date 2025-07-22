@@ -8,7 +8,6 @@ import type { Match, Player } from '@/types/entities'
 // shadcn/ui components
 import { TooltipProvider } from '@/components/ui/tooltip'
 import type { PlayerLBRow } from '@/types/types'
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
@@ -244,8 +243,9 @@ const LeaderboardTab: FC = () => {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <h2 className="text-lg font-semibold leading-tight m-0 text-center">Leaderboard</h2>
-      <Separator className="mt-2 mb-0" />
+      <div className="w-full border-b border-border min-h-11 max-h-11 flex items-center justify-center relative">
+        <h2 className="text-xl font-semibold leading-tight m-0">Leaderboard</h2>
+      </div>
 
       {rows.length === 0 ? (
         <div className="h-full flex items-center justify-center">
@@ -259,7 +259,7 @@ const LeaderboardTab: FC = () => {
               <div role="table" className="table w-full">
                 {/* cabeçalho */}
                 <div role="rowgroup" className="table-header-group">
-                  <div role="row" className="table-row sticky top-0 z-20 bg-background font-medium">
+                  <div role="row" className="table-row sticky top-0 z-20 bg-background font-medium text-md">
                     <div role="columnheader" className="table-cell p-2 border-b border-t">
                       #
                     </div>
@@ -283,7 +283,7 @@ const LeaderboardTab: FC = () => {
                 </div>
 
                 {/* corpo */}
-                <div role="rowgroup" className="table-row-group text-sm ">
+                <div role="rowgroup" className="table-row-group text-md">
                   {rows.map((p, idx) => {
                     const isLastRow = idx === rows.length - 1
                     const cellClass: string = isLastRow ? 'table-cell p-2' : 'table-cell p-2 border-b'
@@ -340,7 +340,7 @@ const LeaderboardTab: FC = () => {
       )}
 
       {rows.length > 0 && (
-        <div className="flex flex-col text-xs text-muted-foreground mt-2 pl-4">
+        <div className="flex flex-col text-sm text-muted-foreground mt-2 pl-4">
           <p>
             <b>P</b> = Pontos (3 por vitória) | <b>V-D</b> = Vitórias-Derrotas
             <br />

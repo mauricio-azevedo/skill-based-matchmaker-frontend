@@ -34,7 +34,7 @@ const PlayerSortDropdown: React.FC<Props> = ({ sortBy, setSortBy }) => (
           key={option}
           checked={sortBy === option}
           onCheckedChange={() => setSortBy(option)}
-          className="flex items-center gap-2"
+          className="flex items-center h-11 text-md"
         >
           {LABELS[option]}
         </DropdownMenuCheckboxItem>
