@@ -62,7 +62,10 @@ export const MatchesProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setMatchesById({})
   }
 
-  const matches = useMemo(() => Object.values(matchesById), [matchesById])
+  const matches = useMemo(
+    () => Object.values(matchesById).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+    [matchesById],
+  )
   const getById = (id: string): Match | null => matchesById[id] ?? null
 
   return (

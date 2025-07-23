@@ -169,7 +169,7 @@ export function useMatchManager(): {
 
       const freePlayers: Player[] = result.players
       const modeToUse = determineFormationMode(court.formationMode, court.autoAlternate, matches, courtId)
-      const teams = generateMatch(freePlayers, modeToUse, partnerCounts)
+      const teams = generateMatch(freePlayers, modeToUse, partnerCounts, matches)
 
       addMatchToCourt({
         courtId,
@@ -216,7 +216,7 @@ export function useMatchManager(): {
 
       let newTeams
       try {
-        newTeams = generateMatch(freePlayers, mode, partnerCounts, excluded)
+        newTeams = generateMatch(freePlayers, mode, partnerCounts, matches, excluded)
       } catch (e) {
         return singleToastError(e instanceof Error ? e.message : 'Erro ao gerar combinação.')
       }

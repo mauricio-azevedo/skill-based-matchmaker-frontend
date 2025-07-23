@@ -1,4 +1,4 @@
-import type { Player } from '@/types/entities'
+import type { Match, Player } from '@/types/entities'
 import { type FormationMode } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
 
@@ -20,12 +20,6 @@ type DoublesPair = readonly [PlayerIdx, PlayerIdx]
 
 export type PartnerCounts = Record<string, Record<string, number>>
 
-/** Histórico cronológico de partidas já realizadas (mais antigas → primeiro). */
-export interface PlayedMatch {
-  teamA: readonly [string, string]
-  teamB: readonly [string, string]
-}
-
 interface ScoredMatch {
   teamA: DoublesPair
   teamB: DoublesPair
@@ -45,12 +39,13 @@ const comboKey = (...ids: [string, string, string, string]) =>
   [[ids[0], ids[1]].sort().join('|'), [ids[2], ids[3]].sort().join('|')].sort().join('#')
 
 /** Distância (em partidas) desde a última vez que cada atleta jogou. */
-function buildRecencyMap(history: readonly PlayedMatch[], players: readonly Player[]): Record<string, number> {
-  const now = history.length
+function buildRecencyMap(matchHistory: readonly Match[], players: readonly Player[]): Record<string, number> {
+  const now = matchHistory.length
   const distance: Record<string, number> = Object.fromEntries(players.map((p) => [p.id, now]))
 
-  for (let i = history.length - 1; i >= 0; i--) {
-    const ids = [...history[i].teamA, ...history[i].teamB]
+  for (let i = matchHistory.length - 1; i >= 0; i--) {
+    const m = matchHistory[i]
+    const ids = [m.teamAPlayer1, m.teamAPlayer2, m.teamBPlayer1, m.teamBPlayer2]
     const dist = now - i - 1
     for (const id of ids) {
       if (distance[id] === now) distance[id] = dist
@@ -189,14 +184,14 @@ export function filterMatchesForLowRefPlayers(
  * @param players         – lista completa de jogadores.
  * @param formationMode   – homogêneo ou nivelado.
  * @param partnerCounts   – histórico de parcerias (idA → idB → vezes).
- * @param playedHistory   – partidas já disputadas, ordem cronológica.
+ * @param matchHistory   – partidas já disputadas, ordem cronológica.
  * @param excludedCombos  – combinações a descartar.
  */
 export function generateMatch(
   players: readonly Player[],
   formationMode: FormationMode,
   partnerCounts: PartnerCounts,
-  playedHistory: readonly PlayedMatch[] = [],
+  matchHistory: readonly Match[],
   excludedCombos: Set<string> = new Set(),
 ): {
   teamAPlayer1: string
@@ -209,7 +204,7 @@ export function generateMatch(
   }
 
   /* — cálculo de distância desde a última partida de cada atleta — */
-  const recencyMap = buildRecencyMap(playedHistory, players)
+  const recencyMap = buildRecencyMap(matchHistory, players)
 
   /* — pontuação e ordenação — */
   const orderedMatches = enumerateMatches(players, formationMode, partnerCounts, recencyMap).sort((a, b) =>
