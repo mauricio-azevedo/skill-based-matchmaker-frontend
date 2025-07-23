@@ -7,9 +7,9 @@ export const MIN_PLAYERS = 4 as const
 
 /** Pesos usados na função de pontuação. */
 const WEIGHT = {
-  LAST_PLAYED: 10, // bônus proporcional ao tempo sem jogar
   SKILL_IMBALANCE: 8,
-  WITHIN_TEAM_VARIATION: 3, // vira -3 no modo nivelado
+  WITHIN_TEAM_VARIATION: 7, // negativa no modo nivelado
+  LAST_PLAYED: 6, // bônus proporcional ao tempo sem jogar
   PARTNER_COUNT: 2,
   PREFERRED_PAIR: 1,
 } as const
@@ -78,8 +78,7 @@ function scoreMatch(
 
   /* — variação interna das equipes — */
   const withinTeamVariation = Math.abs(pA1.level - pA2.level) + Math.abs(pB1.level - pB2.level)
-  const withinWeight =
-    mode === FORMATION_MODES.HOMOGENEOUS ? WEIGHT.WITHIN_TEAM_VARIATION : -WEIGHT.WITHIN_TEAM_VARIATION
+  const withinVariationSign = mode === FORMATION_MODES.HOMOGENEOUS ? 1 : -1
 
   /* — penalidades e bônus — */
   const pastPairPenalty = timesPartnered(partnerCounts, pA1.id, pA2.id) + timesPartnered(partnerCounts, pB1.id, pB2.id)
@@ -92,7 +91,7 @@ function scoreMatch(
 
   return (
     WEIGHT.SKILL_IMBALANCE * skillPairImbalance +
-    withinWeight * withinTeamVariation +
+    WEIGHT.WITHIN_TEAM_VARIATION * withinTeamVariation * withinVariationSign +
     WEIGHT.PARTNER_COUNT * pastPairPenalty -
     WEIGHT.PREFERRED_PAIR * preferredBonus +
     WEIGHT.LAST_PLAYED * recencyBonus
