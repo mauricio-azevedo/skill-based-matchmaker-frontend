@@ -10,7 +10,7 @@ const WEIGHT = {
   SKILL_IMBALANCE: 8,
   WITHIN_TEAM_VARIATION: 3, // vira -3 no modo nivelado
   PREFERRED_PAIR: 2,
-  PARTNER_COUNT: 1,
+  PARTNER_COUNT: 2,
 } as const
 
 /* ──────────────── Tipos ──────────────── */
@@ -59,7 +59,6 @@ function scoreMatch(
   const skillPairImbalance = Math.min(diffOpposite, diffDiagonal)
 
   // Balanço entre equipes e variações internas.
-  const teamImbalance = Math.abs(pA1.level + pA2.level - (pB1.level + pB2.level))
   const withinTeamVariation = Math.abs(pA1.level - pA2.level) + Math.abs(pB1.level - pB2.level)
   const withinWeight =
     mode === FORMATION_MODES.HOMOGENEOUS ? WEIGHT.WITHIN_TEAM_VARIATION : -WEIGHT.WITHIN_TEAM_VARIATION
@@ -72,8 +71,7 @@ function scoreMatch(
     +prefSets[a1].has(pA2.id) + +prefSets[a2].has(pA1.id) + +prefSets[b1].has(pB2.id) + +prefSets[b2].has(pB1.id)
 
   return (
-    skillPairImbalance +
-    WEIGHT.SKILL_IMBALANCE * teamImbalance +
+    WEIGHT.SKILL_IMBALANCE * skillPairImbalance +
     WEIGHT.PARTNER_COUNT * pastPairPenalty -
     WEIGHT.PREFERRED_PAIR * preferredBonus +
     withinWeight * withinTeamVariation
