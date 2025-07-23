@@ -110,14 +110,15 @@ function determineFormationMode(
 export function useMatchManager(): {
   generateAndStartMatch: (courtId: string) => void
   shuffleMatch: (courtId: string) => void
+  completeMatch: (matchId: string, gamesA: number, gamesB: number) => void
 } {
   const { players, updatePlayers } = usePlayers()
-  const { addMatch, matches, getById, deleteMatch } = useMatches()
+  const { addMatch, matches, getById, deleteMatch, updateMatch } = useMatches()
   const { courts, updateCourt } = useCourts()
   const { partnerCounts } = buildStats(matches)
 
   /* ajusta referenceMatchCount */
-  const adjustRef = useCallback(
+  const adjustPlayersMatchCount = useCallback(
     (ids: string[], delta: number) => {
       const now = new Date().toISOString()
       updatePlayers((prev) =>
@@ -136,10 +137,9 @@ export function useMatchManager(): {
     (d: CreateMatchPayload) => {
       const id = addMatch(d)
       updateCourt(d.courtId, { matchId: id })
-      adjustRef([d.teamAPlayer1, d.teamAPlayer2, d.teamBPlayer1, d.teamBPlayer2], +1)
       return id
     },
-    [addMatch, updateCourt, adjustRef],
+    [addMatch, updateCourt],
   )
 
   /* apaga partida, remove da quadra e decrementa contador dos jogadores */
@@ -147,11 +147,10 @@ export function useMatchManager(): {
     (courtId: string, matchId: string) => {
       const match = getById(matchId)
       if (!match) return
-      adjustRef([match.teamAPlayer1, match.teamAPlayer2, match.teamBPlayer1, match.teamBPlayer2], -1)
       deleteMatch(matchId)
       updateCourt(courtId, { matchId: null })
     },
-    [getById, deleteMatch, updateCourt, adjustRef],
+    [getById, deleteMatch, updateCourt],
   )
 
   const generateAndStartMatch = useCallback(
@@ -251,5 +250,25 @@ export function useMatchManager(): {
     [courts, matches, players, partnerCounts, getById, removeMatchFromCourt, addMatchToCourt],
   )
 
-  return { generateAndStartMatch, shuffleMatch }
+  const completeMatch = useCallback(
+    (matchId: string, gamesA: number, gamesB: number) => {
+      const match = getById(matchId)
+      if (!match || gamesA === gamesB) return
+
+      const winner: 'A' | 'B' = gamesA > gamesB ? 'A' : 'B'
+
+      updateMatch(matchId, {
+        gamesA,
+        gamesB,
+        winner,
+        status: 'completed',
+        endTime: new Date().toISOString(),
+      })
+
+      adjustPlayersMatchCount([match.teamAPlayer1, match.teamAPlayer2, match.teamBPlayer1, match.teamBPlayer2], 1)
+    },
+    [getById, updateMatch, adjustPlayersMatchCount],
+  )
+
+  return { generateAndStartMatch, shuffleMatch, completeMatch }
 }

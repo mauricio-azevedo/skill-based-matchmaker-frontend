@@ -2,9 +2,9 @@ import { forwardRef, useEffect, useRef, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Crown, XIcon } from 'lucide-react'
 import { usePlayers } from '@/context/PlayersContext'
-import { useMatches } from '@/context/MatchesContext'
 import type { Match } from '@/types/entities'
 import { PlayerEntry } from '@/components/PlayerEntry'
+import { useMatchManager } from '@/hooks/useMatchManager'
 
 /* ---------- score selector ---------- */
 interface ScoreSelectProps {
@@ -43,7 +43,7 @@ export function MatchCard({ match }: { match: Match }) {
   const [gamesB, setGamesB] = useState<number | ''>('')
 
   const { getById } = usePlayers()
-  const { updateMatch } = useMatches()
+  const { completeMatch } = useMatchManager()
 
   const inputARef = useRef<HTMLInputElement>(null)
   const inputBRef = useRef<HTMLInputElement>(null)
@@ -61,15 +61,8 @@ export function MatchCard({ match }: { match: Match }) {
   useEffect(() => {
     if (!filled || !dirty || gamesA === gamesB) return
 
-    const winnerValue = gamesA > gamesB ? 'A' : 'B'
-    updateMatch(match.id, {
-      gamesA: gamesA as number,
-      gamesB: gamesB as number,
-      winner: winnerValue,
-      status: 'completed',
-      endTime: new Date().toISOString(),
-    })
-  }, [gamesA, gamesB, filled, dirty, match.id, updateMatch])
+    completeMatch(match.id, gamesA as number, gamesB as number)
+  }, [gamesA, gamesB, filled, dirty, match.id, completeMatch])
 
   /* 3–4) focus/blur logic & no ties */
   const handleChangeA = (v: number | '') => {
