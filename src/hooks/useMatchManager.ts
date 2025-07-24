@@ -191,6 +191,9 @@ export function useMatchManager(): {
       })
 
       adjustPlayersMatchCount([match.teamAPlayer1, match.teamAPlayer2, match.teamBPlayer1, match.teamBPlayer2], 1)
+
+      // const { matchCounts } = buildStats(matches)
+      // console.log(Object.keys(matchCounts).length, matchCounts)
     },
     [getById, updateMatch, adjustPlayersMatchCount],
   )
