@@ -12,19 +12,30 @@ import { useCourtMatches } from '@/hooks/useCourtMatches'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { EditMatchPlayersDialog } from '@/components/EditMatchPlayersDialog'
+import type { Match } from '@/types/entities'
+import { SelectAlternativeDialog } from '@/components/SelectAlternativeDialog'
 
 export function PlayTab() {
   const { courts } = useCourts()
-  const { generateAndStartMatch, shuffleMatch } = useMatchManager()
+  const { generateAndStartMatch } = useMatchManager()
   const { getById, matches } = useMatches()
   const { removeCourtAndMatch, addCourtWithMatch } = useCourtMatches()
 
-  const [pendingDelete, setPendingDelete] = useState<{
-    courtId: string
-    courtNumber: number
-  } | null>(null)
+  // useEffect(() => {
+  //   const { matchCounts } = buildStats(matches)
+  //   console.log(Object.keys(matchCounts).length)
+  //   console.log(matchCounts)
+  // }, [matches])
 
-  const [pendingShuffle, setPendingShuffle] = useState<{
+  const [selectAlternativeMatch, setSelectAlternativeMatch] = useState<Match | null>(null)
+  const handleOpenAlternatives = useCallback((match: Match) => {
+    setSelectAlternativeMatch(match)
+  }, [])
+  const handleCloseAlternatives = useCallback(() => {
+    setSelectAlternativeMatch(null)
+  }, [])
+
+  const [pendingDelete, setPendingDelete] = useState<{
     courtId: string
     courtNumber: number
   } | null>(null)
@@ -63,20 +74,6 @@ export function PlayTab() {
 
   const handleCancelDelete = useCallback(() => {
     setPendingDelete(null)
-  }, [])
-
-  const handleRequestShuffle = useCallback((courtId: string, courtNumber: number) => {
-    setPendingShuffle({ courtId, courtNumber }) // abre ConfirmDialog
-  }, [])
-
-  const handleConfirmShuffle = useCallback(() => {
-    if (!pendingShuffle) return
-    shuffleMatch(pendingShuffle.courtId) // executa shuffle
-    setPendingShuffle(null)
-  }, [pendingShuffle, shuffleMatch])
-
-  const handleCancelShuffle = useCallback(() => {
-    setPendingShuffle(null) // apenas fecha diálogo
   }, [])
 
   return (
@@ -168,7 +165,7 @@ export function PlayTab() {
                         variant="secondary"
                         className="w-11 h-11"
                         disabled={!hasOngoingMatch}
-                        onClick={() => hasOngoingMatch && handleRequestShuffle(court.id, courtNumber)}
+                        onClick={() => hasOngoingMatch && handleOpenAlternatives(match)}
                       >
                         <ShuffleIcon className="!w-4.5 !h-4.5" />
                       </Button>
@@ -217,21 +214,9 @@ export function PlayTab() {
         confirmVariant="destructive"
       />
 
-      <ConfirmDialog
-        open={Boolean(pendingShuffle)}
-        onOpenChange={(open) => {
-          if (!open) handleCancelShuffle()
-        }}
-        title={`Embaralhar partida da quadra ${pendingShuffle?.courtNumber}?`}
-        description={
-          <p>
-            Uma nova combinação de jogadores será gerada. <span className="text-nowrap">Deseja continuar?</span>
-          </p>
-        }
-        confirmText="Embaralhar"
-        cancelText="Cancelar"
-        onConfirm={handleConfirmShuffle}
-      />
+      {selectAlternativeMatch && (
+        <SelectAlternativeDialog open={true} onOpenChange={handleCloseAlternatives} match={selectAlternativeMatch} />
+      )}
     </div>
   )
 }

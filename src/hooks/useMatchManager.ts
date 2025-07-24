@@ -3,8 +3,8 @@ import { useMatches } from '@/context/MatchesContext'
 import { usePlayers } from '@/context/PlayersContext'
 import { useCourts } from '@/context/CourtsContext'
 import { generateMatch } from '@/lib/algorithm'
-import { type Match, type Player } from '@/types/entities'
-import { type CreateMatchPayload, type FormationMode } from '@/types/types'
+import { type Match, type MatchPlayers, type Player } from '@/types/entities'
+import { type CreateMatchPayload, type FormationMode, type MatchResult } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
 import { singleToastError } from '@/utils/singleToast'
 import { getBusyPlayerIds } from '@/lib/matchUtils'
@@ -109,11 +109,11 @@ function determineFormationMode(
 
 export function useMatchManager(): {
   generateAndStartMatch: (courtId: string) => void
-  shuffleMatch: (courtId: string) => void
   completeMatch: (matchId: string, gamesA: number, gamesB: number) => void
+  selectAlternative: (matchId: string, alternative: MatchPlayers) => void
 } {
   const { players, updatePlayers } = usePlayers()
-  const { addMatch, matches, getById, deleteMatch, updateMatch } = useMatches()
+  const { addMatch, matches, getById, updateMatch } = useMatches()
   const { courts, updateCourt } = useCourts()
   const { partnerCounts } = buildStats(matches)
 
@@ -142,17 +142,6 @@ export function useMatchManager(): {
     [addMatch, updateCourt],
   )
 
-  /* apaga partida, remove da quadra e decrementa contador dos jogadores */
-  const removeMatchFromCourt = useCallback(
-    (courtId: string, matchId: string) => {
-      const match = getById(matchId)
-      if (!match) return
-      deleteMatch(matchId)
-      updateCourt(courtId, { matchId: null })
-    },
-    [getById, deleteMatch, updateCourt],
-  )
-
   const generateAndStartMatch = useCallback(
     (courtId: string) => {
       const court = courts.find((c) => c.id === courtId)
@@ -168,11 +157,10 @@ export function useMatchManager(): {
 
       const freePlayers: Player[] = result.players
       const modeToUse = determineFormationMode(court.formationMode, court.autoAlternate, matches, courtId)
-      const teams = generateMatch(freePlayers, modeToUse, partnerCounts, matches)
+      const matchResult: MatchResult = generateMatch(freePlayers, modeToUse, partnerCounts, matches)
 
       addMatchToCourt({
         courtId,
-        ...teams,
         startTime: new Date().toISOString(),
         endTime: null,
         status: 'ongoing',
@@ -180,74 +168,11 @@ export function useMatchManager(): {
         gamesB: null,
         winner: null,
         formationMode: modeToUse,
-        shuffleHistory: [],
+        alternatives: matchResult.alternatives,
+        ...matchResult.players,
       })
     },
     [players, matches, courts, partnerCounts, addMatchToCourt],
-  )
-
-  const shuffleMatch = useCallback(
-    (courtId: string) => {
-      const court = courts.find((c) => c.id === courtId)
-      if (!court) throw new Error('Quadra não encontrada')
-      if (!court.matchId) return singleToastError('Nenhuma partida em andamento nesta quadra.')
-
-      const currentMatch: Match | null = getById(court.matchId)
-      if (!currentMatch) return singleToastError('Partida não encontrada.')
-
-      const mode: FormationMode = court.autoAlternate ? currentMatch.formationMode : court.formationMode
-
-      /* jogadores livres, ignorando a partida atual */
-      const busy = getBusyPlayerIds(matches.filter((m) => m.id !== currentMatch.id))
-      const freePlayers = players.filter((p) => p.active && !busy.has(p.id))
-      if (freePlayers.length < MIN_PLAYERS) return singleToastError('Jogadores suficientes não disponíveis.')
-
-      /* combinações já usadas */
-      const excluded = new Set<string>()
-      const addKey = (m: { teamAPlayer1: string; teamAPlayer2: string; teamBPlayer1: string; teamBPlayer2: string }) =>
-        excluded.add(
-          [[m.teamAPlayer1, m.teamAPlayer2].sort().join('|'), [m.teamBPlayer1, m.teamBPlayer2].sort().join('|')]
-            .sort()
-            .join('#'),
-        )
-      addKey(currentMatch)
-      currentMatch.shuffleHistory.forEach(addKey)
-
-      let newTeams
-      try {
-        newTeams = generateMatch(freePlayers, mode, partnerCounts, matches, excluded)
-      } catch (e) {
-        return singleToastError(e instanceof Error ? e.message : 'Erro ao gerar combinação.')
-      }
-
-      /* novo histórico = histórico anterior + combinação que acabou de sair */
-      const newHistory = [
-        ...currentMatch.shuffleHistory,
-        {
-          teamAPlayer1: currentMatch.teamAPlayer1,
-          teamAPlayer2: currentMatch.teamAPlayer2,
-          teamBPlayer1: currentMatch.teamBPlayer1,
-          teamBPlayer2: currentMatch.teamBPlayer2,
-        },
-      ]
-
-      /* remove a partida antiga e cria uma nova, preservando o histórico */
-      removeMatchFromCourt(courtId, currentMatch.id)
-
-      addMatchToCourt({
-        courtId,
-        ...newTeams,
-        startTime: new Date().toISOString(),
-        endTime: null,
-        status: 'ongoing',
-        gamesA: null,
-        gamesB: null,
-        winner: null,
-        formationMode: mode,
-        shuffleHistory: newHistory,
-      })
-    },
-    [courts, matches, players, partnerCounts, getById, removeMatchFromCourt, addMatchToCourt],
   )
 
   const completeMatch = useCallback(
@@ -270,5 +195,33 @@ export function useMatchManager(): {
     [getById, updateMatch, adjustPlayersMatchCount],
   )
 
-  return { generateAndStartMatch, shuffleMatch, completeMatch }
+  const selectAlternative = useCallback(
+    (matchId: string, alternative: MatchPlayers) => {
+      const match = getById(matchId)
+      if (!match) throw new Error('Partida não encontrada')
+
+      // captura jogadores atuais
+      const previousPlayers: MatchPlayers = {
+        teamAPlayer1: match.teamAPlayer1,
+        teamAPlayer2: match.teamAPlayer2,
+        teamBPlayer1: match.teamBPlayer1,
+        teamBPlayer2: match.teamBPlayer2,
+      }
+
+      // Remove a alternativa selecionada
+      const updatedAlternatives = match.alternatives.filter((alt) => alt !== alternative)
+
+      // atualiza a partida: aplica a alternativa e empurra os antigos p/ alternatives
+      updateMatch(matchId, {
+        teamAPlayer1: alternative.teamAPlayer1,
+        teamAPlayer2: alternative.teamAPlayer2,
+        teamBPlayer1: alternative.teamBPlayer1,
+        teamBPlayer2: alternative.teamBPlayer2,
+        alternatives: [...updatedAlternatives, previousPlayers],
+      })
+    },
+    [getById, updateMatch],
+  )
+
+  return { generateAndStartMatch, completeMatch, selectAlternative }
 }

@@ -1,9 +1,14 @@
-import type { Match, Player } from '@/types/entities'
+import type { Match, MatchPlayers, Player } from '@/types/entities'
 import { FORMATION_MODES } from '@/lib/formationModes'
 
 export type CreateMatchPayload = Omit<Match, 'id' | 'createdAt' | 'updatedAt'>
 
 export type FormationMode = (typeof FORMATION_MODES)[keyof typeof FORMATION_MODES]
+
+export interface MatchResult {
+  players: MatchPlayers
+  alternatives: MatchPlayers[]
+}
 
 export interface PlayerLBRow extends Player {
   P: number

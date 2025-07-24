@@ -1,5 +1,5 @@
-import type { Match, Player } from '@/types/entities'
-import { type FormationMode } from '@/types/types'
+import type { Match, MatchPlayers, Player } from '@/types/entities'
+import { type FormationMode, type MatchResult } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
 
 /** Número mínimo de jogadores para formar duas duplas. */
@@ -33,10 +33,6 @@ const indexPairs = (n: number): DoublesPair[] =>
 
 const timesPartnered = (counts: PartnerCounts, a: string, b: string) => counts[a]?.[b] ?? 0
 const preferredPairSets = (players: readonly Player[]) => players.map((p) => new Set(p.preferredPairs ?? []))
-
-/** Chave única para impedir combinações repetidas, independente da ordem. */
-const comboKey = (...ids: [string, string, string, string]) =>
-  [[ids[0], ids[1]].sort().join('|'), [ids[2], ids[3]].sort().join('|')].sort().join('#')
 
 /** Distância (em partidas) desde a última vez que cada atleta jogou. */
 function buildRecencyMap(matchHistory: readonly Match[], players: readonly Player[]): Record<string, number> {
@@ -128,23 +124,6 @@ function enumerateMatches(
   return matches
 }
 
-function selectNextMatch(
-  matches: ScoredMatch[],
-  players: readonly Player[],
-  excluded: Set<string>,
-): ScoredMatch | undefined {
-  for (const match of matches) {
-    const key = comboKey(
-      players[match.teamA[0]].id,
-      players[match.teamA[1]].id,
-      players[match.teamB[0]].id,
-      players[match.teamB[1]].id,
-    )
-    if (!excluded.has(key)) return match
-  }
-  return undefined
-}
-
 /* —──── jogadores com menos referenceMatchCount —─── */
 
 export function playersBelowMaxReferenceCount(players: readonly Player[]): string[] {
@@ -170,6 +149,27 @@ export function filterMatchesForLowRefPlayers(
   })
 }
 
+/** Retorna todas as partidas com a menor pontuação (melhor) entre as fornecidas. */
+function getBestMatches(matches: readonly ScoredMatch[]): ScoredMatch[] {
+  if (matches.length === 0) return []
+  const bestScore = matches.reduce((min, m) => (m.score < min ? m.score : min), matches[0].score)
+  return matches.filter((m) => m.score === bestScore)
+}
+
+function formatMatches(matches: readonly ScoredMatch[], players: readonly Player[]): MatchPlayers[] {
+  return matches.map((m) => {
+    const [x1, x2] = m.teamA
+    const [y1, y2] = m.teamB
+
+    return {
+      teamAPlayer1: players[x1].id,
+      teamAPlayer2: players[x2].id,
+      teamBPlayer1: players[y1].id,
+      teamBPlayer2: players[y2].id,
+    }
+  })
+}
+
 /* ──────────────── API pública ──────────────── */
 
 /**
@@ -180,48 +180,37 @@ export function filterMatchesForLowRefPlayers(
  *  • atender pares preferidos,
  *  • e, agora, jogadores que estão há mais tempo sem jogar.
  *
- * @param players         – lista completa de jogadores.
+ * @param AllPlayers         – lista completa de jogadores.
  * @param formationMode   – homogêneo ou nivelado.
  * @param partnerCounts   – histórico de parcerias (idA → idB → vezes).
  * @param matchHistory   – partidas já disputadas, ordem cronológica.
- * @param excludedCombos  – combinações a descartar.
  */
 export function generateMatch(
-  players: readonly Player[],
+  AllPlayers: readonly Player[],
   formationMode: FormationMode,
   partnerCounts: PartnerCounts,
   matchHistory: readonly Match[],
-  excludedCombos: Set<string> = new Set(),
-): {
-  teamAPlayer1: string
-  teamAPlayer2: string
-  teamBPlayer1: string
-  teamBPlayer2: string
-} {
-  if (players.length < MIN_PLAYERS) {
+): MatchResult {
+  if (AllPlayers.length < MIN_PLAYERS) {
     throw new Error(`É preciso ao menos ${MIN_PLAYERS} jogadores para gerar o cronograma.`)
   }
 
-  /* — cálculo de distância desde a última partida de cada atleta — */
-  const recencyMap = buildRecencyMap(matchHistory, players)
+  const recencyMap = buildRecencyMap(matchHistory, AllPlayers)
 
-  /* — pontuação e ordenação — */
-  const orderedMatches = enumerateMatches(players, formationMode, partnerCounts, recencyMap).sort((a, b) =>
+  const orderedMatches = enumerateMatches(AllPlayers, formationMode, partnerCounts, recencyMap).sort((a, b) =>
     a.score !== b.score ? a.score - b.score : Math.random() - 0.5,
   )
 
-  const eligibleMatches = filterMatchesForLowRefPlayers(orderedMatches, players)
+  const eligibleMatches = filterMatchesForLowRefPlayers(orderedMatches, AllPlayers)
 
-  const chosen = selectNextMatch(eligibleMatches, players, excludedCombos)
-  if (!chosen) throw new Error('Não há novas combinações disponíveis.')
+  if (!eligibleMatches.length) throw new Error('Não há novas combinações disponíveis.')
 
-  const [a1, a2] = chosen.teamA
-  const [b1, b2] = chosen.teamB
+  const bestMatches = getBestMatches(eligibleMatches)
 
-  return {
-    teamAPlayer1: players[a1].id,
-    teamAPlayer2: players[a2].id,
-    teamBPlayer1: players[b1].id,
-    teamBPlayer2: players[b2].id,
-  }
+  const bestFormatted = formatMatches(bestMatches, AllPlayers)
+
+  const [players, ...allAlternatives] = bestFormatted
+  const alternatives = allAlternatives.slice(0, 3)
+
+  return { players, alternatives }
 }
