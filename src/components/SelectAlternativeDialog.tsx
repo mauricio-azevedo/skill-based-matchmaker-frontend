@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useMatchManager } from '@/hooks/useMatchManager'
 import { type Match, type MatchPlayers } from '@/types/entities'
 import { usePlayers } from '@/context/PlayersContext'
+import { XIcon } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -40,13 +41,15 @@ export function SelectAlternativeDialog({ open, onOpenChange, match }: Props) {
               ${selected === alt && ' bg-accent'}
               hover:bg-accent transition-colors text-left`}
             >
-              <div className="flex justify-between">
-                <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 w-full">
+                <div className="flex flex-col gap-2 min-w-0">
                   <PlayerEntry name={getById(alt.teamAPlayer1)?.name || 'Desconhecido'} />
                   <PlayerEntry name={getById(alt.teamAPlayer2)?.name || 'Desconhecido'} />
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <XIcon className="text-muted-foreground !w-4 !h-4" />
+
+                <div className="flex flex-col gap-2 min-w-0">
                   <PlayerEntry name={getById(alt.teamBPlayer1)?.name || 'Desconhecido'} reverse />
                   <PlayerEntry name={getById(alt.teamBPlayer2)?.name || 'Desconhecido'} reverse />
                 </div>
@@ -55,7 +58,7 @@ export function SelectAlternativeDialog({ open, onOpenChange, match }: Props) {
           ))}
 
           {match.alternatives.length === 0 && (
-            <p className="text-muted-foreground text-center">Nenhuma alternativa disponível.</p>
+            <p className="text-muted-foreground text-center text-md my-4">Nenhuma alternativa disponível.</p>
           )}
         </div>
 
