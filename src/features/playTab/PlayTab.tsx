@@ -183,7 +183,7 @@ export function PlayTab() {
                         className="flex-1 h-11 text-md"
                         variant="default"
                         disabled={hasOngoingMatch}
-                        onClick={() => hasOngoingMatch && handleStart(court.id)}
+                        onClick={() => !hasOngoingMatch && handleStart(court.id)}
                       >
                         Gerar nova partida
                       </Button>
