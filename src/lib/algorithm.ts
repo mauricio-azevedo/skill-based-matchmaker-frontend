@@ -8,8 +8,8 @@ export const MIN_PLAYERS = 4 as const
 
 /** Pesos usados na função de pontuação. */
 const WEIGHT = {
-  SKILL_IMBALANCE: 8,
-  WITHIN_TEAM_VARIATION: 7, // negativa no modo nivelado
+  SKILL_IMBALANCE: 20.1,
+  WITHIN_TEAM_VARIATION: 20, // negativa no modo nivelado
   LAST_PLAYED: 6, // bônus proporcional ao tempo sem jogar
   PARTNER_COUNT: 2,
   PREFERRED_PAIR: 1,
