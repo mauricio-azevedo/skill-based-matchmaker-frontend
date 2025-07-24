@@ -16,7 +16,7 @@ interface ScoreSelectProps {
 
 const ScoreSelect = forwardRef<HTMLInputElement, ScoreSelectProps>(({ value, onChange, label, isWinner }, ref) => (
   <div className="relative flex flex-col items-center">
-    {isWinner && <Crown className="!w-4.5 !h-4.5 text-yellow-500 absolute -top-4" aria-label="Vencedor" />}
+    {isWinner && <Crown className="!w-4.5 !h-4.5 text-yellow-500 absolute -top-4.5" aria-label="Vencedor" />}
     <Input
       ref={ref}
       type="text"
