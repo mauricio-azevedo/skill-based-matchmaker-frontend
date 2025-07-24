@@ -1,6 +1,7 @@
 import type { Match, MatchPlayers, Player } from '@/types/entities'
 import { type FormationMode, type MatchResult } from '@/types/types'
 import { FORMATION_MODES } from '@/lib/formationModes'
+import { shuffle } from '@/utils/shuffle'
 
 /** Número mínimo de jogadores para formar duas duplas. */
 export const MIN_PLAYERS = 4 as const
@@ -206,6 +207,8 @@ export function generateMatch(
   if (!eligibleMatches.length) throw new Error('Não há novas combinações disponíveis.')
 
   const bestMatches = getBestMatches(eligibleMatches)
+
+  shuffle(bestMatches)
 
   const bestFormatted = formatMatches(bestMatches, AllPlayers)
 
