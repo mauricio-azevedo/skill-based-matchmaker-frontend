@@ -19,14 +19,14 @@ import { getBusyPlayerIds } from '@/lib/matchUtils'
 import { PlayerEntry } from '@/components/PlayerEntry'
 import { FORMATION_MODES } from '@/lib/formationModes'
 import { buildStats } from '@/lib/stats'
+import { Description } from '@radix-ui/react-dialog'
 
 /* ------------------------------------------------------------------------ */
 interface Props {
   match: Match
-  matchNumber: number
 }
 
-export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
+export function EditMatchPlayersDialog({ match }: Props) {
   const { players } = usePlayers()
   const { matches, updateMatch } = useMatches()
 
@@ -87,7 +87,8 @@ export function EditMatchPlayersDialog({ match, matchNumber }: Props) {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Editar partida {matchNumber}</DialogTitle>
+          <DialogTitle>Editar confronto manualmente</DialogTitle>
+          <Description className="text-muted-foreground">Priorize jogadores com menos partidas</Description>
         </DialogHeader>
 
         {/* ---------- layout: 3‑col grid (1fr‑auto‑1fr) ---------- */}

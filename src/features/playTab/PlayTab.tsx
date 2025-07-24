@@ -18,7 +18,7 @@ import { SelectAlternativeDialog } from '@/components/SelectAlternativeDialog'
 export function PlayTab() {
   const { courts } = useCourts()
   const { generateAndStartMatch } = useMatchManager()
-  const { getById, matches } = useMatches()
+  const { getById } = useMatches()
   const { removeCourtAndMatch, addCourtWithMatch } = useCourtMatches()
 
   const [selectAlternativeMatch, setSelectAlternativeMatch] = useState<Match | null>(null)
@@ -90,7 +90,6 @@ export function PlayTab() {
             {courts.map((court, courtIdx) => {
               const match = court.matchId ? getById(court.matchId) : null
               const hasOngoingMatch = match?.status === 'ongoing'
-              const matchNumber: number = matches.findIndex((m) => m.id === match?.id) + 1
               const courtNumber = courtIdx + 1
 
               return (
@@ -166,7 +165,7 @@ export function PlayTab() {
                       </Button>
 
                       {hasOngoingMatch ? (
-                        <EditMatchPlayersDialog key={match.id} match={match} matchNumber={matchNumber} />
+                        <EditMatchPlayersDialog key={match.id} match={match} />
                       ) : (
                         <Button variant="secondary" className="w-11 h-11" disabled>
                           <EditIcon className="!w-4.5 !h-4.5" />

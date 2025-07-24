@@ -6,6 +6,7 @@ import { useMatchManager } from '@/hooks/useMatchManager'
 import { type Match, type MatchPlayers } from '@/types/entities'
 import { usePlayers } from '@/context/PlayersContext'
 import { XIcon } from 'lucide-react'
+import { Description } from '@radix-ui/react-dialog'
 
 interface Props {
   open: boolean
@@ -29,7 +30,10 @@ export function SelectAlternativeDialog({ open, onOpenChange, match }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>Escolha outro confronto</DialogTitle>
+          <DialogTitle>Escolher confronto alternativo</DialogTitle>
+          <Description className="text-muted-foreground">
+            Todas as alternativas mantêm equilibrado o número de partidas entre os jogadores
+          </Description>
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
