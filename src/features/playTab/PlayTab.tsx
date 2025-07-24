@@ -21,12 +21,6 @@ export function PlayTab() {
   const { getById, matches } = useMatches()
   const { removeCourtAndMatch, addCourtWithMatch } = useCourtMatches()
 
-  // useEffect(() => {
-  //   const { matchCounts } = buildStats(matches)
-  //   console.log(Object.keys(matchCounts).length)
-  //   console.log(matchCounts)
-  // }, [matches])
-
   const [selectAlternativeMatch, setSelectAlternativeMatch] = useState<Match | null>(null)
   const handleOpenAlternatives = useCallback((match: Match) => {
     setSelectAlternativeMatch(match)
