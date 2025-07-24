@@ -32,7 +32,7 @@ export function SelectAlternativeDialog({ open, onOpenChange, match }: Props) {
           <DialogTitle>Escolha outro confronto</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {match.alternatives.map((alt, idx) => (
             <button
               key={idx}
