@@ -163,11 +163,12 @@ export function PlayTab() {
                     <div className="w-full mt-4 flex items-center gap-2">
                       <Button
                         variant="secondary"
-                        className="w-11 h-11"
-                        disabled={!hasOngoingMatch}
+                        className="h-11"
+                        disabled={!hasOngoingMatch || !match.alternatives.length}
                         onClick={() => hasOngoingMatch && handleOpenAlternatives(match)}
                       >
                         <ShuffleIcon className="!w-4.5 !h-4.5" />
+                        <span className="text-muted-foreground text-md">({match ? match.alternatives.length : 0})</span>
                       </Button>
 
                       {hasOngoingMatch ? (
