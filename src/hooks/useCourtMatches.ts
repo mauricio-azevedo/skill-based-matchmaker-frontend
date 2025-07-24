@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react'
 export function useCourtMatches() {
   const { deleteMatch } = useMatches()
   const { courts, setCourts } = useCourts()
-  const { generateAndStartMatch } = useMatchManager()
+  const { generateMatchAndAddToCourt } = useMatchManager()
   const pendingNewCourtId = useRef<string | null>(null)
 
   /**
@@ -46,11 +46,11 @@ export function useCourtMatches() {
     if (pendingNewCourtId.current) {
       const exists = courts.some((c) => c.id === pendingNewCourtId.current)
       if (exists) {
-        generateAndStartMatch(pendingNewCourtId.current)
+        generateMatchAndAddToCourt(pendingNewCourtId.current)
         pendingNewCourtId.current = null
       }
     }
-  }, [courts, generateAndStartMatch])
+  }, [courts, generateMatchAndAddToCourt])
 
   return {
     removeCourtAndMatch,

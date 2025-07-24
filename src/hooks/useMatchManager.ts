@@ -108,12 +108,12 @@ function determineFormationMode(
 }
 
 export function useMatchManager(): {
-  generateAndStartMatch: (courtId: string) => void
+  generateMatchAndAddToCourt: (courtId: string) => void
   completeMatch: (matchId: string, gamesA: number, gamesB: number) => void
   selectAlternative: (matchId: string, alternative: MatchPlayers) => void
 } {
   const { players, updatePlayers } = usePlayers()
-  const { addMatch, matches, getById, updateMatch } = useMatches()
+  const { addMatch, matches, getById, updateMatch, deleteMatch } = useMatches()
   const { courts, updateCourt } = useCourts()
   const { partnerCounts } = buildStats(matches)
 
@@ -142,10 +142,18 @@ export function useMatchManager(): {
     [addMatch, updateCourt],
   )
 
-  const generateAndStartMatch = useCallback(
+  const generateMatchAndAddToCourt = useCallback(
     (courtId: string) => {
       const court = courts.find((c) => c.id === courtId)
       if (!court) throw new Error('Quadra não encontrada')
+
+      if (court.matchId) {
+        const currentMatch = matches.find((m) => m.id === court.matchId)
+        if (currentMatch && currentMatch.status === 'ongoing') {
+          deleteMatch(currentMatch.id)
+          updateCourt(court.id, { matchId: null })
+        }
+      }
 
       // valida e obtém jogadores livres elegíveis
       const result = computeEligibility(players, matches)
@@ -172,7 +180,7 @@ export function useMatchManager(): {
         ...matchResult.players,
       })
     },
-    [players, matches, courts, partnerCounts, addMatchToCourt],
+    [courts, players, matches, partnerCounts, addMatchToCourt, deleteMatch, updateCourt],
   )
 
   const completeMatch = useCallback(
@@ -226,5 +234,5 @@ export function useMatchManager(): {
     [getById, updateMatch],
   )
 
-  return { generateAndStartMatch, completeMatch, selectAlternative }
+  return { generateMatchAndAddToCourt, completeMatch, selectAlternative }
 }

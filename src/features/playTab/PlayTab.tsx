@@ -17,7 +17,7 @@ import { SelectAlternativeDialog } from '@/components/SelectAlternativeDialog'
 
 export function PlayTab() {
   const { courts } = useCourts()
-  const { generateAndStartMatch } = useMatchManager()
+  const { generateMatchAndAddToCourt } = useMatchManager()
   const { getById } = useMatches()
   const { removeCourtAndMatch, addCourtWithMatch } = useCourtMatches()
 
@@ -37,12 +37,12 @@ export function PlayTab() {
   const handleStart = useCallback(
     async (courtId: string) => {
       try {
-        generateAndStartMatch(courtId)
+        generateMatchAndAddToCourt(courtId)
       } catch (error) {
         console.error(error)
       }
     },
-    [generateAndStartMatch],
+    [generateMatchAndAddToCourt],
   )
 
   /**
